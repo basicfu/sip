@@ -8,13 +8,13 @@ pipeline {
     }
     stage('docker build') {
       steps {
-        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/dmka/sip-eureka sip-eureka/'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka sip-eureka/'
       }
     }
     stage('docker push') {
       steps {
         sh '''docker login -u ${ALIYUN_DOCKER_REPO_USR} -p ${ALIYUN_DOCKER_REPO_PSW} registry-vpc.cn-beijing.aliyuncs.com
-docker push registry-vpc.cn-beijing.aliyuncs.com/dmka/sip-eureka'''
+docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'''
       }
     }
   }
