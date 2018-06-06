@@ -1,0 +1,9 @@
+version: '3'
+services:
+  sip-eureka:
+    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-eureka
+    environment:
+      - ENV=prod
+    ports:
+     - "7000:80"
+   sip-getway

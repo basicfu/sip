@@ -56,6 +56,12 @@ project(":sip-eureka") {
         compile("org.springframework.cloud:spring-cloud-starter-eureka-server")
     }
 }
+project(":sip-getway"){
+    dependencies{
+        compile("org.springframework.cloud:spring-cloud-starter-eureka")
+        compile("org.springframework.cloud:spring-cloud-starter-zuul")
+    }
+}
 project(":sip-api") {
     dependencies {
     }

@@ -1,0 +1,23 @@
+server:
+  port: ${ENV_SERVER_PORT:80}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka/
+zuul:
+  sensitiveHeaders: Cookie,Set-Cookie
+  host:
+    connect-timeout-millis: 10000
+    socket-timeout-millis: 10000
+    max-per-route-connections: 1000
+    max-total-connections: 1000
+  routes:
+    system:
+      path: /system/**
+      serviceId: system
+    position:
+      path: /position/**
+      serviceId: wutong-position
+    position:
+      path: /resume/**
+      serviceId: wutong-resume

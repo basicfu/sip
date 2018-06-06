@@ -1,5 +1,5 @@
 spring:
   application:
-    name: sip-eureka
+    name: sip-getway
   profiles:
     active: ${ENV:dev}
