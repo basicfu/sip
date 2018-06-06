@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sip-eureka
+  profiles:
+    active: ${ENV_PROFILE:dev}
