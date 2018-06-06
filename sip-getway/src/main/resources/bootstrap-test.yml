@@ -18,6 +18,6 @@ zuul:
     position:
       path: /position/**
       serviceId: wutong-position
-    position:
+    resume:
       path: /resume/**
       serviceId: wutong-resume
