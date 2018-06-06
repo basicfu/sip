@@ -10,7 +10,7 @@ pipeline {
         }
         stage('sip-getway') {
           steps {
-            sh './gradlew :wutong-getway:build'
+            sh './gradlew :sip-getway:build'
           }
         }
       }
