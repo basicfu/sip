@@ -15,9 +15,6 @@ zuul:
     system:
       path: /system/**
       serviceId: system
-    position:
-      path: /position/**
-      serviceId: wutong-position
     resume:
-      path: /resume/**
-      serviceId: wutong-resume
+      path: /base/**
+      serviceId: wutong-base
