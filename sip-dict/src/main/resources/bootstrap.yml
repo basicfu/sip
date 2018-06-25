@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sip-dict
+  profiles:
+    active: ${ENV:dev}

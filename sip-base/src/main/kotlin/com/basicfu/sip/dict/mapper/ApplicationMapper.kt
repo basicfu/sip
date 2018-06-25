@@ -1,4 +1,4 @@
-package com.basicfu.sip.base.mapper
+package com.basicfu.sip.dict.mapper
 
 import com.basicfu.sip.core.model.po.Application
 import com.basicfu.sip.core.mapper.CustomMapper

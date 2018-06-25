@@ -18,14 +18,15 @@ SIP服务集成平台描述
 - 租户、应用
 ```
 ├── sip-docs               // 文档中心
-│   ├── server             // 服务端文档
-│   ├── client             // 客户端文档
-│   ├── api                // 前台API
+│   ├── docs               // 文档说明
+│   │   ├── api            // API文档
+│   │   ├── server         // 服务端文档
+│   │   └── client         // 客户端文档
 │   └── sql                // 初始化sql
-├── sip-core               // SIP核心依赖(命名待定)
+├── sip-core               // SIP核心依赖
+├── sip-base               // SIP基础(租户、应用、用户)
 ├── sip-eureka             // 注册中心  
 ├── sip-getway             // 网关
-├── sip-user               // 用户体系
 ├── sip-sso                // 单点登录
 ├── sip-permission         // 权限管理
 ├── sip-dict               // 字典服务

@@ -1,4 +1,4 @@
-package com.basicfu.sip.base;
+package com.basicfu.sip.dict;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

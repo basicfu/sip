@@ -1,6 +1,6 @@
-package com.basicfu.sip.base.controller
+package com.basicfu.sip.dict.controller
 
-import com.basicfu.sip.base.service.ApplicationService
+import com.basicfu.sip.dict.service.ApplicationService
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping

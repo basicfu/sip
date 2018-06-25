@@ -1,4 +1,4 @@
-package com.basicfu.sip.base
+package com.basicfu.sip.dict
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication

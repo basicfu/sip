@@ -84,6 +84,13 @@ project(":sip-base") {
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
+project(":sip-dict") {
+    dependencies {
+        compile project(':sip-core')
+        compile("org.springframework.cloud:spring-cloud-starter-eureka")
+        compile("mysql:mysql-connector-java:5.1.45")
+    }
+}
 
 project(":sip-api") {
     dependencies {

@@ -473,13 +473,13 @@ class Example<T> @JvmOverloads constructor(
         this.forUpdate = forUpdate
     }
 
-    fun Example<T>.select(vararg properties: String) {
-        if (properties.isNotEmpty()) {
-            for (property in properties) {
-                if (this.propertyMap.containsKey(property)) {
-                    propertyMap[property]?.column?.let { this.selectColumns.add(it) }
+    fun Example<T>.select(vararg k: KMutableProperty1<T, *>) {
+        if (k.isNotEmpty()) {
+            for (property in k) {
+                if (this.propertyMap.containsKey(property.name)) {
+                    propertyMap[property.name]?.column?.let { this.selectColumns.add(it) }
                 } else {
-                    throw MapperException("当前实体类不包含名为" + property + "的属性!")
+                    throw MapperException("当前实体类不包含名为" + property.name + "的属性!")
                 }
             }
         }
