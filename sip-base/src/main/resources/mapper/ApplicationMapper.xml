@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.baidu.erp.mapper.ApplicationMapper" >
+  <resultMap id="BaseResultMap" type="com.basicfu.sip.core.model.po.Application" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="path" property="path" jdbcType="VARCHAR" />
+    <result column="server_id" property="serverId" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="strip_prefix" property="stripPrefix" jdbcType="BIT" />
+    <result column="retryable" property="retryable" jdbcType="BIT" />
+    <result column="sensitive_headers" property="sensitiveHeaders" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

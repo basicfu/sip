@@ -1,4 +1,4 @@
-package com.basicfu.sip.log
+package com.basicfu.sip.getway
 
 import org.junit.Test
 import org.junit.runner.RunWith

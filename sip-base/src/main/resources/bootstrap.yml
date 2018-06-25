@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sip-base
+  profiles:
+    active: ${ENV:dev}

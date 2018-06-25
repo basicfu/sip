@@ -11,10 +11,13 @@ zuul:
     socket-timeout-millis: 10000
     max-per-route-connections: 1000
     max-total-connections: 1000
-  routes:
-    system:
-      path: /system/**
-      serviceId: system
-    resume:
-      path: /base/**
-      serviceId: wutong-base
+spring:
+  redis:
+    host: ${ENV_REDIS_HOST:redis-dev.dmka.cn}
+    port: ${ENV_REDIS_PORT:4379}
+    password: ${ENV_REDIS_PASSWORD:root}
+    pool:
+      max-idle: 8
+      min-idle: 0
+      max-active: 8
+      max-wait: -1
