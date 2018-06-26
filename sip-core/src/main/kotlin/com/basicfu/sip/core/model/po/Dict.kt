@@ -50,6 +50,8 @@ class Dict {
      */
     var value: String? = null
 
+    var description: String? = null
+
     /**
      * 左节点
      */

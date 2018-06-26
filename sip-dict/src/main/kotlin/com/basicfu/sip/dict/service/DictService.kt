@@ -6,12 +6,12 @@ import com.basicfu.sip.core.model.dto.DictDto
 import com.basicfu.sip.core.model.po.Dict
 import com.basicfu.sip.core.model.vo.DictVo
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.dict.common.Enum
 import com.basicfu.sip.dict.mapper.DictMapper
 import com.github.pagehelper.PageInfo
 import org.springframework.beans.BeanUtils
 import org.springframework.stereotype.Service
 import tk.mybatis.mapper.entity.Example
-import com.basicfu.sip.dict.common.Enum
 
 /**
  * @author basicfu
@@ -21,9 +21,9 @@ import com.basicfu.sip.dict.common.Enum
 class DictService : BaseService<DictMapper, Dict>() {
 
     fun all(): List<Any> {
-        val all = mapper.selectByExample(example<Dict> {
+        val all = to<DictDto>(mapper.selectByExample(example<Dict> {
             andEqualTo(Dict::isdel, "0")
-        })
+        }))
         val result = ArrayList<DictDto>()
         all.filter { it.lvl == 0 }.forEach { e ->
             val dto = DictDto()
@@ -54,40 +54,64 @@ class DictService : BaseService<DictMapper, Dict>() {
             example<Dict> {
                 andEqualTo {
                     name = vo.name
+                    lvl=1
                     isdel = 0
                 }
             }
         )
     }
-
+    fun get(value: String): List<DictDto> {
+        val list=to<DictDto>(mapper.selectBySql("SELECT d1.id,d1.name,d1.value,d1.lft,d1.rgt,d1.lvl,d1.fixed FROM dict AS d1,dict AS d2 WHERE d1.lft > d2.lft AND d1.lft<d2.rgt AND d2.value = '$value' and d1.isdel=0"))
+        val result = ArrayList<DictDto>()
+        list.filter { it.lvl==2 }.forEach { item->
+            val children = ArrayList<DictDto>()
+            list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach {dict->
+                chidren(dict, list)
+                dict.value = dict.id.toString()
+                dict.pid = item.id
+                children.add(dict)
+            }
+            item.children = children
+            result.add(item)
+        }
+        return result
+    }
     /**
      * 叶子节点下增加节点，添加到子节点的最后一个
      */
     fun insert(vo: DictVo): Int {
-        val one=mapper.selectByExample(example<Dict>{
-            select(Dict::rgt,Dict::lvl)
+        val parentDict= mapper.selectOneByExample(example<Dict>{
+            select(Dict::value,Dict::rgt,Dict::lvl)
             forUpdate()
             andEqualTo {
-                id=vo.id
+                id=vo.pid
                 isdel=0
             }
-        })
-        if (one.isEmpty()) throw CustomException(Enum.Dict.NOT_FOUND)
-        val tmp = one[0]
-        mapper.updateBySql("set rgt=rgt+2 where rgt>=${tmp.rgt} and isdel=0")
-        mapper.updateBySql("set lft=lft+2 where lft>${tmp.rgt} and isdel=0")
+        }) ?: throw CustomException(Enum.Dict.NOT_FOUND)
+        val count = mapper.selectCountBySql(
+            "SELECT count(*) FROM dict AS d1,dict AS d2 " +
+                    "WHERE d1.lft > d2.lft AND d1.lft<d2.rgt AND d2.value = '"+parentDict.value+"' AND d1.lvl=d2.lvl+1 and d1.value='"+vo.value+"' and d1.isdel=0"
+        )
+        if(count!=0){
+            throw CustomException(Enum.Dict.VALUE_REPEAT)
+        }
+        mapper.updateBySql("set rgt=rgt+2 where rgt>=${parentDict.rgt} and isdel=0")
+        mapper.updateBySql("set lft=lft+2 where lft>${parentDict.rgt} and isdel=0")
         val po = Dict()
         po.name = vo.name
+        po.value=vo.value
+        po.description=vo.description
         po.fixed = vo.fixed
-        po.lft = tmp.rgt!!
-        po.rgt = tmp.rgt!! + 1
-        po.lvl = tmp.lvl!! + 1
+        po.lft = parentDict.rgt!!
+        po.rgt = parentDict.rgt!! + 1
+        po.lvl = parentDict.lvl!! + 1
         mapper.insertSelective(po)
         return 1
     }
 
     /**
      * 只能更新name和是否编辑
+     * 后期可以添加支持修改节点
      */
     fun update(vo: DictVo): Int {
         val po = Dict()
@@ -124,18 +148,14 @@ class DictService : BaseService<DictMapper, Dict>() {
         return 1
     }
 
-    fun chidren(dict: DictDto, list: List<Dict>) {
+    fun chidren(item: DictDto, list: List<DictDto>) {
         val children = ArrayList<DictDto>()
-        list.forEach { ee ->
-            if (ee.lft in dict.lft!!..dict.rgt!! && ee.lvl == dict.lvl!! + 1) {
-                val dto = DictDto()
-                BeanUtils.copyProperties(ee, dto)
-                chidren(dto, list)
-                dto.value = dto.id.toString()
-                dto.pid = dict.id
-                children.add(dto)
-            }
+        list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach {dict->
+            chidren(dict, list)
+            dict.value = dict.id.toString()
+            dict.pid = item.id
+            children.add(dict)
         }
-        dict.children = children
+        item.children = children
     }
 }

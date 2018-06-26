@@ -1,6 +1,6 @@
-package com.basicfu.sip.dict.init
+package com.basicfu.sip.base.init
 
-import com.basicfu.sip.dict.service.ApplicationService
+import com.basicfu.sip.base.service.ApplicationService
 import com.basicfu.sip.core.Constant
 import com.basicfu.sip.core.util.RedisUtil
 import org.springframework.beans.factory.annotation.Autowired

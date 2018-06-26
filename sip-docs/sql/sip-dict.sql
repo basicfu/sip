@@ -7,6 +7,7 @@ create table dict (
   id bigint auto_increment comment '主键' primary key,
   name varchar(255) NOT NULL DEFAULT '' COMMENT '字典名',
   value varchar(255) NOT NULL DEFAULT '' COMMENT '字典值',
+  description varchar(255) COMMENT '字典描述',
   lft bigint NOT NULL DEFAULT 0 COMMENT '左节点',
   rgt bigint NOT NULL DEFAULT 0 COMMENT '右节点',
   lvl int NOT NULL DEFAULT 0 COMMENT '节点层级',
@@ -17,4 +18,6 @@ create table dict (
   KEY key_rgt (rgt),
   KEY key_isdel (isdel)
 )comment '字典表' engine=InnoDB;
--- 添加desc描述字段
+
+
+INSERT INTO dict (id,name, value, description, lft, rgt, lvl, fixed, isdel) VALUES (1,'根', 'root', '根', 1, 2, 0, 0, 0);

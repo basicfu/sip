@@ -16,6 +16,7 @@ enum class Enum constructor(val value: Int,val msg:String) {
         NOT_FOUND(201,"找不到字典"),
         ID_PID_REPEAT(202,"父类型不能是当前类型"),
         NO_DELETE_ROOT(202,"不能删除根字典"),
+        VALUE_REPEAT(202,"当前value已存在"),
     }
 
 }

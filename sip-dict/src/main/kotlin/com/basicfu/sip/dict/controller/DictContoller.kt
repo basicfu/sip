@@ -16,14 +16,19 @@ class DictContoller {
     @Autowired
     lateinit var dictService: DictService
 
+    @GetMapping("/all")
+    fun all(): Result {
+        return Result.success(dictService.all())
+    }
+
     @GetMapping("/list")
     fun list(vo: DictVo): Result {
         return Result.success(dictService.list(vo))
     }
 
-    @GetMapping("/all")
-    fun all(): Result {
-        return Result.success(dictService.all())
+    @GetMapping("/get/{value}")
+    fun get(@PathVariable value:String): Result {
+        return Result.success(dictService.get(value))
     }
 
     @PostMapping("/insert")

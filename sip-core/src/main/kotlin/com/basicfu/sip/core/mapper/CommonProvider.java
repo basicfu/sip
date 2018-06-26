@@ -11,6 +11,14 @@ public class CommonProvider extends MapperTemplate {
         super(mapperClass, mapperHelper);
     }
 
+    public String selectCountBySql(MappedStatement ms){
+        return "${sql}";
+    }
+
+    public String selectBySql(MappedStatement ms) {
+        return "${sql}";
+    }
+
     public String updateBySql(MappedStatement ms) {
         Class<?> entityClass = getEntityClass(ms);
         StringBuilder sql = new StringBuilder();

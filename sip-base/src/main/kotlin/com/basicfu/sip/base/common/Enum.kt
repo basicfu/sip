@@ -1,4 +1,4 @@
-package com.basicfu.sip.dict.common
+package com.basicfu.sip.base.common
 
 /**
  * @author fuliang
