@@ -18,7 +18,7 @@ class ApplicationController {
     lateinit var applicationService: ApplicationService
 
     @GetMapping("/all")
-    fun all(): Result {
-        return Result.success(applicationService.all())
+    fun all(): Result<Any> {
+        return Result(applicationService.all())
     }
 }

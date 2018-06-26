@@ -7,4 +7,5 @@ include "sip-core",
         "sip-log",
         "sip-eureka",
         "sip-notify",
-        "sip-schedule"
+        "sip-schedule",
+        "sip-client"

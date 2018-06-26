@@ -26,10 +26,10 @@ class GlobalExceptionHandler {
      */
     @ResponseBody
     @ExceptionHandler(Exception::class)
-    private fun errorHandler(response: HttpServletResponse, e: Exception): Result {
+    private fun errorHandler(response: HttpServletResponse, e: Exception): Result<Any> {
         log.error("全局异常：", e)
         response.status = 500
-        return Result.error(-1, com.basicfu.sip.core.Enum.SERVER_ERROR.msg)
+        return Result(com.basicfu.sip.core.Enum.SERVER_ERROR.msg, -1)
     }
 
     /**
@@ -37,9 +37,12 @@ class GlobalExceptionHandler {
      */
     @ResponseBody
     @ExceptionHandler(HttpMessageNotReadableException::class)
-    private fun httpMessageNotReadableException(e: HttpMessageNotReadableException): Result {
+    private fun httpMessageNotReadableException(e: HttpMessageNotReadableException): Result<Any> {
         log.error("\${Enum.INVALID_PARAMETER.msg}-【msg】--" + e.message)
-        return Result.error(com.basicfu.sip.core.Enum.INVALID_PARAMETER.value, com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg)
+        return Result(
+            com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg,
+            com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
+        )
     }
 
     /**
@@ -47,9 +50,9 @@ class GlobalExceptionHandler {
      */
     @ResponseBody
     @ExceptionHandler(CustomException::class)
-    private fun customException(e: CustomException): Result {
+    private fun customException(e: CustomException): Result<Any> {
         log.error("自定义异常--【code】--" + e.code + "--【msg】--" + e.msg + "--【data】--" + e.data)
-        return Result.error(e.code, e.msg, e.data!!)
+        return Result(e.msg, e.code, e.data!!)
     }
 
     /**
@@ -57,9 +60,12 @@ class GlobalExceptionHandler {
      */
     @ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    private fun notValidException(e: Exception): Result {
+    private fun notValidException(e: Exception): Result<Any> {
         log.error(e.message)
-        return Result.error(com.basicfu.sip.core.Enum.INVALID_PARAMETER.value, com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg)
+        return Result(
+            com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg,
+            com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
+        )
     }
 
 

@@ -17,35 +17,32 @@ class DictContoller {
     lateinit var dictService: DictService
 
     @GetMapping("/all")
-    fun all(): Result {
-        return Result.success(dictService.all())
+    fun all(): Result<Any> {
+        return Result(dictService.all())
     }
 
     @GetMapping("/list")
-    fun list(vo: DictVo): Result {
-        return Result.success(dictService.list(vo))
+    fun list(vo: DictVo): Result<Any> {
+        return Result(dictService.list(vo))
     }
 
     @GetMapping("/get/{value}")
-    fun get(@PathVariable value:String): Result {
-        return Result.success(dictService.get(value))
+    fun get(@PathVariable value: String): Result<Any> {
+        return Result(dictService.get(value))
     }
 
     @PostMapping("/insert")
-    fun insert(@RequestBody vo: DictVo): Result {
-        dictService.insert(vo)
-        return Result.insert
+    fun insert(@RequestBody vo: DictVo): Result<Any> {
+        return Result(dictService.insert(vo))
     }
 
-        @PostMapping("/update")
-    fun update(@RequestBody vo: DictVo): Result {
-        dictService.update(vo)
-        return Result.update
+    @PostMapping("/update")
+    fun update(@RequestBody vo: DictVo): Result<Any> {
+        return Result(dictService.update(vo))
     }
 
     @DeleteMapping("/delete")
-    fun delete(@RequestBody ids: List<Long>): Result {
-        dictService.delete(ids)
-        return Result.delete
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
+        return Result(dictService.delete(ids))
     }
 }

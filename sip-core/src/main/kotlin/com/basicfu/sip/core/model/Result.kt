@@ -4,79 +4,47 @@ import com.alibaba.fastjson.JSONObject
 import com.github.pagehelper.PageInfo
 import java.util.*
 
-class Result{
+@Suppress("UNCHECKED_CAST")
+class Result<T> {
     var code = 0
-    var success = true
-    var rid = UUID.randomUUID().toString()
     var msg = ""
-    var data: Any?=JSONObject()
+    var success: Boolean = true
+    var rid = UUID.randomUUID().toString()
+    var data: T? = null
 
-    constructor() {}
-
-    constructor(msg: String) {
+    /**
+     * 字符串类型开始且泛型结尾为错误结果
+     */
+    @JvmOverloads
+    constructor(msg: String = "", code: Int = 0, data: T? = null) {
         this.msg = msg
+        this.code = code
+        this.data = data
+        this.success = false
     }
 
-    companion object {
-
-        var insert = Result("添加成功")
-        var update = Result("更新成功")
-        var delete = Result("删除成功")
-        var logout = Result("退出成功")
-
-        fun success(data: PageInfo<*>): Result {
-            val obj = JSONObject()
-            obj["list"] = data.list
-            val page = JSONObject()
-            page["total"] = data.total
-            page["pageSize"] = data.pageSize
-            page["pageNum"] = data.pageNum
-            obj["page"] = page
-            val result = Result()
-            result.data = obj
-            return result
+    /**
+     * 第一个类型为泛型开始为正确结果
+     */
+    @JvmOverloads
+    constructor(data: T, msg: String? = null) {
+        when (data) {
+            is Int -> this.msg = "操作成功" + data.toString() + "条数据"
+            is List<*> -> this.data = data
+            is PageInfo<*> -> {
+                val obj = JSONObject()
+                obj["list"] = data.list
+                val page = JSONObject()
+                page["total"] = data.total
+                page["pageSize"] = data.pageSize
+                page["pageNum"] = data.pageNum
+                obj["page"] = page
+                this.data = obj as T
+            }
         }
-
-        inline fun <reified T> success(data: List<T>): Result {
-            val result = Result()
-            result.data = data
-            return result
-        }
-
-        fun success(data: Any): Result {
-            val result = Result()
-            result.data = data
-            return result
-        }
-
-        fun success(data: Any, message: String): Result {
-            val result = Result()
-            result.data = data
-            result.msg = message
-            return result
-        }
-
-        fun success(msg: String): Result {
-            val result = Result()
-            result.msg = msg
-            return result
-        }
-
-        fun error(code: Int?, msg: String): Result {
-            val result = Result()
-            result.code = code!!
-            result.success = false
-            result.msg = msg
-            return result
-        }
-
-        fun error(code: Int?, msg: String, data: Any): Result {
-            val result = Result()
-            result.code = code!!
-            result.success = false
-            result.msg = msg
-            result.data = data
-            return result
+        if (msg != null) {
+            this.msg = msg
         }
     }
+
 }

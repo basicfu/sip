@@ -15,8 +15,14 @@ open class BaseVo {
      */
     fun setInfo(): BaseVo {
         val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
-        this.pageNum = request.getParameter("pageNum").toInt()
-        this.pageSize = request.getParameter("pageSize").toInt()
+        val pageNum = request.getParameter("pageNum")
+        val pageSize = request.getParameter("pageSize")
+        if (pageNum != null) {
+            this.pageNum = pageNum.toInt()
+        }
+        if (pageSize != null) {
+            this.pageSize = pageSize.toInt()
+        }
         return this
     }
 }
