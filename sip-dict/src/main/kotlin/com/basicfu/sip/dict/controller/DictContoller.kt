@@ -45,4 +45,9 @@ class DictContoller {
     fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result(dictService.delete(ids))
     }
+
+    @PostMapping("/import")
+    fun import(@RequestBody vo:DictVo): Result<Any> {
+        return Result(dictService.import(vo))
+    }
 }

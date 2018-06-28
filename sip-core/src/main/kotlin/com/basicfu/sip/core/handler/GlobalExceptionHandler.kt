@@ -52,7 +52,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(CustomException::class)
     private fun customException(e: CustomException): Result<Any> {
         log.error("自定义异常--【code】--" + e.code + "--【msg】--" + e.msg + "--【data】--" + e.data)
-        return Result(e.msg, e.code, e.data!!)
+        return Result(e.msg, e.code, e.data)
     }
 
     /**
