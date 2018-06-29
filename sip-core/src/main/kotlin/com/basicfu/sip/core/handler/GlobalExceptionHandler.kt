@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.servlet.NoHandlerFoundException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -67,6 +68,15 @@ class GlobalExceptionHandler {
             com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
         )
     }
-
-
+    /**
+     * 404
+     */
+    @ResponseBody
+    @ExceptionHandler(NoHandlerFoundException::class)
+    private fun noHandlerFoundException(response: HttpServletResponse,e: NoHandlerFoundException): Result<Any> {
+        response.status=404
+        val msg="No handler found for " + e.httpMethod + " " + e.requestURL
+        log.error(msg)
+        return Result(msg,404)
+    }
 }
