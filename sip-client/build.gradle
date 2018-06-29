@@ -1,6 +1,6 @@
 group 'com.basicfu.sip'
 version '0.0.1'
-artifactId = "sip-client"
+def artifactId = "sip-client"
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'

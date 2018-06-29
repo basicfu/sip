@@ -1,9 +1,5 @@
-package com.basicfu.sip.base.service
+package com.basicfu.sip.dict.service
 
-import com.alibaba.fastjson.JSON
-import com.basicfu.sip.core.model.vo.DictVo
-import com.basicfu.sip.dict.service.DictService
-import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,19 +24,19 @@ class DictServiceTests {
 
     @Test
     fun get() {
-        val result = dictService.get("dog1")
-        println(JSON.toJSONString(result))
+//        val result = dictService.get("dog1")
+//        println(JSON.toJSONString(result))
     }
 
     @Test
     fun insert() {
-        val vo = DictVo()
-        vo.pid=2
-        vo.name="猫"
-        vo.value="dog2"
-        vo.description="(>^ω^<)喵"
-        val result = dictService.insert(vo)
-        Assert.assertEquals(result,1)
+//        val vo = DictVo()
+//        vo.pid=2
+//        vo.name="猫"
+//        vo.value="dog2"
+//        vo.description="(>^ω^<)喵"
+//        val result = dictService.insert(vo)
+//        Assert.assertEquals(result,1)
     }
 
     @Test
