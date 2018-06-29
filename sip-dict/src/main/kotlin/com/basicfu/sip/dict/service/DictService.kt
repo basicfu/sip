@@ -30,7 +30,6 @@ class DictService : BaseService<DictMapper, Dict>() {
         all.filter { it.lvl == 0 }.forEach { e ->
             val dto = DictDto()
             BeanUtils.copyProperties(e, dto)
-            dto.value = dto.id.toString()
             dto.pid = 0
             result.add(dto)
         }
@@ -41,7 +40,6 @@ class DictService : BaseService<DictMapper, Dict>() {
                     val dto = DictDto()
                     BeanUtils.copyProperties(ee, dto)
                     chidren(dto, all)
-                    dto.value = dto.id.toString()
                     dto.pid = e.id
                     children.add(dto)
                 }
@@ -71,7 +69,6 @@ class DictService : BaseService<DictMapper, Dict>() {
             val children = ArrayList<DictDto>()
             list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach { dict ->
                 chidren(dict, list)
-                dict.value = dict.id.toString()
                 dict.pid = item.id
                 children.add(dict)
             }
@@ -264,7 +261,6 @@ class DictService : BaseService<DictMapper, Dict>() {
         val children = ArrayList<DictDto>()
         list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach { dict ->
             chidren(dict, list)
-            dict.value = dict.id.toString()
             dict.pid = item.id
             children.add(dict)
         }
