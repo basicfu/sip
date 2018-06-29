@@ -1,5 +1,5 @@
 server:
-  port: 7000
+  port: ${ENV_SERVER_PORT:7000}
 eureka:
   client:
     registerWithEureka: false
