@@ -176,7 +176,6 @@ class DictService : BaseService<DictMapper, Dict>() {
                 if(parentDict==null){
                     val pdict = mapper.selectOneByExample(example<Dict> {
                         andEqualTo {
-                            value = "root"
                             lvl=0
                             isdel = 0
                         }
