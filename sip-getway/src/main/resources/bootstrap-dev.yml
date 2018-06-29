@@ -4,6 +4,9 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka/
+logging:
+  level:
+    com: debug
 zuul:
   sensitiveHeaders: Cookie,Set-Cookie
   host:
