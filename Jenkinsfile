@@ -44,28 +44,28 @@ pipeline {
           steps {
             sh './gradlew :sip-eureka:build'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka sip-eureka'
-            docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'''
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'
           }
         }
         stage('sip-getway') {
           steps {
             sh './gradlew :sip-getway:build'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway sip-getway'
-            docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway'''
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway'
           }
         }
         stage('sip-base') {
           steps {
             sh './gradlew :sip-base:build'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base sip-base'
-            docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base'''
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base'
           }
         }
         stage('sip-dict') {
           steps {
             sh './gradlew :sip-dict:build'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict sip-dict'
-            docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict'''
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict'
           }
         }
       }
@@ -79,14 +79,14 @@ pipeline {
           steps {
             sh './gradlew :sip-eureka:build'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka sip-eureka'
-            docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'''
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'
           }
         }
         stage('sip-getway') {
           steps {
             sh './gradlew :sip-getway:build'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway sip-getway'
-            docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway'''
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway'
           }
         }
       }
