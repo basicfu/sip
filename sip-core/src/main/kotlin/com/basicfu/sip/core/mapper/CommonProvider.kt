@@ -5,6 +5,7 @@ import tk.mybatis.mapper.mapperhelper.MapperHelper
 import tk.mybatis.mapper.mapperhelper.MapperTemplate
 import tk.mybatis.mapper.mapperhelper.SqlHelper
 
+@Suppress("UNUSED_PARAMETER")
 class CommonProvider(mapperClass: Class<*>, mapperHelper: MapperHelper) : MapperTemplate(mapperClass, mapperHelper) {
 
     fun selectCountBySql(ms: MappedStatement): String {
