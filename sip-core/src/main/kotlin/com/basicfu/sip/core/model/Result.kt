@@ -27,7 +27,7 @@ class Result<T> {
      * 第一个类型为泛型开始为正确结果
      */
     @JvmOverloads
-    constructor(data: T, msg: String? = null) {
+    constructor(data: T?, msg: String? = null) {
         when (data) {
             is Int -> this.msg = "操作成功" + data.toString() + "条数据"
             is List<*> -> this.data = data

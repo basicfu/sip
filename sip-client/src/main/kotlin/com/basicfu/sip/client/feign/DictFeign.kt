@@ -1,4 +1,4 @@
-package com.basicfu.sip.client
+package com.basicfu.sip.client.feign
 
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.DictDto
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 @FeignClient(value = "sip-dict", url = "\${sip.dict.url:}")
 interface DictFeign {
 
-    @GetMapping("/get/{value}")
-    fun get(@PathVariable value: String): Result<List<DictDto>>
+    @GetMapping("/dict/get/{value}")
+    fun get(@PathVariable("value") value: String): Result<List<DictDto>>
 
 }

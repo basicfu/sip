@@ -12,6 +12,7 @@ buildscript {
     }
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
 }
 subprojects {
@@ -37,6 +38,7 @@ subprojects {
     }
     repositories {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
     compileKotlin {
         kotlinOptions {
@@ -68,8 +70,8 @@ project(":sip-eureka") {
         compile("org.springframework.cloud:spring-cloud-starter-eureka-server")
     }
 }
-project(":sip-getway"){
-    dependencies{
+project(":sip-getway") {
+    dependencies {
         compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-zuul")

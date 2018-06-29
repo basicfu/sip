@@ -8,8 +8,9 @@ import tk.mybatis.spring.annotation.MapperScan
 
 @MapperScan(basePackages = ["com.basicfu.sip.base.mapper"])
 @ComponentScan(basePackages = ["com.basicfu.sip"])
+@EnableFeignClients(basePackages = ["com.basicfu.sip"])
 @SpringBootApplication
-@EnableFeignClients
+
 class SipBaseApplication
 
 fun main(args: Array<String>) {
