@@ -55,7 +55,7 @@ open class Sqls<T> {
     }
 
 
-    fun Sqls<T>.andEqualTo(k: KMutableProperty1<T, *>, v: String) {
+    fun Sqls<T>.andEqualTo(k: KMutableProperty1<T, *>, v: String?) {
         this.andEqualTo(k.name, v)
     }
 
@@ -66,7 +66,7 @@ open class Sqls<T> {
     }
 
     @PublishedApi
-    internal fun andEqualTo(k: String, v: Any) {
+    internal fun andEqualTo(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "=", "and"))
     }
 
@@ -193,12 +193,16 @@ open class Sqls<T> {
         this.criteria.criterions.add(Criterion(k, v1, v2, "not between", "and"))
     }
 
-    fun Sqls<T>.andLike(k: KMutableProperty1<T, *>, v: String) {
+    fun Sqls<T>.andLike(k: KMutableProperty1<T, *>, v: String?) {
         this.andLike(k.name, dealLikeValue(v))
     }
-
+    inline fun <reified T> Sqls<T>.andLike(op: T.() -> Unit = {}) {
+        for ((k, v) in this.getValues(op)) {
+            this.andLike(k, v)
+        }
+    }
     @PublishedApi
-    internal fun andLike(k: String, v: Any) {
+    internal fun andLike(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "like", "and"))
     }
 
@@ -207,7 +211,7 @@ open class Sqls<T> {
     }
 
     @PublishedApi
-    internal fun andNotLike(k: String, v: Any) {
+    internal fun andNotLike(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "not like", "and"))
     }
 
@@ -375,7 +379,7 @@ open class Sqls<T> {
     }
 
     @PublishedApi
-    internal fun orLike(k: String, v: Any) {
+    internal fun orLike(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "like", "or"))
     }
 
@@ -384,12 +388,15 @@ open class Sqls<T> {
     }
 
     @PublishedApi
-    internal fun orNotLike(k: String, v: Any) {
+    internal fun orNotLike(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "not like", "or"))
     }
 
 
-    private fun dealLikeValue(v: String): String {
+    private fun dealLikeValue(v: String?): String? {
+        if(v==null){
+            return null
+        }
         var value = v
         if (value.contains("%") || value.contains("_")) {
             value = value.replace("%", "/%").replace("_", "/_")
@@ -431,7 +438,7 @@ open class Sqls<T> {
         }
 
 
-        constructor(property: String, value: Any, condition: String, andOr: String) {
+        constructor(property: String, value: Any?, condition: String, andOr: String) {
             this.property = property
             this.value = value
             this.condition = condition

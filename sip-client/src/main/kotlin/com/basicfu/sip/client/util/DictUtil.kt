@@ -26,8 +26,15 @@ class DictUtil {
         /**
          * 根据字典value获取字典
          */
-        fun get(value:String): List<DictDto>? {
+        fun get(value: String): List<DictDto>? {
             return dictFeign.get(value).data
+        }
+
+        /**
+         * 根据字典value获取字典(返回Map<Value,DictDot>)
+         */
+        fun getMap(value: String): Map<String, DictDto> {
+            return get(value)?.associateBy({ it.value!! }, { it }) ?: HashMap()
         }
     }
 }

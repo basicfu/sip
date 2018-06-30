@@ -1,5 +1,7 @@
 package com.basicfu.sip.core.exception
 
+import org.springframework.util.ReflectionUtils
+
 class CustomException : RuntimeException {
     var code = 0
     var msg = ""
@@ -48,15 +50,17 @@ class CustomException : RuntimeException {
         this.data=data
     }
 
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     private fun deal(any: Any) {
-        val java = any.javaClass
-        val value = java.getDeclaredField("value")
-        value.isAccessible = true
-        this.code = value.getInt(any)
-        val msg = java.getDeclaredField("msg")
-        msg.isAccessible = true
-        this.msg = msg.get(any).toString()
-
+        val clazz = any.javaClass
+        val value = ReflectionUtils.findField(clazz, "value")
+        if(value!=null){
+            value.isAccessible = true
+            this.code = value.getInt(any)
+        }
+        val msg = ReflectionUtils.findField(clazz, "msg")
+        if(msg!=null){
+            msg.isAccessible = true
+            this.code = msg.getInt(any)
+        }
     }
 }

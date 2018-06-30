@@ -1,5 +1,6 @@
 package com.basicfu.sip.core.model.po
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import javax.persistence.Column
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -7,21 +8,30 @@ import javax.persistence.Id
 
 class Application {
     /**
-     * 主键
+     * @return id
      */
     /**
-     * 获取主键
-     *
-     * @return id - 主键
-     */
-    /**
-     * 设置主键
-     *
-     * @param id 主键
+     * @param id
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+
+    /**
+     * 租户ID
+     */
+    /**
+     * 获取租户ID
+     *
+     * @return tenant_id - 租户ID
+     */
+    /**
+     * 设置租户ID
+     *
+     * @param tenantId 租户ID
+     */
+    @Column(name = "tenant_id")
+    var tenantId: Long? = null
 
     /**
      * 应用名

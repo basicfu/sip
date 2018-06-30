@@ -38,6 +38,7 @@ class DataSourceConfig {
         val sqlSessionFactoryBean = SqlSessionFactoryBean()
         sqlSessionFactoryBean.setDataSource(dataSource)
         sqlSessionFactoryBean.setMapperLocations(PathMatchingResourcePatternResolver().getResources("classpath*:/mapper/*.xml"))
+
         return sqlSessionFactoryBean
     }
 

@@ -1,5 +1,5 @@
 group 'com.basicfu.sip'
-version '0.0.1'
+version "0.0.1-2-SNAPSHOT"
 def artifactId = "sip-client"
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -13,11 +13,11 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: "$System.env.NEXUS_USERNAME",password: "$System.env.NEXUS_PASSWORD")
+                authentication(userName: "basicfu",password: "W?#na9/v@dU8A83M")
             }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: "$System.env.NEXUS_USERNAME", password: "$System.env.NEXUS_PASSWORD")
-            }
+//            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+//                authentication(userName: "$System.env.NEXUS_USERNAME", password: "$System.env.NEXUS_PASSWORD")
+//            }
             pom.version = "$project.version"
             pom.artifactId = "$artifactId"
             pom.groupId = "$project.group"

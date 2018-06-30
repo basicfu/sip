@@ -95,7 +95,6 @@ project(":sip-dict") {
 }
 project(":sip-client") {
     dependencies {
-        compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
     }
 }

@@ -34,8 +34,3 @@ SIP服务集成平台描述
 ├── sip-schedule           // 调度服务
 ├── sip-api                // API服务
 ├── sip-log                // LOG服务
-
-```
-### 安装
-
-spring actuator
