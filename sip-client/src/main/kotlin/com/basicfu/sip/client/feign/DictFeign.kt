@@ -1,7 +1,7 @@
 package com.basicfu.sip.client.feign
 
-import com.basicfu.sip.core.model.Result
-import com.basicfu.sip.core.model.dto.DictDto
+import com.basicfu.sip.client.model.DictDto
+import com.basicfu.sip.client.model.Result
 import org.springframework.cloud.netflix.feign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
