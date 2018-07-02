@@ -1,6 +1,5 @@
 package com.basicfu.sip.core.model.po
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import javax.persistence.Column
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType

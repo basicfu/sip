@@ -1,7 +1,7 @@
 package com.basicfu.sip.getway.config
 
 import com.basicfu.sip.core.Constant
-import com.basicfu.sip.core.model.po.Application
+import com.basicfu.sip.core.model.dto.ApplicationDto
 import com.basicfu.sip.core.util.RedisUtil
 import org.springframework.cloud.netflix.zuul.filters.RefreshableRouteLocator
 import org.springframework.cloud.netflix.zuul.filters.SimpleRouteLocator
@@ -18,7 +18,7 @@ class CustomRouteLocator(servletPath: String, private val properties: ZuulProper
     override fun locateRoutes(): Map<String, ZuulProperties.ZuulRoute> {
         val routesMap = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         routesMap.putAll(super.locateRoutes())
-        val all = RedisUtil.hGetAll<Application>(Constant.Redis.APP)
+        val all = RedisUtil.hGetAll<ApplicationDto>(Constant.Redis.APP)
         all.forEach { _, v ->
             if (v != null) {
                 val zuulRoute = ZuulProperties.ZuulRoute()
