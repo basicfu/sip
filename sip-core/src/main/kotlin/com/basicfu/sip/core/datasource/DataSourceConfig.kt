@@ -2,7 +2,9 @@ package com.basicfu.sip.core.datasource
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder
 import org.mybatis.spring.SqlSessionFactoryBean
-import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
+import org.springframework.aop.Advisor
+import org.springframework.aop.aspectj.AspectJExpressionPointcut
+import org.springframework.aop.support.DefaultPointcutAdvisor
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -12,9 +14,9 @@ import org.springframework.transaction.interceptor.TransactionInterceptor
 import java.util.*
 import javax.sql.DataSource
 
+
 @Configuration
 class DataSourceConfig {
-
     @Primary
     @Bean
 //    @ConfigurationProperties("spring.datasource.druid.master")
@@ -26,7 +28,7 @@ class DataSourceConfig {
     fun dynamicDataSource(): DataSource {
         val targetDataSources = HashMap<Any, Any>()
         val masterDataSource = masterDataSource()
-        targetDataSources.put(DataSourceContextHolder.DataSourceType.MASTER.name + "0", masterDataSource)
+        targetDataSources[DataSourceContextHolder.DataSourceType.MASTER.name + "0"] = masterDataSource
         val dataSource = DynamicDataSource(1, 2)
         dataSource.setTargetDataSources(targetDataSources)
         dataSource.setDefaultTargetDataSource(masterDataSource)
@@ -38,7 +40,6 @@ class DataSourceConfig {
         val sqlSessionFactoryBean = SqlSessionFactoryBean()
         sqlSessionFactoryBean.setDataSource(dataSource)
         sqlSessionFactoryBean.setMapperLocations(PathMatchingResourcePatternResolver().getResources("classpath*:/mapper/*.xml"))
-
         return sqlSessionFactoryBean
     }
 
@@ -53,15 +54,22 @@ class DataSourceConfig {
         properties.setProperty("insert*", "PROPAGATION_REQUIRED,-Exception")
         properties.setProperty("update*", "PROPAGATION_REQUIRED,-Exception")
         properties.setProperty("delete*", "PROPAGATION_REQUIRED,-Exception")
+        properties.setProperty("import*", "PROPAGATION_REQUIRED,-Exception")
         return TransactionInterceptor(transactionManager, properties)
     }
 
+//    @Bean
+//    fun txProxy(): BeanNameAutoProxyCreator {
+//        val creator = BeanNameAutoProxyCreator()
+//        creator.setInterceptorNames("txAdvice")
+//        creator.setBeanNames("*Service")
+//        creator.isProxyTargetClass = true
+//        return creator
+//    }
     @Bean
-    fun txProxy(): BeanNameAutoProxyCreator {
-        val creator = BeanNameAutoProxyCreator()
-        creator.setInterceptorNames("txAdvice")
-        creator.setBeanNames("*Service")
-        creator.isProxyTargetClass = true
-        return creator
+    fun txAdviceAdvisor(txAdvice: TransactionInterceptor): Advisor {
+        val pointcut = AspectJExpressionPointcut()
+        pointcut.expression = "execution(* com.basicfu.sip.*.service.*Service.*(..))&&!execution(* com.basicfu.sip.core.service.BaseService.*(..))"
+        return DefaultPointcutAdvisor(pointcut, txAdvice)
     }
 }

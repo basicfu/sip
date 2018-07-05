@@ -1,6 +1,5 @@
 package com.basicfu.sip.core.service
 
-import com.basicfu.sip.core.exception.CustomException
 import com.basicfu.sip.core.mapper.CustomMapper
 import com.basicfu.sip.core.model.BaseVo
 import com.github.pagehelper.PageHelper
@@ -16,7 +15,6 @@ import java.lang.reflect.ParameterizedType
 abstract class BaseService<M : CustomMapper<T>, T> {
     @Autowired
     lateinit var mapper: M
-
     private val clazz: Class<T> =
         (this.javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<T>
 
@@ -26,10 +24,11 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      */
     inline fun <reified R> to(obj: Any): R {
         val clazz = R::class.java
-        val instance= clazz.newInstance()
+        val instance = clazz.newInstance()
         BeanUtils.copyProperties(obj, instance)
         return instance
     }
+
     /**
      * list<bean> copy
      * obj源对象,R目标对象
@@ -58,13 +57,14 @@ abstract class BaseService<M : CustomMapper<T>, T> {
             ReflectionUtils.makeAccessible(cdate)
             cdate.set(obj, time)
         }
-        return dealUpdate(obj,time)
+        return dealUpdate(obj, time)
     }
+
     /**
      * 为更新对象处理udate值
      * 如果没有udate则不处理
      */
-    inline fun <reified R> dealUpdate(obj: R,time:Int?=null): R {
+    inline fun <reified R> dealUpdate(obj: R, time: Int? = null): R {
         val clazz = R::class.java
         val udate = ReflectionUtils.findField(clazz, "udate")
         if (udate != null) {
@@ -73,6 +73,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
         }
         return obj
     }
+
     /**
      * 根据ids查询
      */
@@ -83,20 +84,22 @@ abstract class BaseService<M : CustomMapper<T>, T> {
             arrayListOf()
         }
     }
+
     /**
      * 根据ids删除
      */
     protected fun deleteByIds(ids: List<Long>?): Int {
         return if (ids?.isNotEmpty() == true) {
-            return if(ids.size==1){
+            return if (ids.size == 1) {
                 mapper.deleteByPrimaryKey(ids[0])
-            }else{
+            } else {
                 mapper.deleteByIds(StringUtils.join(ids, ","))
             }
         } else {
             0
         }
     }
+
     /**
      * 分页查询，返回指定的类型集合，自动从request里获取分页信息
      * 无条件

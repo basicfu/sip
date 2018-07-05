@@ -63,6 +63,8 @@ project(":sip-core") {
         compile("org.apache.httpcomponents:httpmime:4.5.1")
         compile("io.protostuff:protostuff-core:1.5.9")
         compile("io.protostuff:protostuff-runtime:1.5.9")
+        compile("org.springframework:spring-aspects")
+        compile("org.springframework:spring-orm")
     }
 }
 project(":sip-eureka") {
