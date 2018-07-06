@@ -19,6 +19,22 @@ class UserTests {
     lateinit var userService: UserService
 
     @Test
+    fun list() {
+        val vo = UserVo()
+        vo.username = "basicfu"
+        val user = userService.list(vo)
+        Assert.assertEquals(user.size,1)
+    }
+
+    @Test
+    fun get() {
+        val vo = UserVo()
+        vo.username = "basicfu"
+        val user = userService.get(vo)
+        Assert.assertEquals(user.username,"basicfu")
+    }
+
+    @Test
     fun insert() {
         val vo = UserVo()
         vo.username = "basicfu"

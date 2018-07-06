@@ -7,6 +7,7 @@ import com.basicfu.sip.base.model.po.UserTemplate
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.core.exception.CustomException
 import com.basicfu.sip.core.mapper.example
+import com.basicfu.sip.core.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import org.springframework.stereotype.Service
 
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
 
-    fun all(vo:UserTemplateVo):List<UserTemplateDto>{
+    fun all(vo: UserTemplateVo): List<UserTemplateDto> {
         val sortedBy = mapper.selectByExample(example<UserTemplate> {
             andLike(UserTemplate::name, vo.name)
         }).sortedBy { it.sort }
@@ -25,10 +26,8 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
     }
 
     fun insert(vo: UserTemplateVo): Int {
-        if (mapper.selectCountByExample(example<UserTemplate> {
-                andEqualTo {
-                    name = vo.name
-                }
+        if (mapper.selectCount(generate {
+                name = vo.name
             }) != 0) throw CustomException(Enum.UserTemplate.FIELD_NAME_EXISTS)
         val po = dealInsert(to<UserTemplate>(vo))
         return mapper.insertSelective(po)
@@ -40,6 +39,6 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
     }
 
     fun delete(ids: List<Long>?): Int {
-        return deleteByIds(ids)
+        return 0
     }
 }

@@ -45,7 +45,7 @@ class UserAuth {
      *
      * @param type auth类型0用户名,1手机号,2字典(读取字典)
      */
-    var type: Byte? = null
+    var type: Int? = null
 
     /**
      * 登录标识

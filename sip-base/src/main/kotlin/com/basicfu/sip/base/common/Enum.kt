@@ -18,6 +18,10 @@ enum class Enum constructor(val value: Int, val msg:String) {
         FIELD_NAME_EXISTS(1,"字段名已存在"),
         SERVER(2,"服务端")
     }
+    enum class User constructor(val value: Int,msg: String){
+        EXIST_USER(1,"用户名已存在"),
+        SERVER(2,"服务端")
+    }
 
 
 

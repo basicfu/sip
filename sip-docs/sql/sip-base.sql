@@ -28,6 +28,7 @@ drop table if exists user;
 create table user(
   id bigint auto_increment primary key,
   tenant_id bigint not null default 0 comment '租户ID',
+  username varchar(32) not null default '' comment '用户名',
   content varchar(20000) null default '' comment '用户json信息(mysql8)',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',

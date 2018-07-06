@@ -6,7 +6,8 @@ eureka:
       defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka
 logging:
   level:
-    com: debug
+    com.basicfu.sip: TRACE
+    org.springframework.jdbc.datasource: TRACE
 spring:
   datasource:
     url: jdbc:mysql://${ENV_MYSQL_HOST:mysql-dev.dmka.cn}:${ENV_MYSQL_PORT:4306}/sip-base?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false

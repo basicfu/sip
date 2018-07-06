@@ -7,6 +7,11 @@ import tk.mybatis.mapper.util.StringUtil
 import kotlin.reflect.KMutableProperty1
 
 
+inline fun <reified T> generate(op: T.() -> Unit = {}):T {
+    val instance = T::class.java.newInstance()
+    op(instance)
+    return instance
+}
 inline fun <reified T> example(op: Example<T>.() -> Unit = {}): tk.mybatis.mapper.entity.Example {
     val clazz = T::class.java
     val builder = Example<T>(clazz)
