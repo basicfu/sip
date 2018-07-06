@@ -48,6 +48,7 @@ class UserTemplate {
      * @param name 字段名
      */
     var name: String? = null
+    var enName: String? = null
 
     /**
      * 字段类型(0Text,1Number,2Check,3Radio,4Date,5Time,6DateTime,7Dict)
@@ -78,6 +79,8 @@ class UserTemplate {
      * @param extra 字段长度(Text限制字段长度,Number限制字段范围大小(-100~300),字典存储关联的字典,其他不限)
      */
     var extra: String? = null
+    var defaultValue: String? = null
+    var required:Boolean?=null
     var sort: Int? = null
 
     /**

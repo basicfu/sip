@@ -60,7 +60,7 @@ class CustomException : RuntimeException {
         val msg = ReflectionUtils.findField(clazz, "msg")
         if(msg!=null){
             msg.isAccessible = true
-            this.code = msg.getInt(any)
+            this.msg = msg.get(any).toString()
         }
     }
 }

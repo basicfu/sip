@@ -1,5 +1,7 @@
 package com.basicfu.sip.base.model.vo
 
+import com.alibaba.fastjson.JSONObject
+
 class UserVo {
     var id: Long? = null
     var tenantId: Long? = null
@@ -8,7 +10,8 @@ class UserVo {
     var mobile:String?=null
     var email:String?=null
     var password: String? = null
-    var content: String? = null
+    //json字段
+    var content=JSONObject()
     var cdate: Int? = null
     var udate: Int? = null
     var type: Int? = null

@@ -1,5 +1,7 @@
 package com.basicfu.sip.base.service
 
+import com.basicfu.sip.base.model.vo.UserTemplateVo
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,11 +27,13 @@ class UserTemplateServiceTests {
 
     @Test
     fun insert() {
-//        val vo=UserTemplateVo()
-//        vo.name="昵称"
-//        vo.type="Text"
-//        vo.extra="5"
-//        Assert.assertEquals(userTemplateService.insert(vo),1)
+        val vo= UserTemplateVo()
+        vo.name="昵称"
+        vo.enName="nickname"
+        vo.type="Text"
+        vo.extra="5"
+        vo.defaultValue="小明"
+        Assert.assertEquals(userTemplateService.insert(vo),1)
     }
 
     @Test

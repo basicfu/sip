@@ -16,12 +16,16 @@ class UserController {
     @Autowired
     lateinit var userService: UserService
 
-    @GetMapping("/all")
-    fun all(vo: UserVo): Result<Any> {
+    @PostMapping("/insert")
+    fun insert(@RequestBody vo: UserVo): Result<Any> {
+        return Result(userService.insert(vo))
+    }
+    @PostMapping("/register")
+    fun register(@RequestBody vo: UserVo): Result<Any> {
         return Result(userService.insert(vo))
     }
     @GetMapping("/update")
-    fun update(vo: UserVo): Result<Any> {
+    fun update(@RequestBody vo: UserVo): Result<Any> {
         return Result(userService.update(vo))
     }
 //

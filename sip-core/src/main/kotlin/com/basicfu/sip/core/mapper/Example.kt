@@ -7,11 +7,12 @@ import tk.mybatis.mapper.util.StringUtil
 import kotlin.reflect.KMutableProperty1
 
 
-inline fun <reified T> generate(op: T.() -> Unit = {}):T {
+inline fun <reified T> generate(op: T.() -> Unit = {}): T {
     val instance = T::class.java.newInstance()
     op(instance)
     return instance
 }
+
 inline fun <reified T> example(op: Example<T>.() -> Unit = {}): tk.mybatis.mapper.entity.Example {
     val clazz = T::class.java
     val builder = Example<T>(clazz)
@@ -22,6 +23,7 @@ inline fun <reified T> example(op: Example<T>.() -> Unit = {}): tk.mybatis.mappe
 open class Sqls<T> {
     val criteria: Criteria = Criteria()
 
+    //根据反射过滤值为NULL的
     @PublishedApi
     internal inline fun <reified T> getValues(op: T.() -> Unit = {}): LinkedHashMap<String, Any> {
         val clazz = T::class.java
@@ -201,11 +203,13 @@ open class Sqls<T> {
     fun Sqls<T>.andLike(k: KMutableProperty1<T, *>, v: String?) {
         this.andLike(k.name, dealLikeValue(v))
     }
+
     inline fun <reified T> Sqls<T>.andLike(op: T.() -> Unit = {}) {
         for ((k, v) in this.getValues(op)) {
             this.andLike(k, v)
         }
     }
+
     @PublishedApi
     internal fun andLike(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "like", "and"))
@@ -399,7 +403,7 @@ open class Sqls<T> {
 
 
     private fun dealLikeValue(v: String?): String? {
-        if(v==null){
+        if (v == null) {
             return null
         }
         var value = v
@@ -463,9 +467,13 @@ open class Sqls<T> {
 
 class Example<T> @JvmOverloads constructor(
     private var entityClass: Class<*>,
-    private var exists: Boolean = true,
-    private var notNull: Boolean = false
-) : Sqls<T>() {
+    //过滤为Null的值
+    private var filterNull:Boolean=true,
+    //值是否允许为Null
+    private var notNull: Boolean = false,
+    //判断属性是否必须存在
+    private var exists: Boolean = true
+    ) : Sqls<T>() {
     private var table = EntityHelper.getEntityTable(entityClass)
     private var propertyMap = table.propertyMap
     private var orderByClause = StringBuilder()
@@ -576,7 +584,10 @@ class Example<T> @JvmOverloads constructor(
                 val andOr = criterion.andOr
                 val property = criterion.property
                 val values = criterion.values
-                transformCriterion(exampleCriteria, condition, property, values, andOr)
+                //过滤value为NULL的
+                if(criterion.value!=null){
+                    transformCriterion(exampleCriteria, condition, property, values, andOr)
+                }
             }
             oredCriteria!!.add(exampleCriteria)
         }
@@ -587,7 +598,7 @@ class Example<T> @JvmOverloads constructor(
         val clazz = this::class.java
         for (field in clazz.declaredFields) {
             field.isAccessible = true
-            if (field.name == "sqlsCriteria") {
+            if (field.name == "sqlsCriteria"||field.name == "filterNull") {
                 continue
             }
             var value = field.get(this)

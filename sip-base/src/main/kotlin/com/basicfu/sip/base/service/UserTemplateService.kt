@@ -29,6 +29,9 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
         if (mapper.selectCount(generate {
                 name = vo.name
             }) != 0) throw CustomException(Enum.UserTemplate.FIELD_NAME_EXISTS)
+        if (mapper.selectCount(generate {
+                enName = vo.enName
+            }) != 0) throw CustomException(Enum.UserTemplate.FIELD_EN_NAME_EXISTS)
         val po = dealInsert(to<UserTemplate>(vo))
         return mapper.insertSelective(po)
     }
@@ -39,6 +42,6 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
     }
 
     fun delete(ids: List<Long>?): Int {
-        return 0
+        return deleteByIds(ids)
     }
 }

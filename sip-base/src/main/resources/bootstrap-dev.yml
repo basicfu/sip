@@ -1,5 +1,8 @@
 server:
   port: ${ENV_SERVER_PORT:7200}
+sip:
+  dict:
+    url: http://sip-dev.dmka.cn/dict/
 eureka:
   client:
     serviceUrl:
