@@ -41,6 +41,7 @@ class Result<T> {
                 obj["page"] = page
                 this.data = obj as T
             }
+            else->this.data=data
         }
         if (msg != null) {
             this.msg = msg

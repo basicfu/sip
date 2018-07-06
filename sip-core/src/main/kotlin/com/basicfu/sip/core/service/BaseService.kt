@@ -22,7 +22,10 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      * bean copy
      * obj源对象,R目标对象
      */
-    inline fun <reified R> to(obj: Any): R {
+    inline fun <reified R> to(obj: Any?): R? {
+        if(obj==null){
+            return null
+        }
         val clazz = R::class.java
         val instance = clazz.newInstance()
         BeanUtils.copyProperties(obj, instance)

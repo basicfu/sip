@@ -44,10 +44,8 @@ class UserService : BaseService<UserMapper, User>() {
         return list
     }
 
-    fun get(vo: UserVo): UserDto {
-        return to(mapper.selectOne(generate {
-            username = vo.username
-        }))
+    fun get(id: Long): UserDto? {
+        return to(mapper.selectByPrimaryKey(id))
     }
 
     fun suggest(vo: UserVo): List<UserDto> {
@@ -77,7 +75,6 @@ class UserService : BaseService<UserMapper, User>() {
             val required = it.required!!
             val name = it.name!!
             val defaultValue = it.defaultValue!!
-            val type = it.type!!
             val value = contentJson.getString(enName)
             when (valueOf(it.type!!)) {
                 TEXT -> {

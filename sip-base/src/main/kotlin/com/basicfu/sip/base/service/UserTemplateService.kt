@@ -25,6 +25,9 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
         return to(sortedBy)
     }
 
+    /**
+     * //TODO 系统级字段做校验限制不能添加
+     */
     fun insert(vo: UserTemplateVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name

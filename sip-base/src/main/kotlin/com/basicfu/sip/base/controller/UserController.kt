@@ -16,14 +16,21 @@ class UserController {
     @Autowired
     lateinit var userService: UserService
 
+    @GetMapping("/get/{id}")
+    fun get(@PathVariable id: Long): Result<Any> {
+        return Result(userService.get(id))
+    }
+
     @PostMapping("/insert")
     fun insert(@RequestBody vo: UserVo): Result<Any> {
         return Result(userService.insert(vo))
     }
+
     @PostMapping("/register")
     fun register(@RequestBody vo: UserVo): Result<Any> {
         return Result(userService.insert(vo))
     }
+
     @GetMapping("/update")
     fun update(@RequestBody vo: UserVo): Result<Any> {
         return Result(userService.update(vo))
