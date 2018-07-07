@@ -22,19 +22,21 @@ class UserUtil {
         @PublishedApi
         internal
         lateinit var userFeign: UserFeign
+
         /**
          * 根据用户ID获取用户信息
          */
         inline fun <reified T> get(id: Long): T? {
-            val user = userFeign.get(id)
+            val user = userFeign.get(id).data
             val clazz = T::class.java
             val result = clazz.newInstance()
             if (user == null) {
-                return result
+                return null
             }
             val contentJson = JSON.parseObject(user.content)
             val fields = clazz.declaredFields
             fields.forEach { it ->
+                it.isAccessible = true
                 when (it.name) {
                     "id" -> it.set(result, user.id)
                     "username" -> it.set(result, user.username)
@@ -52,6 +54,5 @@ class UserUtil {
             }
             return result
         }
-
     }
 }
