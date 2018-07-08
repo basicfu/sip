@@ -163,7 +163,11 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun andIn(k: String, values: Iterable<*>) {
-        this.criteria.criterions.add(Criterion(k, values, "in", "and"))
+        val notNullValues = values.filterNotNull()
+        if(notNullValues.isEmpty()){
+            throw RuntimeException("list中没有非null元素")
+        }
+        this.criteria.criterions.add(Criterion(k, notNullValues, "in", "and"))
     }
 
 

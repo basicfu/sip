@@ -10,19 +10,20 @@ import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.po.UserAuth
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.base.model.vo.UserVo
+import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
 import com.basicfu.sip.core.exception.CustomException
 import com.basicfu.sip.core.mapper.example
 import com.basicfu.sip.core.mapper.generate
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.RedisUtil
+import com.basicfu.sip.core.util.TokenUtil
 import com.github.pagehelper.PageInfo
-import org.apache.commons.lang3.ArrayUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * @author basicfu
@@ -48,6 +49,16 @@ class UserService : BaseService<UserMapper, User>() {
         return to(mapper.selectByPrimaryKey(id))
     }
 
+    fun getByToken(token: String): UserDto? {
+        return RedisUtil.get<UserDto>(token)
+    }
+
+    fun listUsernameByIds(ids: List<Long>): List<UserDto> {
+        return to(mapper.selectByExample(example<User> {
+            select(User::id,User::username)
+            andIn(User::id,ids)
+        }))
+    }
     fun suggest(vo: UserVo): List<UserDto> {
         val list = to<UserDto>(mapper.selectByExample(example<User> {
             andLike {
@@ -57,6 +68,34 @@ class UserService : BaseService<UserMapper, User>() {
         return list
     }
 
+    /**
+     * 登录
+     * 用户名登录
+     * 后期密码使用加密后的值
+     * //TODO 登录成功获取用户资源放入缓存
+     */
+    fun login(vo: UserVo): JSONObject? {
+        val userAuth= userAuthService.mapper.selectOne(generate {
+            username=vo.username
+            type=0
+        }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+        if(!PasswordUtil.matches(vo.password!!,userAuth.password!!))throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+        val user=to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
+        userAuthService.mapper.updateByPrimaryKeySelective(generate {
+            id=userAuth.id
+            ldate=(System.currentTimeMillis() / 1000).toInt()
+        })
+        RedisUtil.set(TokenUtil.generateToken(),user)
+        val result = JSONObject()
+        result["success"] = true
+        return result
+        //查询用户资源
+//        val rids = urMapper.selectByIds(user.id.toString()).mapNotNull { it.roleId }
+//        val mids = if (rids.isEmpty()) emptyList() else rmMapper.selectByIds(StringUtils.join(rids, ",")).mapNotNull { it.menuId }
+//        val pids = if (rids.isEmpty()) emptyList() else rpMapper.selectByIds(StringUtils.join(rids, ",")).mapNotNull { it.permissionId }
+//        val resourceIds = if (pids.isEmpty()) emptyList() else prMapper.selectByIds(StringUtils.join(pids, ",")).mapNotNull { it.resourceId }
+//        val tokenStr = Utils.generateToken()
+    }
     /**
      * 用户模板需要在添加时强制限制好格式
      */

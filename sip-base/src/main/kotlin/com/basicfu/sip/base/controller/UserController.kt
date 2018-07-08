@@ -21,6 +21,21 @@ class UserController {
         return Result(userService.get(id))
     }
 
+    @GetMapping("/get/token/{token}")
+    fun getByToken(@PathVariable token: String): Result<Any> {
+        return Result(userService.getByToken(token))
+    }
+
+    @GetMapping("/list/username/{ids}")
+    fun listUsernameByIds(@PathVariable ids: List<Long>): Result<Any> {
+        return Result(userService.listUsernameByIds(ids))
+    }
+
+    @PostMapping("/login")
+    fun login(@RequestBody vo: UserVo): Result<Any> {
+        return Result(userService.login(vo))
+    }
+
     @PostMapping("/insert")
     fun insert(@RequestBody vo: UserVo): Result<Any> {
         return Result(userService.insert(vo))
