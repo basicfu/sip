@@ -12,4 +12,10 @@ interface UserFeign {
     @GetMapping("/user/get/{id}")
     fun get(@PathVariable("id") id: Long): Result<UserDto>
 
+    @GetMapping("/user/list/username/{ids}")
+    fun listUsernameByIds(@PathVariable("ids") ids: List<Long>): Result<List<UserDto>>
+
+    @GetMapping("/user/get/token/{token}")
+    fun getByToken(@PathVariable("token") token: String): Result<UserDto>
+
 }

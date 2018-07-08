@@ -27,10 +27,10 @@ class DictUtil {
         }
 
         /**
-         * 根据字典value获取字典(返回Map<Value,DictDot>)
+         * 根据字典value获取字典(返回Map<Value,DictDto>)
          */
-        fun getMap(value: String): Map<String, DictDto>? {
-            return get(value)?.associateBy({ it.value!! }, { it })
+        fun getMap(value: String): Map<String, DictDto> {
+            return get(value)?.associateBy({ it.value!! }, { it })?:HashMap()
         }
     }
 }
