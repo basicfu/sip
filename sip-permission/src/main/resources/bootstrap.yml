@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sip-permission
+  profiles:
+    active: ${ENV:dev}

@@ -3,6 +3,8 @@ server:
 sip:
   dict:
     url: http://sip-dev.dmka.cn/dict/
+  base:
+    url: http://sip-dev.dmka.cn/base/
 eureka:
   client:
     serviceUrl:

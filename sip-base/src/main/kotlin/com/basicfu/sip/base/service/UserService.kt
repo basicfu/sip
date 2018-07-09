@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.common.Enum.FieldType.*
+import com.basicfu.sip.base.feign.RoleFeign
 import com.basicfu.sip.base.mapper.UserMapper
 import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
@@ -35,6 +36,8 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var userAuthService: UserAuthService
     @Autowired
     lateinit var userTemplateService: UserTemplateService
+    @Autowired
+    lateinit var roleFeign: RoleFeign
 
     fun list(vo: UserVo): PageInfo<UserDto> {
         val list = selectPage<UserDto>(example<User> {
@@ -79,22 +82,25 @@ class UserService : BaseService<UserMapper, User>() {
             username=vo.username
             type=0
         }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
-        if(!PasswordUtil.matches(vo.password!!,userAuth.password!!))throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+        if(!PasswordUtil.matches(vo.username+vo.password!!,userAuth.password!!))throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
         val user=to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
         userAuthService.mapper.updateByPrimaryKeySelective(generate {
             id=userAuth.id
             ldate=(System.currentTimeMillis() / 1000).toInt()
         })
+        val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(Enum.User.LOGIN_ERROR)
+        user.roleIds=permission.getJSONArray("roleIds").toJavaList(Long::class.java)
+        user.menuIds=permission.getJSONArray("menuIds").toJavaList(Long::class.java)
+        user.permissionIds=permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
+        user.resourceIds=permission.getJSONArray("resourceIds").toJavaList(Long::class.java)
         RedisUtil.set(TokenUtil.generateToken(),user)
         val result = JSONObject()
-        result["success"] = true
+        result["username"] = user.username
+        result["roleIds"] = user.roleIds
+        result["menuIds"] = user.menuIds
+        result["permissionIds"] = user.permissionIds
+        result["resourceIds"] = user.resourceIds
         return result
-        //查询用户资源
-//        val rids = urMapper.selectByIds(user.id.toString()).mapNotNull { it.roleId }
-//        val mids = if (rids.isEmpty()) emptyList() else rmMapper.selectByIds(StringUtils.join(rids, ",")).mapNotNull { it.menuId }
-//        val pids = if (rids.isEmpty()) emptyList() else rpMapper.selectByIds(StringUtils.join(rids, ",")).mapNotNull { it.permissionId }
-//        val resourceIds = if (pids.isEmpty()) emptyList() else prMapper.selectByIds(StringUtils.join(pids, ",")).mapNotNull { it.resourceId }
-//        val tokenStr = Utils.generateToken()
     }
     /**
      * 用户模板需要在添加时强制限制好格式
@@ -178,7 +184,7 @@ class UserService : BaseService<UserMapper, User>() {
                     if(value==null){
                         contentResult[enName]="[]"
                     }else{
-                        val dictMap = DictUtil.getMap(extra) ?: throw CustomException("找不到字典[$name]请确认是否存在")
+                        val dictMap = DictUtil.getMap(extra)
                         JSON.parseArray(value).forEach { item ->
                             if (!dictMap.containsKey(item.toString())) {
                                 throw CustomException("找不到字典[$extra]下为[$item]的值")
@@ -192,7 +198,7 @@ class UserService : BaseService<UserMapper, User>() {
                     if(value==null){
                         contentResult[enName] = ""
                     }else{
-                        val dictMap = DictUtil.getMap(extra) ?: throw CustomException("找不到字典[$name]请确认是否存在")
+                        val dictMap = DictUtil.getMap(extra)
                         if (!dictMap.containsKey(value.toString())) {
                             throw CustomException("找不到字典[$extra]下为[$value]的值")
                         }
@@ -207,7 +213,7 @@ class UserService : BaseService<UserMapper, User>() {
                         }
                         contentResult[enName] = ""
                     }else{
-                        val dictMap = DictUtil.getMap(extra) ?: throw CustomException("找不到字典[$name]请确认是否存在")
+                        val dictMap = DictUtil.getMap(extra)
                         if (!dictMap.containsKey(value.toString())) {
                             throw CustomException("找不到字典[$extra]下为[$value]的值")
                         }

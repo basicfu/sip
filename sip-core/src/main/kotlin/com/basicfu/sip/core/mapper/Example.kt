@@ -62,7 +62,7 @@ open class Sqls<T> {
     }
 
 
-    fun Sqls<T>.andEqualTo(k: KMutableProperty1<T, *>, v: String?) {
+    fun Sqls<T>.andEqualTo(k: KMutableProperty1<T, *>, v: Any?) {
         this.andEqualTo(k.name, v)
     }
 

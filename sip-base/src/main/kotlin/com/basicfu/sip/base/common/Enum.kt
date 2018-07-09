@@ -26,7 +26,7 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class User constructor(val value: Int,val msg: String){
         EXIST_USER(1,"用户名已存在"),
         USERNAME_OR_PASSWORD_ERROR(1,"用户名或密码错误"),
-        SERVER(2,"服务端")
+        LOGIN_ERROR(2,"登录失败，请稍后重试")
     }
     enum class FieldType{
         TEXT,

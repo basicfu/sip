@@ -7,6 +7,8 @@ import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.ReflectionUtils
 import tk.mybatis.mapper.entity.Example
 import java.lang.reflect.ParameterizedType
@@ -37,7 +39,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      * obj源对象,R目标对象
      * 如果T和R是同一个类型是否能优化省性能
      */
-    inline fun <reified R> to(list: List<T>): List<R> {
+    inline fun <reified R> to(list: List<T>): MutableList<R> {
         val clazz = R::class.java
         val result = arrayListOf<R>()
         list.forEach {

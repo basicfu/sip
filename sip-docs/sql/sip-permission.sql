@@ -1,58 +1,77 @@
-drop database if exists `sip-base`;
-create database `sip-base` default charset utf8 collate utf8_general_ci;
-USE `sip-base`;
+drop database if exists `sip-permission`;
+create database `sip-permission` default charset utf8 collate utf8_general_ci;
+USE `sip-permission`;
 
 drop table if exists role;
 create table role(
-	id bigint auto_increment primary key,
-	sensitive_headers varchar(5000) null comment '敏感头信息'
+  id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
+  name varchar(32) not null comment '角色名',
+  enalbe tinyint not null default 0 comment '是否启用'
 )
 comment '角色表' engine=InnoDB;
 
 drop table if exists user_role;
 create table user_role(
   id bigint auto_increment primary key,
-  tenant_id bigint not null default 0 comment '租户ID',
-)comment '用户角色表' engine=InnoDB;
+  user_id bigint not null default 0 comment '用户Id',
+  role_id bigint not null default 0 comment '角色Id'
+)
+comment '用户角色表' engine=InnoDB;
 
 drop table if exists menu;
 CREATE TABLE menu (
   id bigint auto_increment primary key,
-  unique key (uid,type)
-)comment '菜单表' engine=InnoDB;
+  app_id bigint not null default 0 comment '应用Id',
+  pid bigint not null default 0 comment '父级Id',
+  name varchar(32) not null default '' comment '菜单名',
+  path varchar(255) not null default '' comment '菜单路径',
+  sort int not null default 0 comment '菜单顺序',
+  icon varchar(255) not null default '' comment '菜单图标',
+  type varchar(64) not null default '' comment '菜单类型(页面,元素)',
+  display tinyint not null default 0 comment '是否显示'
+  union key (app_id,name,path)
+)
+comment '菜单表' engine=InnoDB;
 
 drop table if exists role_menu;
 CREATE TABLE role_menu (
   id bigint auto_increment primary key,
-  unique key (tenant_id,name)
+  role_id bigint not null default 0 comment '角色ID',
+  menu_id bigint not null default 0 comment '菜单ID'
 )comment '角色菜单表' engine=InnoDB;
 
-drop table if exists role_menu;
-CREATE TABLE role_menu (
+drop table if exists resource;
+CREATE TABLE resource (
   id bigint auto_increment primary key,
-  unique key (tenant_id,name)
+  service_id bigint not null default 0 comment '服务Id',
+  url varchar(255) not null comment '资源URL',
+  name varchar(100) not null comment '资源名'
 )comment '资源表' engine=InnoDB;
 
-drop table if exists role_menu;
-CREATE TABLE role_menu (
+drop table if exists menu_resource;
+CREATE TABLE menu_resource (
   id bigint auto_increment primary key,
-  unique key (tenant_id,name)
+  menu_id bigint not null default 0 comment '菜单Id',
+  resource_id bigint not null default 0 comment '资源Id'
 )comment '菜单资源表' engine=InnoDB;
 
-drop table if exists role_menu;
-CREATE TABLE role_menu (
+drop table if exists role_permission;
+CREATE TABLE role_permission (
   id bigint auto_increment primary key,
-  unique key (tenant_id,name)
+  role_id bigint not null default 0 comment '角色Id',
+  permission_id bigint not null default 0 comment '权限Id'
 )comment '角色权限表' engine=InnoDB;
 
-drop table if exists role_menu;
-CREATE TABLE role_menu (
+create table permission(
   id bigint auto_increment primary key,
-  unique key (tenant_id,name)
+  app_id bigint not null default 0 comment '应用Id',
+  name varchar(32) not null comment '权限名'
 )comment '权限表' engine=InnoDB;
 
-drop table if exists role_menu;
-CREATE TABLE role_menu (
+drop table if exists permission_resource;
+CREATE TABLE permission_resource (
   id bigint auto_increment primary key,
-  unique key (tenant_id,name)
+  permission_id bigint not null default 0 comment '权限Id',
+  resource_id bigint not null default 0 comment '资源Id'
 )comment '权限资源表' engine=InnoDB;

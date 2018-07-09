@@ -11,4 +11,9 @@ class UserDto {
     var udate: Int? = null
     var type: Int? = null
     var status: Int? = null
+
+    var roleIds:List<Long>?=null
+    var menuIds:List<Long>?=null
+    var permissionIds:List<Long>?=null
+    var resourceIds:List<Long>?=null
 }
