@@ -42,7 +42,39 @@ class RoleServiceTests {
             id=1
             menuIds= arrayListOf(1,2)
         }
-        Assert.assertEquals(roleService.insertMenu(vo),1)
+        Assert.assertEquals(roleService.insertMenu(vo),2)
+    }
+    @Test
+    fun insertPermission() {
+        val vo=generate<RoleVo> {
+            id=1
+            permissionIds= arrayListOf(1)
+        }
+        Assert.assertEquals(roleService.insertPermission(vo),1)
+    }
+    @Test
+    fun deleteUser() {
+        val vo=generate<RoleVo> {
+            id=1
+            userIds= arrayListOf(12)
+        }
+        Assert.assertEquals(roleService.deleteUser(vo),1)
+    }
+    @Test
+    fun deleteMenu() {
+        val vo=generate<RoleVo> {
+            id=1
+            menuIds= arrayListOf(1,2)
+        }
+        Assert.assertEquals(roleService.deleteMenu(vo),2)
+    }
+    @Test
+    fun deletePermission() {
+        val vo=generate<RoleVo> {
+            id=1
+            permissionIds= arrayListOf(1)
+        }
+        Assert.assertEquals(roleService.deletePermission(vo),1)
     }
     @Test
     fun update() {

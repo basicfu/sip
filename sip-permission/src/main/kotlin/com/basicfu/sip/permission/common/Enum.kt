@@ -23,7 +23,8 @@ enum class Enum constructor(val value: Int, val msg:String) {
     }
     enum class Role constructor(val value: Int,val msg: String){
         EXIST_NAME(1,"角色名已存在"),
-        MENU_NOT_FOUND(1,"部分要添加菜单没有找到,请刷新最新菜单后重试")
+        MENU_NOT_FOUND(1,"部分要添加菜单没有找到,请刷新数据后重试"),
+        PERMISSION_NOT_FOUND(1,"部分要添加权限没有找到,请刷新数据后重试")
     }
     enum class Resource constructor(val value: Int,val msg: String){
         EXIST_URL(1,"该服务下资源URL已存在"),

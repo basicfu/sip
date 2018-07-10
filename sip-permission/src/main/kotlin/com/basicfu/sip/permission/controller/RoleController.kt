@@ -41,6 +41,11 @@ class RoleController {
         return Result(roleService.insertMenu(vo))
     }
 
+    @PostMapping("/insert/permission")
+    fun insertPermission(@RequestBody vo: RoleVo): Result<Any> {
+        return Result(roleService.insertPermission(vo))
+    }
+
     @PostMapping("/update")
     fun update(@RequestBody vo: RoleVo): Result<Any> {
         return Result(roleService.update(vo))
@@ -54,5 +59,10 @@ class RoleController {
     @DeleteMapping("/delete/menu")
     fun deleteMenu(vo: RoleVo): Result<Any> {
         return Result(roleService.deleteMenu(vo))
+    }
+
+    @DeleteMapping("/delete/permission")
+    fun deletePermission(vo: RoleVo): Result<Any> {
+        return Result(roleService.deletePermission(vo))
     }
 }

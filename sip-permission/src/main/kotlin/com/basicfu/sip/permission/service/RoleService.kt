@@ -32,7 +32,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
     @Autowired
     lateinit var prMapper: PermissionResourceMapper
     @Autowired
-    lateinit var menuService: MenuService
+    lateinit var menuMapper: MenuMapper
+    @Autowired
+    lateinit var permissionMapper: PermissionMapper
 
     fun getPermissionByUid(uid: Long): JSONObject {
         val roleIds = urMapper.selectByExample(example<UserRole> {
@@ -44,7 +46,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         } else {
             rmMapper.selectByExample(example<RoleMenu> {
                 select(RoleMenu::menuId)
-                andIn(RoleMenu::menuId, roleIds)
+                andIn(RoleMenu::roleId, roleIds)
             }).mapNotNull { it.menuId }
         }
         val menuResourceIds = if (menuIds.isEmpty()) {
@@ -121,7 +123,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
 
     fun insertMenu(vo: RoleVo): Int {
         var ids = vo.menuIds!!
-        if (menuService.mapper.selectCountByExample(example<Menu> {
+        if (menuMapper.selectCountByExample(example<Menu> {
                 andIn(Menu::id, ids)
             }) != ids.size) throw CustomException(Enum.Role.MENU_NOT_FOUND)
         val existsMenuIds = rmMapper.selectByExample(example<RoleMenu> {
@@ -137,6 +139,26 @@ class RoleService : BaseService<RoleMapper, Role>() {
             roleMenus.add(rm)
         }
         return rmMapper.insertList(roleMenus)
+    }
+
+    fun insertPermission(vo: RoleVo): Int {
+        var ids = vo.permissionIds!!
+        if (permissionMapper.selectCountByExample(example<Permission> {
+                andIn(Permission::id, ids)
+            }) != ids.size) throw CustomException(Enum.Role.MENU_NOT_FOUND)
+        val existsPermissionIds = rpMapper.selectByExample(example<RolePermission> {
+            andEqualTo(RolePermission::roleId, vo.id)
+            andIn(RolePermission::permissionId, ids)
+        }).map { it.permissionId }
+        ids = ids.filter { !existsPermissionIds.contains(it) }
+        val rolePermissions = arrayListOf<RolePermission>()
+        ids.forEach { it ->
+            val rp = RolePermission()
+            rp.roleId = vo.id
+            rp.permissionId = it
+            rolePermissions.add(rp)
+        }
+        return rpMapper.insertList(rolePermissions)
     }
 
     fun update(vo: RoleVo): Int {
@@ -157,10 +179,24 @@ class RoleService : BaseService<RoleMapper, Role>() {
         return deleteByIds(ids)
     }
 
+    fun deleteUser(vo: RoleVo): Int {
+        return urMapper.deleteByExample(example<UserRole> {
+            andEqualTo(UserRole::roleId, vo.id)
+            andIn(UserRole::userId, vo.userIds!!)
+        })
+    }
+
     fun deleteMenu(vo: RoleVo): Int {
         return rmMapper.deleteByExample(example<RoleMenu> {
             andEqualTo(RoleMenu::roleId, vo.id)
             andIn(RoleMenu::menuId, vo.menuIds!!)
+        })
+    }
+
+    fun deletePermission(vo: RoleVo): Int {
+        return rpMapper.deleteByExample(example<RolePermission> {
+            andEqualTo(RolePermission::roleId, vo.id)
+            andIn(RolePermission::permissionId, vo.permissionIds!!)
         })
     }
 }

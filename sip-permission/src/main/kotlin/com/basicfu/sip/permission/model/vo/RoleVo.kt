@@ -8,4 +8,5 @@ class RoleVo {
 
     var userIds:List<Long>?=null
     var menuIds:List<Long>?=null
+    var permissionIds:List<Long>?=null
 }

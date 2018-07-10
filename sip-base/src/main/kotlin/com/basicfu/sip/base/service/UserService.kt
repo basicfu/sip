@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.common.Enum.FieldType.*
 import com.basicfu.sip.base.feign.RoleFeign
+import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
 import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
@@ -33,7 +34,7 @@ import java.text.SimpleDateFormat
 @Service
 class UserService : BaseService<UserMapper, User>() {
     @Autowired
-    lateinit var userAuthService: UserAuthService
+    lateinit var userAuthMapper: UserAuthMapper
     @Autowired
     lateinit var userTemplateService: UserTemplateService
     @Autowired
@@ -78,13 +79,13 @@ class UserService : BaseService<UserMapper, User>() {
      * //TODO 登录成功获取用户资源放入缓存
      */
     fun login(vo: UserVo): JSONObject? {
-        val userAuth= userAuthService.mapper.selectOne(generate {
+        val userAuth= userAuthMapper.selectOne(generate {
             username=vo.username
             type=0
         }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
         if(!PasswordUtil.matches(vo.username+vo.password!!,userAuth.password!!))throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
         val user=to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
-        userAuthService.mapper.updateByPrimaryKeySelective(generate {
+        userAuthMapper.updateByPrimaryKeySelective(generate {
             id=userAuth.id
             ldate=(System.currentTimeMillis() / 1000).toInt()
         })
@@ -107,7 +108,7 @@ class UserService : BaseService<UserMapper, User>() {
      */
     fun insert(vo: UserVo): Int {
         //检查用户名重复
-        if (userAuthService.mapper.selectCount(generate {
+        if (userAuthMapper.selectCount(generate {
                 username = vo.username
             }) > 0) throw CustomException(Enum.User.EXIST_USER)
         val contentJson = vo.content
@@ -245,7 +246,7 @@ class UserService : BaseService<UserMapper, User>() {
             password = BCryptPasswordEncoder().encode(vo.username + vo.password)
             type = 0
         })
-        userAuthService.mapper.insertSelective(userAuth)
+        userAuthMapper.insertSelective(userAuth)
         return 1
     }
 
