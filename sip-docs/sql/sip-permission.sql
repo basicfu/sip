@@ -30,7 +30,6 @@ CREATE TABLE menu (
   icon varchar(255) not null default '' comment '菜单图标',
   type varchar(64) not null default '' comment '菜单类型(页面,元素)',
   display tinyint not null default 0 comment '是否显示'
-  union key (app_id,name,path)
 )
 comment '菜单表' engine=InnoDB;
 
