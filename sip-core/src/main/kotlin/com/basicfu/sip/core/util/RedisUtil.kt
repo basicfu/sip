@@ -25,14 +25,18 @@ class RedisUtil {
             val serialize = SerializationUtil.serialize(v)
             redisTemplate.opsForValue().set(k, serialize)
         }
-
+        fun set(k: Any, v: Any?,expireMilliseconds:Long) {
+            val serialize = SerializationUtil.serialize(v)
+            redisTemplate.opsForValue().set(k, serialize)
+            expire(k,expireMilliseconds)
+        }
         inline fun <reified T> get(k: Any): T? {
             val data = redisTemplate.opsForValue().get(k)
             return SerializationUtil.deserialize(data)
         }
 
-        fun expire(key: Any, expireTime: Long) {
-            redisTemplate.expire(key, expireTime, timeUnit)
+        fun expire(key: Any, expireMilliseconds: Long) {
+            redisTemplate.expire(key, expireMilliseconds, timeUnit)
         }
 
         fun del(key: Any) {

@@ -1,8 +1,11 @@
 package com.basicfu.sip.permission.service
 
 import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.permission.model.po.Menu
+import com.basicfu.sip.permission.model.po.MenuResource
 import com.basicfu.sip.permission.model.vo.MenuVo
 import com.basicfu.sip.permission.model.vo.RoleVo
+import org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,7 +29,7 @@ class MenuServiceTests {
             pid=0
             name = "菜单管理"
             path="/menu"
-            sort=2
+            sort=1
             icon="menu"
             type="PAGE"
             display=1
@@ -35,14 +38,21 @@ class MenuServiceTests {
     }
 
     @Test
-    fun insertMenu() {
-//        val vo = generate<RoleVo> {
-//            enalbe = 1
-//            name = "测试角色"
-//        }
-//        Assert.assertEquals(menuService.insertMenu(vo), 1)
+    fun insertResource() {
+        val vo = generate<MenuVo> {
+            id=1
+            resourceIds= arrayListOf(1)
+        }
+        Assert.assertEquals(menuService.insertResource(vo), 1)
     }
-
+    @Test
+    fun deleteResource() {
+        val vo = generate<MenuVo> {
+            id=1
+            resourceIds= arrayListOf(1)
+        }
+        Assert.assertEquals(menuService.deleteResource(vo), 1)
+    }
     @Test
     fun update() {
 //        val vo=UserTemplateVo()
