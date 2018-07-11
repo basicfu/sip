@@ -6,7 +6,7 @@ drop table if exists role;
 create table role(
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
-  name varchar(32) not null comment '角色名',
+  name varchar(32) not null default '' comment '角色名',
   enalbe tinyint not null default 0 comment '是否启用'
 )
 comment '角色表' engine=InnoDB;
@@ -44,8 +44,8 @@ drop table if exists resource;
 CREATE TABLE resource (
   id bigint auto_increment primary key,
   service_id bigint not null default 0 comment '服务Id',
-  url varchar(255) not null comment '资源URL',
-  name varchar(100) not null comment '资源名'
+  url varchar(255) not null default '' comment '资源URL',
+  name varchar(100) not null default '' comment '资源名'
 )comment '资源表' engine=InnoDB;
 
 drop table if exists menu_resource;
@@ -65,7 +65,7 @@ CREATE TABLE role_permission (
 create table permission(
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
-  name varchar(32) not null comment '权限名'
+  name varchar(32) not null default '' comment '权限名'
 )comment '权限表' engine=InnoDB;
 
 drop table if exists permission_resource;
