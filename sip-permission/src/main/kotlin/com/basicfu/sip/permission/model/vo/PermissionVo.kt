@@ -6,4 +6,5 @@ class PermissionVo {
     var name: String? = null
 
     var keyword:String?=null
+    var resourceIds:List<Long>?=null
 }

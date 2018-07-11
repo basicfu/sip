@@ -7,10 +7,11 @@ import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
+import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.dto.MenuDto
 import com.basicfu.sip.permission.model.po.Menu
 import com.basicfu.sip.permission.model.po.MenuResource
-import com.basicfu.sip.permission.model.po.RoleMenu
+import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.MenuVo
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service
 class MenuService : BaseService<MenuMapper, Menu>() {
     @Autowired
     lateinit var mrMapper: MenuResourceMapper
+    @Autowired
+    lateinit var resourceMapper:ResourceMapper
 
 //    fun list(token:String?): List<Any> {
 //        val token = RedisUtil.get(Constant.Redis.TOKEN + token,Token::class.java)
@@ -74,8 +77,8 @@ class MenuService : BaseService<MenuMapper, Menu>() {
 
     fun insertResource(vo: MenuVo): Int {
         val ids = vo.resourceIds!!
-        if (mrMapper.selectCountByExample(example<RoleMenu> {
-                andIn(RoleMenu::menuId, ids)
+        if (resourceMapper.selectCountByExample(example<Resource> {
+                andIn(Resource::id, ids)
             }) != ids.size) throw CustomException(Enum.Menu.RESOURCE_NOT_FOUND)
         val menuResources = arrayListOf<MenuResource>()
         ids.forEach { it ->

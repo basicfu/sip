@@ -2,6 +2,7 @@ package com.basicfu.sip.permission.controller
 
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.permission.model.vo.PermissionVo
+import com.basicfu.sip.permission.model.vo.RoleVo
 import com.basicfu.sip.permission.service.PermissionService
 import com.basicfu.sip.permission.service.ResourceService
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +31,10 @@ class PermissionController {
     @PostMapping("/insert")
     fun insert(@RequestBody vo: PermissionVo): Result<Any> {
         return Result(permissionService.insert(vo))
+    }
+    @PostMapping("/insert/resource")
+    fun insertPermission(@RequestBody vo: PermissionVo): Result<Any> {
+        return Result(permissionService.insertResource(vo))
     }
 
     @PostMapping("/update")

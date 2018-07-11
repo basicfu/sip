@@ -54,7 +54,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         } else {
             mrMapper.selectByExample(example<MenuResource> {
                 select(MenuResource::resourceId)
-                andIn(MenuResource::resourceId, roleIds)
+                andIn(MenuResource::menuId, menuIds)
             }).mapNotNull { it.resourceId }
         }
         val permissionIds = if (roleIds.isEmpty()) {
@@ -62,7 +62,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         } else {
             rpMapper.selectByExample(example<RolePermission> {
                 select(RolePermission::permissionId)
-                andIn(RolePermission::permissionId, roleIds)
+                andIn(RolePermission::roleId, roleIds)
             }).mapNotNull { it.permissionId }
         }
         val permissionResourceIds = if (permissionIds.isEmpty()) {
@@ -70,7 +70,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         } else {
             prMapper.selectByExample(example<PermissionResource> {
                 select(PermissionResource::resourceId)
-                andIn(PermissionResource::resourceId, roleIds)
+                andIn(PermissionResource::permissionId, permissionIds)
             }).mapNotNull { it.resourceId }
         }
         val resourceIds = arrayListOf<Long>()
@@ -80,7 +80,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         result["roleIds"] = roleIds
         result["menuIds"] = menuIds
         result["permissionIds"] = permissionIds
-        result["resourceIds"] = resourceIds
+        result["resourceIds"] = resourceIds.distinct()
         return result
     }
 

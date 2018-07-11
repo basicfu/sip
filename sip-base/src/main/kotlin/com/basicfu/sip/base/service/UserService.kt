@@ -94,13 +94,13 @@ class UserService : BaseService<UserMapper, User>() {
         user.menuIds=permission.getJSONArray("menuIds").toJavaList(Long::class.java)
         user.permissionIds=permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
         user.resourceIds=permission.getJSONArray("resourceIds").toJavaList(Long::class.java)
-        RedisUtil.set(TokenUtil.generateToken(),user)
+        val token=TokenUtil.generateToken()
+        //TODO 系统设置登录过期时间
+        RedisUtil.set(token,user,24*60*60*1000)
         val result = JSONObject()
-        result["username"] = user.username
-        result["roleIds"] = user.roleIds
-        result["menuIds"] = user.menuIds
-        result["permissionIds"] = user.permissionIds
-        result["resourceIds"] = user.resourceIds
+        result["success"] = true
+        result["token"] = token
+        result["time"] = System.currentTimeMillis()
         return result
     }
     /**

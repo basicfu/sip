@@ -19,7 +19,7 @@ enum class Enum constructor(val value: Int, val msg:String) {
     }
     enum class Menu constructor(val value: Int,val msg: String){
         EXIST_NAME(1,"菜单名已存在"),
-        RESOURCE_NOT_FOUND(1,"部分要添加资源没有找到,请刷新最新菜单后重试")
+        RESOURCE_NOT_FOUND(1,"部分要添加资源没有找到,请刷新数据后重试")
     }
     enum class Role constructor(val value: Int,val msg: String){
         EXIST_NAME(1,"角色名已存在"),
@@ -32,7 +32,7 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class Permission constructor(val value: Int,val msg: String){
         EXIST_NAME(1,"权限名已存在"),
         FIELD_EN_NAME_EXISTS(1,"字段英文名已存在"),
-        SERVER(2,"服务端")
+        RESOURCE_NOT_FOUND(1,"部分要添加资源没有找到,请刷新数据后重试")
     }
 
 
