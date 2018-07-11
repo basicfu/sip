@@ -76,7 +76,7 @@ class UserService : BaseService<UserMapper, User>() {
      * 登录
      * 用户名登录
      * 后期密码使用加密后的值
-     * //TODO 登录成功获取用户资源放入缓存
+     * TODO 登录后清除该用户其他token
      */
     fun login(vo: UserVo): JSONObject? {
         val userAuth= userAuthMapper.selectOne(generate {
@@ -85,11 +85,13 @@ class UserService : BaseService<UserMapper, User>() {
         }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
         if(!PasswordUtil.matches(vo.username+vo.password!!,userAuth.password!!))throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
         val user=to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
+        val currentTime=(System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
             id=userAuth.id
-            ldate=(System.currentTimeMillis() / 1000).toInt()
+            ldate=currentTime
         })
         val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(Enum.User.LOGIN_ERROR)
+        user.ldate=currentTime
         user.roleIds=permission.getJSONArray("roleIds").toJavaList(Long::class.java)
         user.menuIds=permission.getJSONArray("menuIds").toJavaList(Long::class.java)
         user.permissionIds=permission.getJSONArray("permissionIds").toJavaList(Long::class.java)

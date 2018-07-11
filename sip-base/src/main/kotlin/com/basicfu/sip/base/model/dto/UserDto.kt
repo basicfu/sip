@@ -9,6 +9,7 @@ class UserDto {
     var content: String? = null
     var cdate: Int? = null
     var udate: Int? = null
+    var ldate:Int?=null
     var type: Int? = null
     var status: Int? = null
 
