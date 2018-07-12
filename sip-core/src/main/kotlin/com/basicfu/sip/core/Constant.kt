@@ -1,7 +1,5 @@
 package com.basicfu.sip.core
 
-import javax.annotation.PostConstruct
-
 /**
  * Constant
  *
@@ -9,7 +7,16 @@ import javax.annotation.PostConstruct
  * @date 2018/6/22
  */
 object Constant {
-    object Redis{
-        const val APP="app"
+    object System {
+        const val GUEST = "GUEST"
+        const val AUTHORIZATION = "Authorization"
+        const val SESSION_TIMEOUT: Long = 24 * 60 * 60 * 1000
+    }
+
+    object Redis {
+        const val APP = "APP"
+        const val TOKEN_PREFIX = "TOKEN_"
+        const val TOKEN_GUEST = TOKEN_PREFIX + "_" + System.GUEST
+        const val RESOURCE = "RESOURCE"
     }
 }

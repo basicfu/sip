@@ -46,6 +46,7 @@ class Role {
      * @param name 角色名
      */
     var name: String? = null
+    var code: String? = null
 
     /**
      * 是否启用

@@ -50,12 +50,12 @@ class RedisUtil {
 
         inline fun <reified T> hGet(key: Any, hk: Any): T? {
             val data = redisTemplate.opsForHash<Any, Any>().get(key.toString(), hk.toString())
-            return SerializationUtil.deserialize(data as ByteArray)
+            return SerializationUtil.deserialize(data)
 
         }
 
         inline fun <reified T : Any> hMSet(key: String, map: Map<String, T?>) {
-            val result = hashMapOf<String, ByteArray?>()
+            val result = hashMapOf<String, Any?>()
             map.forEach { k, v ->
                 result[k] = SerializationUtil.serialize(v)
             }

@@ -7,13 +7,14 @@ import com.basicfu.sip.base.common.Enum.FieldType.*
 import com.basicfu.sip.base.feign.RoleFeign
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
-import com.basicfu.sip.base.model.dto.UserDto
+import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.po.UserAuth
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
+import com.basicfu.sip.core.Constant
 import com.basicfu.sip.core.exception.CustomException
 import com.basicfu.sip.core.mapper.example
 import com.basicfu.sip.core.mapper.generate
@@ -98,7 +99,7 @@ class UserService : BaseService<UserMapper, User>() {
         user.resourceIds=permission.getJSONArray("resourceIds").toJavaList(Long::class.java)
         val token=TokenUtil.generateToken()
         //TODO 系统设置登录过期时间
-        RedisUtil.set(token,user,24*60*60*1000)
+        RedisUtil.set(Constant.Redis.TOKEN_PREFIX+token,user,Constant.System.SESSION_TIMEOUT)
         val result = JSONObject()
         result["success"] = true
         result["token"] = token

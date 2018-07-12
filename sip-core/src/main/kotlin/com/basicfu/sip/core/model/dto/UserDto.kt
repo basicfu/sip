@@ -1,4 +1,4 @@
-package com.basicfu.sip.base.model.dto
+package com.basicfu.sip.core.model.dto
 
 class UserDto {
     var id: Long? = null

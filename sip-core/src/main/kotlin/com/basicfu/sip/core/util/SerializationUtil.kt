@@ -1,6 +1,8 @@
 package com.basicfu.sip.core.util
 
-import io.protostuff.*
+import io.protostuff.LinkedBuffer
+import io.protostuff.ProtostuffIOUtil
+import io.protostuff.Schema
 import io.protostuff.runtime.RuntimeSchema
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -55,10 +57,17 @@ object SerializationUtil {
 
     /**
      * 序列化
+     * 会出现bean中有空list时反序列化时为null
      */
-    fun <T : Any> serialize(obj: T?): ByteArray? {
-        if(obj==null){
+    fun <T : Any> serialize(obj: T?): Any? {
+        if (obj == null) {
             return null
+        }
+        when (obj) {
+            is Long -> return obj
+            is Int -> return obj
+            is String -> return obj
+            is Boolean -> return obj
         }
         val clazz = obj.javaClass
         val buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE)
@@ -77,14 +86,16 @@ object SerializationUtil {
     }
 
     /**
-     * 反序列化
+     * 反序列化,只序列ByteArray,非该类型直接返回
      * 调用方式：SerializationUtil.deserialize<Result>(byte)
      */
     inline fun <reified T> deserialize(data: Any?): T? {
-        if(data==null){
+        if (data == null) {
             return null
         }
-        data as ByteArray
+        if (data !is ByteArray) {
+            return data as T
+        }
         val clazz = T::class.java
         return if (!wrapperList.contains(clazz)) {
             val message = clazz.newInstance()
