@@ -78,6 +78,7 @@ project(":sip-getway") {
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-zuul")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
+        compile("mysql:mysql-connector-java:5.1.45")
     }
 }
 project(":sip-base") {

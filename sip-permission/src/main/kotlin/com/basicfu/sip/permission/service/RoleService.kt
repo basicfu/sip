@@ -1,6 +1,7 @@
 package com.basicfu.sip.permission.service
 
 import com.alibaba.fastjson.JSONObject
+import com.basicfu.sip.core.Constant
 import com.basicfu.sip.core.exception.CustomException
 import com.basicfu.sip.core.mapper.example
 import com.basicfu.sip.core.mapper.generate
@@ -40,7 +41,13 @@ class RoleService : BaseService<RoleMapper, Role>() {
         val roleIds = urMapper.selectByExample(example<UserRole> {
             select(UserRole::roleId)
             andEqualTo(UserRole::userId, uid)
-        }).mapNotNull { it.roleId }
+        }).mapNotNull { it.roleId }.toMutableList()
+        //登录用户包含未登录用户的权限
+        val noLoginRoleId=mapper.selectOneByExample(example<Role> {
+            select(Role::id)
+            andEqualTo(Role::code,Constant.System.GUEST)
+        }).id
+        noLoginRoleId?.let { roleIds.add(it) }
         val menuIds = if (roleIds.isEmpty()) {
             emptyList()
         } else {
