@@ -68,6 +68,13 @@ pipeline {
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict'
           }
         }
+        stage('sip-permission') {
+          steps {
+            sh './gradlew :sip-permission:build -x test'
+            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission sip-permission'
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission'
+          }
+        }
       }
     }
     stage('production') {
