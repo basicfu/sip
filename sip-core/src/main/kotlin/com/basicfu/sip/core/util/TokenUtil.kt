@@ -1,28 +1,24 @@
 package com.basicfu.sip.core.util
 
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
+import com.basicfu.sip.core.Constant
+import com.basicfu.sip.core.model.dto.UserDto
 import java.util.*
 
 object TokenUtil {
 
+    /**
+     * 生成token
+     */
     fun generateToken(): String {
         return UUID.randomUUID().toString().replace("-", "")
     }
 
     /**
-     * 获取当前用户的token
+     * 获取当前用户
      */
-    fun getToken(): String {
-        val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
-        return request.getHeader("token")
+    fun getCurrentUser(): UserDto? {
+        val token = RequestUtil.getHeader(Constant.System.AUTHORIZATION) ?: return null
+        return RedisUtil.get<UserDto>(token)
     }
 
-    /**
-     * 获取当前用户的user对象
-     */
-    fun getUser() {
-//        val token = getToken()
-        //
-    }
 }

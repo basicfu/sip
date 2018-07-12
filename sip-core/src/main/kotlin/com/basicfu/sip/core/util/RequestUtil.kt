@@ -1,4 +1,4 @@
-package com.basicfu.sip.client.util
+package com.basicfu.sip.core.util
 
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes

@@ -1,6 +1,7 @@
 package com.basicfu.sip.client.util
 
 import com.alibaba.fastjson.JSON
+import com.basicfu.sip.client.common.Constant
 import com.basicfu.sip.client.feign.UserFeign
 import com.basicfu.sip.client.model.UserDto
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,8 +44,7 @@ class UserUtil {
          * 获取当前登录用户信息
          */
         inline fun <reified T> getCurrentUser():T?{
-            val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
-            val token= request.getHeader("token") ?: return null
+            val token= RequestUtil.getHeader(Constant.AUTHORIZATION) ?: return null
             val user = userFeign.getByToken(token).data
             return dealUser(user)
         }
