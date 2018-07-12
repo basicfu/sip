@@ -2,27 +2,34 @@ drop database if exists `sip-base`;
 create database `sip-base` default charset utf8 collate utf8_general_ci;
 USE `sip-base`;
 
-drop table if exists tenant;
-create table tenant(
+drop table if exists app;
+create table app(
 	id bigint auto_increment primary key,
-	name varchar(64) not null default '' comment '租户企业名',
-	domain varchar(64) not null default '' comment '租户域名前缀'
+	name varchar(64) not null default '' comment '应用名',
+	domain varchar(64) not null default '' comment '应用域名前缀',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
+	unique key (name),
+	unique key (domain)
 )
-comment '租户表' engine=InnoDB;
+comment '应用表' engine=InnoDB;
 
-drop table if exists application;
-create table application(
+drop table if exists service;
+create table service(
 	id bigint auto_increment primary key,
-	tenant_id bigint not null default 0 comment '租户ID',
+	app_id bigint not null default 0 comment '应用ID',
 	name varchar(64) not null default '' comment '应用名',
 	path varchar(64) not null default '' comment '应用path',
 	server_id varchar(64) not null default '' comment '应用注册名',
 	url varchar(255) not null default '' comment '应用URL',
 	strip_prefix tinyint not null default 0 comment '过滤前缀',
 	retryable tinyint not null default 0 comment '重试',
-	sensitive_headers varchar(5000) null comment '敏感头信息'
+	sensitive_headers varchar(500) null comment '敏感头信息',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
+  unique key (app_id,path)
 )
-comment '应用表' engine=InnoDB;
+comment '服务表' engine=InnoDB;
 
 drop table if exists user;
 create table user(
@@ -65,3 +72,6 @@ CREATE TABLE user_template (
   udate int not null default 0 comment '更新时间',
   unique key (tenant_id,name)
 )comment '用户模板' engine=InnoDB;
+
+
+INSERT INTO `sip-base`.app (id,name, domain, cdate, udate) VALUES (1,'SIP', 'sip', 1531389485, 1531389485);

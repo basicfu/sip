@@ -33,10 +33,10 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
     }
 
     fun insert(vo: ResourceVo): Int {
-        if (mapper.selectCount(generate {
-                serviceId = vo.serviceId
-                url = vo.url
-            }) != 0) throw CustomException(Enum.Resource.EXIST_URL)
+//        if (mapper.selectCount(generate {
+//                serviceId = vo.serviceId
+//                url = vo.url
+//            }) != 0) throw CustomException(Enum.Resource.EXIST_URL)
         val po = dealInsert(to<Resource>(vo))
         return mapper.insertSelective(po)
     }

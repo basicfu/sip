@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 
-class Application {
+class Service {
     /**
      * @return id
      */
@@ -17,20 +17,20 @@ class Application {
     var id: Long? = null
 
     /**
-     * 租户ID
+     * 应用ID
      */
     /**
-     * 获取租户ID
+     * 获取应用ID
      *
-     * @return tenant_id - 租户ID
+     * @return tenant_id - 应用ID
      */
     /**
      * 设置租户ID
      *
-     * @param tenantId 租户ID
+     * @param appId 应用ID
      */
-    @Column(name = "tenant_id")
-    var tenantId: Long? = null
+    @Column(name = "app_id")
+    var appId: Long? = null
 
     /**
      * 应用名
@@ -139,4 +139,7 @@ class Application {
      */
     @Column(name = "sensitive_headers")
     var sensitiveHeaders: String? = null
+
+    var cdate: Int? = null
+    var udate: Int? = null
 }

@@ -18,7 +18,7 @@ class CustomRouteLocator(servletPath: String, private val properties: ZuulProper
     override fun locateRoutes(): Map<String, ZuulProperties.ZuulRoute> {
         val routesMap = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         routesMap.putAll(super.locateRoutes())
-        val all = RedisUtil.hGetAll<ApplicationDto>(Constant.Redis.APP)
+        val all = RedisUtil.hGetAll<ApplicationDto>(Constant.Redis.SERVICE)
         all.forEach { _, v ->
             if (v != null) {
                 val zuulRoute = ZuulProperties.ZuulRoute()

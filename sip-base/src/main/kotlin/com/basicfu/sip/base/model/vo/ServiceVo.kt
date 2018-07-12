@@ -1,7 +1,8 @@
-package com.basicfu.sip.core.model.vo
+package com.basicfu.sip.base.model.vo
 
-class ApplicationVo {
+class ServiceVo {
     var id: Long? = null
+    var appId: Long? = null
     var name: String? = null
     var path: String? = null
     var serverId: String? = null

@@ -17,7 +17,15 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class Dict{
         TEXT
     }
-
+    enum class App constructor(val value: Int,val msg: String){
+        NAME_EXISTS(1,"应用名已存在"),
+        DOMAIN_EXISTS(2,"应用域名已存在")
+    }
+    enum class Service constructor(val value: Int,val msg: String){
+        PATH_EXISTS(1,"服务路径已存在"),
+        SERVER_ID_EXISTS(1,"服务ID已存在"),
+        URL_EXISTS(1,"服务URL已存在")
+    }
     enum class UserTemplate constructor(val value: Int,val msg: String){
         FIELD_NAME_EXISTS(1,"字段名已存在"),
         FIELD_EN_NAME_EXISTS(1,"字段英文名已存在"),

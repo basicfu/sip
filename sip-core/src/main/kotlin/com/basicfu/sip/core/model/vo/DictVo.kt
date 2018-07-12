@@ -1,8 +1,6 @@
 package com.basicfu.sip.core.model.vo
 
-import com.basicfu.sip.core.model.BaseVo
-
-class DictVo: BaseVo() {
+class DictVo {
     var id: Long? = null
     var name: String? = null
     var value: String? = null
@@ -14,5 +12,5 @@ class DictVo: BaseVo() {
     var isdel: Int? = null
 
     /**父级pid*/
-    var pid:Long?=null
+    var pid: Long? = null
 }

@@ -1,14 +1,12 @@
 package com.basicfu.sip.core.service
 
 import com.basicfu.sip.core.mapper.CustomMapper
-import com.basicfu.sip.core.model.BaseVo
+import com.basicfu.sip.core.model.vo.BaseVo
 import com.github.pagehelper.PageHelper
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.ReflectionUtils
 import tk.mybatis.mapper.entity.Example
 import java.lang.reflect.ParameterizedType

@@ -14,7 +14,7 @@ object Constant {
     }
 
     object Redis {
-        const val APP = "APP"
+        const val SERVICE = "SERVICE"
         const val TOKEN_PREFIX = "TOKEN_"
         const val TOKEN_GUEST = TOKEN_PREFIX + "_" + System.GUEST
         const val RESOURCE = "RESOURCE"

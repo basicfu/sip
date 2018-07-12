@@ -1,7 +1,6 @@
-package com.basicfu.sip.core.model
+package com.basicfu.sip.core.model.vo
 
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
+import com.basicfu.sip.core.util.RequestUtil
 
 open class BaseVo {
     var pageNum: Int = 1
@@ -14,9 +13,8 @@ open class BaseVo {
      * 自动设置当前请求参数中的分页信息
      */
     fun setInfo(): BaseVo {
-        val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
-        val pageNum = request.getParameter("pageNum")
-        val pageSize = request.getParameter("pageSize")
+        val pageNum = RequestUtil.getParameter("pageNum")
+        val pageSize = RequestUtil.getParameter("pageSize")
         if (pageNum != null) {
             this.pageNum = pageNum.toInt()
         }
