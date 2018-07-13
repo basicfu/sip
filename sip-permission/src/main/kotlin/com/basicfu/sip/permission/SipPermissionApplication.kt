@@ -12,8 +12,8 @@ import tk.mybatis.spring.annotation.MapperScan
 @EnableFeignClients(basePackages = ["com.basicfu.sip"])
 @SpringBootApplication
 
-class SipLogApplication
+class SipPermissionApplication
 
 fun main(args: Array<String>) {
-    SpringApplication.run(SipLogApplication::class.java, *args)
+    SpringApplication.run(SipPermissionApplication::class.java, *args)
 }
