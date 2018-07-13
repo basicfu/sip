@@ -96,6 +96,7 @@ class Dict {
      * @param lvl 节点层级
      */
     var lvl: Int? = null
+    var sort: Int? = null
 
     /**
      * 能否固定 0否,1是
@@ -110,7 +111,7 @@ class Dict {
      *
      * @param fixed 能否固定 0否,1是
      */
-    var fixed: Int? = null
+    var fixed: Boolean? = null
 
     /**
      * 逻辑删除 0否,1是
@@ -125,5 +126,5 @@ class Dict {
      *
      * @param isdel 逻辑删除 0否,1是
      */
-    var isdel: Int? = null
+    var isdel: Boolean? = null
 }

@@ -1,7 +1,9 @@
 package com.basicfu.sip.dict.service
 
+import com.basicfu.sip.core.Constant
 import com.basicfu.sip.core.exception.CustomException
 import com.basicfu.sip.core.mapper.example
+import com.basicfu.sip.core.mapper.generate
 import com.basicfu.sip.core.model.dto.DictDto
 import com.basicfu.sip.core.model.po.Dict
 import com.basicfu.sip.core.model.vo.DictVo
@@ -9,10 +11,15 @@ import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.dict.common.Enum
 import com.basicfu.sip.dict.mapper.DictMapper
 import com.github.pagehelper.PageInfo
-import org.springframework.beans.BeanUtils
+import org.apache.commons.lang3.StringUtils
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import tk.mybatis.mapper.entity.Example
 import java.lang.StringBuilder
+import java.nio.charset.Charset
+import java.util.*
 
 /**
  * @author basicfu
@@ -20,42 +27,27 @@ import java.lang.StringBuilder
  */
 @Service
 class DictService : BaseService<DictMapper, Dict>() {
-    private final val splitDelimiter="-"
+    private final val defaultSplitDelimiter = "-"
 
-    fun all(): List<Any> {
+    fun all(): DictDto {
         val all = to<DictDto>(mapper.selectByExample(example<Dict> {
-            andEqualTo(Dict::isdel, "0")
+            andEqualTo(Dict::isdel, Constant.N)
         }))
-        val result = ArrayList<DictDto>()
-        all.filter { it.lvl == 0 }.forEach { e ->
-            val dto = DictDto()
-            BeanUtils.copyProperties(e, dto)
-            dto.pid = 0
-            result.add(dto)
-        }
-        result.forEach { e ->
-            val children = ArrayList<DictDto>()
-            all.forEach { ee ->
-                if (ee.lft in e.lft!!..e.rgt!! && ee.lvl == e.lvl!! + 1) {
-                    val dto = DictDto()
-                    BeanUtils.copyProperties(ee, dto)
-                    chidren(dto, all)
-                    dto.pid = e.id
-                    children.add(dto)
-                }
-            }
-            e.children = children
-        }
-        return result
+        val root = all.filter { it.lvl == 0 }[0]
+        chidren(root, all)
+        return root
     }
 
+    /**
+     * 列出第一层级字典
+     */
     fun list(vo: DictVo): PageInfo<DictDto> {
         return selectPage(
             example<Dict> {
                 andEqualTo {
                     name = vo.name
                     lvl = 1
-                    isdel = 0
+                    isdel = false
                 }
             }
         )
@@ -69,9 +61,9 @@ class DictService : BaseService<DictMapper, Dict>() {
             val children = ArrayList<DictDto>()
             list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach { dict ->
                 chidren(dict, list)
-                dict.pid = item.id
                 children.add(dict)
             }
+            children.sortBy { it.sort }
             item.children = children
             result.add(item)
         }
@@ -87,7 +79,7 @@ class DictService : BaseService<DictMapper, Dict>() {
             forUpdate()
             andEqualTo {
                 id = vo.pid
-                isdel = 0
+                isdel = false
             }
         }) ?: throw CustomException(Enum.Dict.NOT_FOUND)
         val count = mapper.selectCountBySql(
@@ -107,6 +99,7 @@ class DictService : BaseService<DictMapper, Dict>() {
         po.lft = parentDict.rgt!!
         po.rgt = parentDict.rgt!! + 1
         po.lvl = parentDict.lvl!! + 1
+        po.sort = vo.sort
         mapper.insertSelective(po)
         return 1
     }
@@ -116,10 +109,12 @@ class DictService : BaseService<DictMapper, Dict>() {
      * 后期可以添加支持修改节点
      */
     fun update(vo: DictVo): Int {
-        val po = Dict()
-        po.id = vo.id
-        po.name = vo.name
-        po.fixed = vo.fixed
+        val po = generate<Dict> {
+            id = vo.id
+            name = vo.name
+            sort = vo.sort
+            fixed = vo.fixed
+        }
         return mapper.updateByPrimaryKeySelective(po)
     }
 
@@ -139,7 +134,7 @@ class DictService : BaseService<DictMapper, Dict>() {
                 val tmp = one[0]
                 val width = tmp.rgt!! - tmp.lft!! + 1
                 val updatePo = Dict()
-                updatePo.isdel = 1
+                updatePo.isdel = true
                 val exampleDelete = Example(Dict::class.java)
                 exampleDelete.and().andBetween("lft", tmp.lft, tmp.rgt)
                 mapper.updateByExampleSelective(updatePo, exampleDelete)
@@ -150,119 +145,144 @@ class DictService : BaseService<DictMapper, Dict>() {
         return 1
     }
 
+    /**
+     * 导入
+     * 格式：
+     * 层级(n-1)个- value 描述 是否固定 顺序
+     * 性别-SEX-性别-false-0
+     * -男-0
+     * -女-1
+     */
     fun import(vo: DictVo) {
         if (vo.value.isNullOrBlank()) {
-            throw CustomException(Enum.Dict.NO_DELETE_ROOT)
+            throw CustomException(Enum.Dict.IMPORT_FORMAT_ERROR)
+        }
+        val splitDelimiter = if (vo.splitDelimiter == null) {
+            defaultSplitDelimiter
+        } else {
+            vo.splitDelimiter!!
         }
         val list = vo.value?.split("\n")?.filter { it.isNotBlank() }
-        var parentDict:Dict?
+        recursiveImport(splitDelimiter, null, list)
+    }
+
+    fun export(vo: DictVo): String {
+        val splitDelimiter = if (vo.splitDelimiter == null) {
+            defaultSplitDelimiter
+        } else {
+            vo.splitDelimiter!!
+        }
+        val dict = all()
+        return StringUtils.join(chidrenToString(splitDelimiter, dict.children), "\n")
+    }
+
+    private fun recursiveImport(splitDelimiter: String, preParentDict: Dict?, list: List<String>?) {
         list?.forEachIndexed { index, it ->
-            if (index == 0 && it.startsWith("-")) {
-                throw CustomException(Enum.Dict.NO_DELETE_ROOT)
+            //第一条必须不能为子项
+            if (index == 0 && it.startsWith(splitDelimiter)) throw CustomException(Enum.Dict.IMPORT_FORMAT_ERROR)
+            val arrays = arrayListOf<String>()
+            val level = if (preParentDict != null) {
+                arrays.addAll(it.drop(preParentDict.lvl!!).split(splitDelimiter))
+                preParentDict.lvl!!
+            } else {
+                arrays.addAll(it.split(splitDelimiter))
+                0
             }
-            val itemName = it.substringBeforeLast("-")
-            val itemValue = it.substringAfterLast("-")
-            //只处理非-开头父字典
-            if(!itemName.startsWith("-")){
-                parentDict = mapper.selectOneByExample(example<Dict> {
-                    forUpdate()
-                    andEqualTo {
-                        value =itemValue
-                        lvl=1
-                        isdel = 0
-                    }
-                }) ?: null
-                //不存在查询父菜单信息并新建
-                if(parentDict==null){
-                    val pdict = mapper.selectOneByExample(example<Dict> {
-                        andEqualTo {
-                            lvl=0
-                            isdel = 0
-                        }
-                    })
-                    mapper.updateBySql("set rgt=rgt+2 where rgt>=${pdict.rgt} and isdel=0")
-                    mapper.updateBySql("set lft=lft+2 where lft>${pdict.rgt} and isdel=0")
-                    val po = Dict()
-                    po.name = itemName
-                    po.value = itemValue
-                    po.description = ""
-                    po.fixed = 0
-                    po.lft = pdict.rgt
-                    po.rgt = pdict.rgt!! + 1
-                    po.lvl = pdict.lvl!! + 1
-                    mapper.insertSelective(po)
-                    parentDict=po
+            if (arrays.size <= 2) throw CustomException(Enum.Dict.NAME_AND_VALUE_NOT_FOUND)
+            val itemName = arrays[0]
+            val itemValue = arrays[1]
+            val itemDescrption = if (arrays.size >= 3) arrays[2] else null
+            val itemFixed = if (arrays.size >= 4) arrays[3] else null
+            val itemSort = if (arrays.size >= 5) arrays[4] else null
+            //查询当前菜单是否存在
+            var parentDict= mapper.selectOneByExample(example<Dict> {
+                forUpdate()
+                andEqualTo {
+                    value = itemValue
+                    lvl = level+1
+                    isdel = false
                 }
-                recursiveImport(parentDict!!,findChild(list.drop(index + 1),1))
+                if(preParentDict!=null){
+                    andGreaterThan(Dict::lft, preParentDict.lft!!.toString())
+                    andLessThan(Dict::lft, preParentDict.rgt!!.toString())
+                }
+            }) ?: null
+            //不存在查询父菜单信息并新建
+            if (parentDict == null) {
+                val newParentDict = mapper.selectOneByExample(example<Dict> {
+                    if(preParentDict!=null){
+                        andEqualTo {
+                            id = preParentDict.id
+                        }
+                    }else{
+                        andEqualTo {
+                            lvl = level
+                            isdel = false
+                        }
+                    }
+                })
+                mapper.updateBySql("set rgt=rgt+2 where rgt>=${newParentDict.rgt} and isdel=0")
+                mapper.updateBySql("set lft=lft+2 where lft>${newParentDict.rgt} and isdel=0")
+                val po = generate<Dict> {
+                    name = itemName
+                    value = itemValue
+                    description = itemDescrption
+                    fixed = itemFixed?.toBoolean()
+                    sort = itemSort?.toInt()
+                    lft = newParentDict.rgt
+                    rgt = newParentDict.rgt!! + 1
+                    lvl = level + 1
+                }
+                mapper.insertSelective(po)
+                parentDict = po
             }
+            recursiveImport(splitDelimiter, parentDict, findChild(splitDelimiter, list.drop(index + 1), level+1))
         }
     }
-    private fun recursiveImport(pdict:Dict,list:List<String>){
-        var parentDict:Dict?
-        val level=pdict.lvl!!
-        list.forEachIndexed { index, it ->
-            val itemName = it.substringBeforeLast("-")
-            val itemValue = it.substringAfterLast("-")
-            if(itemName.startsWith(spliceStr(splitDelimiter,level))&&!itemName.startsWith(spliceStr(splitDelimiter,level),1)){
-                //查询下一层是否存在
-                parentDict = mapper.selectOneByExample(example<Dict> {
-                    andEqualTo {
-                        value =itemValue
-                        lvl=level+1
-                        isdel = 0
-                    }
-                    andGreaterThan(Dict::lft,pdict.lft!!.toString())
-                    andLessThan(Dict::lft,pdict.rgt!!.toString())
-                }) ?: null
-                //不存在创建
-                if(parentDict==null){
-                    val newParentDict = mapper.selectOneByExample(example<Dict> {
-                        andEqualTo {
-                            id=pdict.id
-                        }
-                    })
-                    mapper.updateBySql("set rgt=rgt+2 where rgt>=${newParentDict.rgt} and isdel=0")
-                    mapper.updateBySql("set lft=lft+2 where lft>${newParentDict.rgt} and isdel=0")
-                    val po = Dict()
-                    po.name = itemName.drop(level)
-                    po.value = itemValue
-                    po.description = ""
-                    po.fixed = 0
-                    po.lft = newParentDict.rgt
-                    po.rgt = newParentDict.rgt!! + 1
-                    po.lvl = level + 1
-                    parentDict=po
-                    mapper.insertSelective(po)
-                }
-                //继续处理下一层
-                recursiveImport(parentDict!!,findChild(list.drop(index + 1),level+1))
-            }
-        }
-    }
-    private fun findChild(list:List<String>,level:Int):List<String>{
-        val childList= arrayListOf<String>()
+
+    private fun findChild(splitDelimiter: String, list: List<String>, level: Int): List<String> {
+        val childList = arrayListOf<String>()
         for (s in list) {
-            if(!s.startsWith(spliceStr(splitDelimiter,level))){
+            if (!s.startsWith(spliceStr(splitDelimiter, level))) {
                 break
             }
             childList.add(s)
         }
         return childList
     }
-    private fun spliceStr(str:String,num:Int):String{
-        val result=StringBuilder()
-        for(i in 1..num){
+
+    private fun spliceStr(str: String, num: Int): String {
+        if (num == 0) {
+            return ""
+        }
+        val result = StringBuilder()
+        for (i in 1..num) {
             result.append(str)
         }
         return result.toString()
     }
-    private fun chidren(item: DictDto, list: List<DictDto>) {
+
+    private fun chidren(parent: DictDto, list: List<DictDto>) {
         val children = ArrayList<DictDto>()
-        list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach { dict ->
-            chidren(dict, list)
-            dict.pid = item.id
-            children.add(dict)
+        list.filter { it.lft in parent.lft!!..parent.rgt!! && it.lvl == parent.lvl!! + 1 }.forEach {
+            chidren(it, list)
+            children.add(it)
         }
-        item.children = children
+        children.sortBy { it.sort }
+        parent.children = children
+    }
+
+    private fun chidrenToString(splitDelimiter: String, list: List<DictDto>?): List<String> {
+        val result = arrayListOf<String>()
+        list?.forEach {
+            result.add(
+                spliceStr(
+                    splitDelimiter,
+                    it.lvl!! - 1
+                ) + it.name + splitDelimiter + it.value + splitDelimiter + it.description + splitDelimiter + it.fixed + splitDelimiter + it.sort
+            )
+            result.addAll(chidrenToString(splitDelimiter, it.children))
+        }
+        return result
     }
 }

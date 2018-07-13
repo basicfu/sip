@@ -11,6 +11,7 @@ create table dict (
   lft bigint NOT NULL DEFAULT 0 COMMENT '左节点',
   rgt bigint NOT NULL DEFAULT 0 COMMENT '右节点',
   lvl int NOT NULL DEFAULT 0 COMMENT '节点层级',
+  sort int NOT NULL DEFAULT 0 COMMENT '排序',
   fixed tinyint NOT NULL DEFAULT 0 COMMENT '能否固定 0否,1是',
   isdel tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否,1是',
   KEY key_value (value),

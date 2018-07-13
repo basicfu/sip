@@ -4,6 +4,7 @@ import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.vo.DictVo
 import com.basicfu.sip.dict.service.DictService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -47,7 +48,12 @@ class DictContoller {
     }
 
     @PostMapping("/import")
-    fun import(@RequestBody vo:DictVo): Result<Any> {
+    fun import(@RequestBody vo: DictVo): Result<Any> {
         return Result(dictService.import(vo))
+    }
+
+    @PostMapping("/export")
+    fun export(vo: DictVo): Result<Any> {
+        return Result(true,dictService.export(vo))
     }
 }

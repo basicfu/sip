@@ -7,6 +7,9 @@ package com.basicfu.sip.core
  * @date 2018/6/22
  */
 object Constant {
+    const val N='0'
+    const val Y='1'
+
     object System {
         const val GUEST = "GUEST"
         const val AUTHORIZATION = "Authorization"

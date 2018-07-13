@@ -17,4 +17,5 @@ class UserDto {
     var menuIds:List<Long>?=null
     var permissionIds:List<Long>?=null
     var resourceIds:List<Long>?=null
+    var test:Map<String,String>?=null
 }
