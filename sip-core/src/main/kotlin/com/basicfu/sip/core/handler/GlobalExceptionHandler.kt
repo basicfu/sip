@@ -5,6 +5,7 @@ import com.basicfu.sip.core.model.Result
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -69,15 +70,29 @@ class GlobalExceptionHandler {
             com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
         )
     }
+
     /**
      * 404
      */
     @ResponseBody
     @ExceptionHandler(NoHandlerFoundException::class)
-    private fun noHandlerFoundException(response: HttpServletResponse,e: NoHandlerFoundException): Result<Any> {
-        response.status=404
-        val msg="No handler found for " + e.httpMethod + " " + e.requestURL
-        log.error(msg)
-        return Result(msg,404)
+    private fun noHandlerFoundException(response: HttpServletResponse, e: NoHandlerFoundException): Result<Any> {
+        response.status = 404
+        log.error(e.message)
+        return Result(e.message.toString(), 404)
+    }
+
+    /**
+     * not supported method
+     */
+    @ResponseBody
+    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+    private fun httpMessageNotReadableException(
+        response: HttpServletResponse,
+        e: HttpRequestMethodNotSupportedException
+    ): Result<Any> {
+        response.status = 405
+        log.error(e.message)
+        return Result(e.message.toString(), 405)
     }
 }
