@@ -1,6 +1,6 @@
 package com.basicfu.sip.getway.mapper
 
-import com.basicfu.sip.getway.model.Resource
+import com.basicfu.sip.core.model.po.Resource
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Param
 import org.apache.ibatis.annotations.Select

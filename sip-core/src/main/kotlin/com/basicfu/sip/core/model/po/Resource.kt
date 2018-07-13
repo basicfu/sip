@@ -1,4 +1,4 @@
-package com.basicfu.sip.permission.model.po
+package com.basicfu.sip.core.model.po
 
 import javax.persistence.Column
 import javax.persistence.GeneratedValue

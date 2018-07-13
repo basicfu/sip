@@ -20,21 +20,22 @@ class InitConfig : CommandLineRunner {
     override fun run(vararg strings: String) {
         initResource()
         initNoLoginToken()
+        //TODO 初始化app和app下的service
     }
 
     /**
      * 初始化未登录用户token永不过期
      */
     fun initNoLoginToken() {
-        val user = UserDto()
-        user.resourceIds
-        val menuResourceIds = mapper.selectMenuResourceIdByRoleCode(Constant.System.GUEST)
-        val permissionResourceIds = mapper.selectPermissionResourceIdByRoleCode(Constant.System.GUEST)
-        val resourceIds = arrayListOf<Long>()
-        resourceIds.addAll(menuResourceIds)
-        resourceIds.addAll(permissionResourceIds)
-        user.resourceIds = resourceIds.distinct()
-        RedisUtil.set(Constant.Redis.TOKEN_GUEST, user)
+//        val user = UserDto()
+//        user.resourceIds
+//        val menuResourceIds = mapper.selectMenuResourceIdByRoleCode(Constant.System.GUEST)
+//        val permissionResourceIds = mapper.selectPermissionResourceIdByRoleCode(Constant.System.GUEST)
+//        val resourceIds = arrayListOf<Long>()
+//        resourceIds.addAll(menuResourceIds)
+//        resourceIds.addAll(permissionResourceIds)
+//        user.resourceIds = resourceIds.distinct()
+//        RedisUtil.set(Constant.Redis.TOKEN_GUEST, user)
     }
 
     fun initResource() {
