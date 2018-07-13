@@ -46,7 +46,9 @@ CREATE TABLE resource (
   id bigint auto_increment primary key,
   service_id bigint not null default 0 comment '服务Id',
   url varchar(255) not null default '' comment '资源URL',
+  method varchar(10) not null default '' comment '请求方法(一个接口有多种请求方式强制拆成多个接口)',
   name varchar(100) not null default '' comment '资源名'
+  unique key (service_id,url,method)
 )comment '资源表' engine=InnoDB;
 
 drop table if exists menu_resource;

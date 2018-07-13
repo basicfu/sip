@@ -27,7 +27,7 @@ enum class Enum constructor(val value: Int, val msg:String) {
         PERMISSION_NOT_FOUND(1,"部分要添加权限没有找到,请刷新数据后重试")
     }
     enum class Resource constructor(val value: Int,val msg: String){
-        EXIST_URL(1,"该服务下资源URL已存在"),
+        SERVICE_URL_METHOD_UNIQUE(1,"一个服务下的资源URL和请求方法需要唯一"),
     }
     enum class Permission constructor(val value: Int,val msg: String){
         EXIST_NAME(1,"权限名已存在"),

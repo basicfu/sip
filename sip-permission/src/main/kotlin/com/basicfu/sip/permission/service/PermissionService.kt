@@ -43,7 +43,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
     fun insert(vo: PermissionVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
-            }) != 0) throw CustomException(Enum.Resource.EXIST_URL)
+            }) != 0) throw CustomException(Enum.Permission.EXIST_NAME)
         val po = dealInsert(to<Permission>(vo))
         return mapper.insertSelective(po)
     }

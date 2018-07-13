@@ -61,4 +61,5 @@ class Resource {
      * @param name 资源名
      */
     var name: String? = null
+    var method:String?=null
 }

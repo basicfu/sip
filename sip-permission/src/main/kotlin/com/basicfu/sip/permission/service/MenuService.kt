@@ -70,7 +70,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
     fun insert(vo: MenuVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
-            }) != 0) throw CustomException(Enum.Resource.EXIST_URL)
+            }) != 0) throw CustomException(Enum.Menu.EXIST_NAME)
         val po = dealInsert(to<Menu>(vo))
         return mapper.insertSelective(po)
     }
@@ -94,7 +94,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         val checkMenu = mapper.selectOne(generate {
             name = vo.name
         })
-        if (checkMenu != null && checkMenu.id != vo.id) throw CustomException(Enum.Resource.EXIST_URL)
+        if (checkMenu != null && checkMenu.id != vo.id) throw CustomException(Enum.Menu.EXIST_NAME)
         val po = dealUpdate(to<Menu>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }
