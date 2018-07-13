@@ -1,9 +1,7 @@
 package com.basicfu.sip.base.service
 
-import com.basicfu.sip.base.model.vo.AppVo
-import com.basicfu.sip.base.model.vo.UserTemplateVo
+import com.basicfu.sip.base.model.vo.ServiceVo
 import com.basicfu.sip.core.mapper.generate
-import org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,27 +15,21 @@ import org.springframework.test.context.junit4.SpringRunner
  */
 @RunWith(SpringRunner::class)
 @SpringBootTest
-class AppServiceTests {
+class ServiceServiceTests {
     @Autowired
-    lateinit var appService: AppService
+    lateinit var serviceService: ServiceService
 
     @Test
     fun insert() {
-        val vo=generate<AppVo> {
-            name="梧桐招聘"
-            domain="wutong"
+        val vo = generate<ServiceVo> {
+            appId = 1
+            name = "sip-dict"
+            path = "/dict/**"
+            serverId = "sip-dict"
+            stripPrefix = true
+            retryable = true
         }
-        Assert.assertEquals(appService.insert(vo),1)
-    }
-
-    @Test
-    fun update() {
-//        val vo=UserTemplateVo()
-//        vo.id=3
-//        vo.name="昵称abc"
-//        vo.type="Text"
-//        vo.extra="5"
-//        Assert.assertEquals(userTemplateService.update(vo),1)
+        Assert.assertEquals(serviceService.insert(vo), 1)
     }
 
     @Test

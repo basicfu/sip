@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
  * @date 2018/6/22
  */
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/service")
 class ServiceController {
     @Autowired
     lateinit var serviceService: ServiceService
