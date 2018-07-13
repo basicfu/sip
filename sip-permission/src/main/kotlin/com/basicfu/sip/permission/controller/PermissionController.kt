@@ -20,30 +20,30 @@ class PermissionController {
 
     @GetMapping("/list")
     fun list(vo: PermissionVo): Result<Any> {
-        return Result(permissionService.list(vo))
+        return Result.success(permissionService.list(vo))
     }
 
     @GetMapping("/all")
     fun all(): Result<Any> {
-        return Result(permissionService.all())
+        return Result.success(permissionService.all())
     }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: PermissionVo): Result<Any> {
-        return Result(permissionService.insert(vo))
+        return Result.success(permissionService.insert(vo))
     }
     @PostMapping("/insert/resource")
     fun insertPermission(@RequestBody vo: PermissionVo): Result<Any> {
-        return Result(permissionService.insertResource(vo))
+        return Result.success(permissionService.insertResource(vo))
     }
 
     @PostMapping("/update")
     fun update(@RequestBody vo: PermissionVo): Result<Any> {
-        return Result(permissionService.update(vo))
+        return Result.success(permissionService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(permissionService.delete(ids))
+        return Result.success(permissionService.delete(ids))
     }
 }

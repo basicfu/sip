@@ -31,7 +31,7 @@ class GlobalExceptionHandler {
     private fun errorHandler(response: HttpServletResponse, e: Exception): Result<Any> {
         log.error("全局异常：", e)
         response.status = 500
-        return Result(com.basicfu.sip.core.Enum.SERVER_ERROR.msg, -1)
+        return Result.error(com.basicfu.sip.core.Enum.SERVER_ERROR.msg, -1)
     }
 
     /**
@@ -41,7 +41,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     private fun httpMessageNotReadableException(e: HttpMessageNotReadableException): Result<Any> {
         log.error("\${Enum.INVALID_PARAMETER.msg}-【msg】--" + e.message)
-        return Result(
+        return Result.error(
             com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg,
             com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
         )
@@ -55,7 +55,7 @@ class GlobalExceptionHandler {
     private fun customException(e: CustomException): Result<Any> {
         log.error("自定义异常-", e)
         log.error("自定义异常--【code】--" + e.code + "--【msg】--" + e.msg + "--【data】--" + e.data)
-        return Result(e.msg, e.code, e.data)
+        return Result.error(e.msg, e.code, e.data)
     }
 
     /**
@@ -65,7 +65,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     private fun notValidException(e: Exception): Result<Any> {
         log.error(e.message)
-        return Result(
+        return Result.error(
             com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg,
             com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
         )
@@ -79,7 +79,7 @@ class GlobalExceptionHandler {
     private fun noHandlerFoundException(response: HttpServletResponse, e: NoHandlerFoundException): Result<Any> {
         response.status = 404
         log.error(e.message)
-        return Result(e.message.toString(), 404)
+        return Result.error(e.message.toString(), 404)
     }
 
     /**
@@ -93,6 +93,6 @@ class GlobalExceptionHandler {
     ): Result<Any> {
         response.status = 405
         log.error(e.message)
-        return Result(e.message.toString(), 405)
+        return Result.error(e.message.toString(), 405)
     }
 }

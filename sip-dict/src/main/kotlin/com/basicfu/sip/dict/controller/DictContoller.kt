@@ -19,41 +19,41 @@ class DictContoller {
 
     @GetMapping("/all")
     fun all(): Result<Any> {
-        return Result(dictService.all())
+        return Result.success(dictService.all())
     }
 
     @GetMapping("/list")
     fun list(vo: DictVo): Result<Any> {
-        return Result(dictService.list(vo))
+        return Result.success(dictService.list(vo))
     }
 
     @GetMapping("/get/{value}")
     fun get(@PathVariable value: String): Result<Any> {
-        return Result(dictService.get(value))
+        return Result.success(dictService.get(value))
     }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: DictVo): Result<Any> {
-        return Result(dictService.insert(vo))
+        return Result.success(dictService.insert(vo))
     }
 
     @PostMapping("/update")
     fun update(@RequestBody vo: DictVo): Result<Any> {
-        return Result(dictService.update(vo))
+        return Result.success(dictService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(@RequestBody ids: List<Long>): Result<Any> {
-        return Result(dictService.delete(ids))
+        return Result.success(dictService.delete(ids))
     }
 
     @PostMapping("/import")
     fun import(@RequestBody vo: DictVo): Result<Any> {
-        return Result(dictService.import(vo))
+        return Result.success(dictService.import(vo))
     }
 
     @PostMapping("/export")
     fun export(vo: DictVo): Result<Any> {
-        return Result(true,dictService.export(vo))
+        return Result.success(dictService.export(vo))
     }
 }

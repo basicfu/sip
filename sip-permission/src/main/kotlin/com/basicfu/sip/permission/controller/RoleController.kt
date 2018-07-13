@@ -18,51 +18,51 @@ class RoleController {
 
     @GetMapping("/get/permission/{uid}")
     fun list(@PathVariable uid: Long): Result<Any> {
-        return Result(roleService.getPermissionByUid(uid))
+        return Result.success(roleService.getPermissionByUid(uid))
     }
 
     @GetMapping("/all")
     fun all(): Result<Any> {
-        return Result(roleService.all())
+        return Result.success(roleService.all())
     }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: RoleVo): Result<Any> {
-        return Result(roleService.insert(vo))
+        return Result.success(roleService.insert(vo))
     }
 
     @PostMapping("/insert/user")
     fun insertUser(@RequestBody vo: RoleVo): Result<Any> {
-        return Result(roleService.insertUser(vo))
+        return Result.success(roleService.insertUser(vo))
     }
 
     @PostMapping("/insert/menu")
     fun insertMenu(@RequestBody vo: RoleVo): Result<Any> {
-        return Result(roleService.insertMenu(vo))
+        return Result.success(roleService.insertMenu(vo))
     }
 
     @PostMapping("/insert/permission")
     fun insertPermission(@RequestBody vo: RoleVo): Result<Any> {
-        return Result(roleService.insertPermission(vo))
+        return Result.success(roleService.insertPermission(vo))
     }
 
     @PostMapping("/update")
     fun update(@RequestBody vo: RoleVo): Result<Any> {
-        return Result(roleService.update(vo))
+        return Result.success(roleService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(roleService.delete(ids))
+        return Result.success(roleService.delete(ids))
     }
 
     @DeleteMapping("/delete/menu")
     fun deleteMenu(vo: RoleVo): Result<Any> {
-        return Result(roleService.deleteMenu(vo))
+        return Result.success(roleService.deleteMenu(vo))
     }
 
     @DeleteMapping("/delete/permission")
     fun deletePermission(vo: RoleVo): Result<Any> {
-        return Result(roleService.deletePermission(vo))
+        return Result.success(roleService.deletePermission(vo))
     }
 }

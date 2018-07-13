@@ -18,21 +18,21 @@ class ServiceController {
 
     @GetMapping("/all")
     fun all(): Result<Any> {
-        return Result(serviceService.all())
+        return Result.success(serviceService.all())
     }
 
     @PostMapping("/insert")
     fun insert(vo: ServiceVo): Result<Any> {
-        return Result(serviceService.insert(vo))
+        return Result.success(serviceService.insert(vo))
     }
 
     @PostMapping("/update")
     fun update(vo: ServiceVo): Result<Any> {
-        return Result(serviceService.update(vo))
+        return Result.success(serviceService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(serviceService.delete(ids))
+        return Result.success(serviceService.delete(ids))
     }
 }

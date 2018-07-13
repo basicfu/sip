@@ -18,21 +18,21 @@ class UserTemplateController {
 
     @GetMapping("/all")
     fun all(vo: UserTemplateVo): Result<Any> {
-        return Result(userTemplateService.all(vo))
+        return Result.success(userTemplateService.all(vo))
     }
 
     @PostMapping("/insert")
     fun insert(vo: UserTemplateVo): Result<Any> {
-        return Result(userTemplateService.insert(vo))
+        return Result.success(userTemplateService.insert(vo))
     }
 
     @PostMapping("/update")
     fun update(vo: UserTemplateVo): Result<Any> {
-        return Result(userTemplateService.update(vo))
+        return Result.success(userTemplateService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(userTemplateService.delete(ids))
+        return Result.success(userTemplateService.delete(ids))
     }
 }

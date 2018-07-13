@@ -18,26 +18,26 @@ class ResourceController {
 
     @GetMapping("/list")
     fun list(vo: ResourceVo): Result<Any> {
-        return Result(resourceService.list(vo))
+        return Result.success(resourceService.list(vo))
     }
 
     @GetMapping("/all")
     fun all(): Result<Any> {
-        return Result(resourceService.all())
+        return Result.success(resourceService.all())
     }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: ResourceVo): Result<Any> {
-        return Result(resourceService.insert(vo))
+        return Result.success(resourceService.insert(vo))
     }
 
     @PostMapping("/update")
     fun update(@RequestBody vo: ResourceVo): Result<Any> {
-        return Result(resourceService.update(vo))
+        return Result.success(resourceService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(resourceService.delete(ids))
+        return Result.success(resourceService.delete(ids))
     }
 }

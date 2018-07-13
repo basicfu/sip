@@ -18,31 +18,31 @@ class MenuController {
 
     @GetMapping("/all")
     fun all(): Result<Any> {
-        return Result(menuService.all())
+        return Result.success(menuService.all())
     }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: MenuVo): Result<Any> {
-        return Result(menuService.insert(vo))
+        return Result.success(menuService.insert(vo))
     }
 
     @PostMapping("/insert/resource")
     fun insertMenu(@RequestBody vo: MenuVo): Result<Any> {
-        return Result(menuService.insertResource(vo))
+        return Result.success(menuService.insertResource(vo))
     }
 
     @PostMapping("/update")
     fun update(@RequestBody vo: MenuVo): Result<Any> {
-        return Result(menuService.update(vo))
+        return Result.success(menuService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(menuService.delete(ids))
+        return Result.success(menuService.delete(ids))
     }
 
     @DeleteMapping("/delete/resource")
     fun deleteMenu(vo: MenuVo): Result<Any> {
-        return Result(menuService.deleteResource(vo))
+        return Result.success(menuService.deleteResource(vo))
     }
 }

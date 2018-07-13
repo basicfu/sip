@@ -18,21 +18,21 @@ class AppController {
 
     @GetMapping("/list")
     fun list(vo: AppVo): Result<Any> {
-        return Result(appService.list(vo))
+        return Result.success(appService.list(vo))
     }
 
     @PostMapping("/insert")
     fun insert(vo: AppVo): Result<Any> {
-        return Result(appService.insert(vo))
+        return Result.success(appService.insert(vo))
     }
 
     @PostMapping("/update")
     fun update(vo: AppVo): Result<Any> {
-        return Result(appService.update(vo))
+        return Result.success(appService.update(vo))
     }
 
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
-        return Result(appService.delete(ids))
+        return Result.success(appService.delete(ids))
     }
 }

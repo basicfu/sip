@@ -18,37 +18,37 @@ class UserController {
 
     @GetMapping("/get/{id}")
     fun get(@PathVariable id: Long): Result<Any> {
-        return Result(userService.get(id))
+        return Result.success(userService.get(id))
     }
 
     @GetMapping("/get/token/{token}")
     fun getByToken(@PathVariable token: String): Result<Any> {
-        return Result(userService.getByToken(token))
+        return Result.success(userService.getByToken(token))
     }
 
     @GetMapping("/list/username/{ids}")
     fun listUsernameByIds(@PathVariable ids: List<Long>): Result<Any> {
-        return Result(userService.listUsernameByIds(ids))
+        return Result.success(userService.listUsernameByIds(ids))
     }
 
     @PostMapping("/login")
     fun login(@RequestBody vo: UserVo): Result<Any> {
-        return Result(userService.login(vo))
+        return Result.success(userService.login(vo))
     }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: UserVo): Result<Any> {
-        return Result(userService.insert(vo))
+        return Result.success(userService.insert(vo))
     }
 
     @PostMapping("/register")
     fun register(@RequestBody vo: UserVo): Result<Any> {
-        return Result(userService.insert(vo))
+        return Result.success(userService.insert(vo))
     }
 
     @GetMapping("/update")
     fun update(@RequestBody vo: UserVo): Result<Any> {
-        return Result(userService.update(vo))
+        return Result.success(userService.update(vo))
     }
 //
 //    @PostMapping("/insert")
