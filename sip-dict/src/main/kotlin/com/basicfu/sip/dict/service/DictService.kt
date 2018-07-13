@@ -12,13 +12,9 @@ import com.basicfu.sip.dict.common.Enum
 import com.basicfu.sip.dict.mapper.DictMapper
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import tk.mybatis.mapper.entity.Example
 import java.lang.StringBuilder
-import java.nio.charset.Charset
 import java.util.*
 
 /**
@@ -55,18 +51,12 @@ class DictService : BaseService<DictMapper, Dict>() {
 
     fun get(value: String): List<DictDto> {
         val list =
-            to<DictDto>(mapper.selectBySql("SELECT d1.id,d1.name,d1.value,d1.lft,d1.rgt,d1.lvl,d1.fixed FROM dict AS d1,dict AS d2 WHERE d1.lft > d2.lft AND d1.lft<d2.rgt AND d2.value = '$value' and d1.isdel=0"))
-        val result = ArrayList<DictDto>()
-        list.filter { it.lvl == 2 }.forEach { item ->
-            val children = ArrayList<DictDto>()
-            list.filter { it.lft in item.lft!!..item.rgt!! && it.lvl == item.lvl!! + 1 }.forEach { dict ->
-                chidren(dict, list)
-                children.add(dict)
-            }
-            children.sortBy { it.sort }
-            item.children = children
-            result.add(item)
+            to<DictDto>(mapper.selectBySql("SELECT d1.id,d1.name,d1.value,d1.lft,d1.rgt,d1.lvl,d1.fixed,d1.sort FROM dict AS d1,dict AS d2 WHERE d1.lft > d2.lft AND d1.lft<d2.rgt AND d2.value = '$value' and d1.isdel=0"))
+        val result = list.filter { it.lvl == 2 }.toMutableList()
+        result.forEach {
+            chidren(it, list)
         }
+        result.sortBy { it.sort }
         return result
     }
 
@@ -148,10 +138,7 @@ class DictService : BaseService<DictMapper, Dict>() {
     /**
      * 导入
      * 格式：
-     * 层级(n-1)个- value 描述 是否固定 顺序
-     * 性别-SEX-性别-false-0
-     * -男-0
-     * -女-1
+     * 层级(n-1)个-value-描述-是否固定-顺序
      */
     fun import(vo: DictVo) {
         if (vo.value.isNullOrBlank()) {
@@ -177,9 +164,12 @@ class DictService : BaseService<DictMapper, Dict>() {
     }
 
     private fun recursiveImport(splitDelimiter: String, preParentDict: Dict?, list: List<String>?) {
-        list?.forEachIndexed { index, it ->
+        if (list == null) {
+            return
+        }
+        for ((index, it) in list.withIndex()) {
             //第一条必须不能为子项
-            if (index == 0 && it.startsWith(splitDelimiter)) throw CustomException(Enum.Dict.IMPORT_FORMAT_ERROR)
+            if (preParentDict == null && index == 0 && it.startsWith(splitDelimiter)) throw CustomException(Enum.Dict.IMPORT_FORMAT_ERROR)
             val arrays = arrayListOf<String>()
             val level = if (preParentDict != null) {
                 arrays.addAll(it.drop(preParentDict.lvl!!).split(splitDelimiter))
@@ -188,6 +178,16 @@ class DictService : BaseService<DictMapper, Dict>() {
                 arrays.addAll(it.split(splitDelimiter))
                 0
             }
+            //每一层只处理同级层
+            if ((level == 0 && it.startsWith(splitDelimiter)) || level != 0 && !(it.startsWith(
+                    spliceStr(
+                        splitDelimiter,
+                        level
+                    )
+                ) && !it.startsWith(spliceStr(splitDelimiter, level), 1))
+            ) {
+                continue
+            }
             if (arrays.size <= 2) throw CustomException(Enum.Dict.NAME_AND_VALUE_NOT_FOUND)
             val itemName = arrays[0]
             val itemValue = arrays[1]
@@ -195,14 +195,14 @@ class DictService : BaseService<DictMapper, Dict>() {
             val itemFixed = if (arrays.size >= 4) arrays[3] else null
             val itemSort = if (arrays.size >= 5) arrays[4] else null
             //查询当前菜单是否存在
-            var parentDict= mapper.selectOneByExample(example<Dict> {
+            var parentDict = mapper.selectOneByExample(example<Dict> {
                 forUpdate()
                 andEqualTo {
                     value = itemValue
-                    lvl = level+1
+                    lvl = level + 1
                     isdel = false
                 }
-                if(preParentDict!=null){
+                if (preParentDict != null) {
                     andGreaterThan(Dict::lft, preParentDict.lft!!.toString())
                     andLessThan(Dict::lft, preParentDict.rgt!!.toString())
                 }
@@ -210,11 +210,11 @@ class DictService : BaseService<DictMapper, Dict>() {
             //不存在查询父菜单信息并新建
             if (parentDict == null) {
                 val newParentDict = mapper.selectOneByExample(example<Dict> {
-                    if(preParentDict!=null){
+                    if (preParentDict != null) {
                         andEqualTo {
                             id = preParentDict.id
                         }
-                    }else{
+                    } else {
                         andEqualTo {
                             lvl = level
                             isdel = false
@@ -236,7 +236,7 @@ class DictService : BaseService<DictMapper, Dict>() {
                 mapper.insertSelective(po)
                 parentDict = po
             }
-            recursiveImport(splitDelimiter, parentDict, findChild(splitDelimiter, list.drop(index + 1), level+1))
+            recursiveImport(splitDelimiter, parentDict, findChild(splitDelimiter, list.drop(index + 1), level + 1))
         }
     }
 
