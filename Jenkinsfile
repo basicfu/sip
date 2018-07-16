@@ -42,35 +42,35 @@ pipeline {
         }
         stage('sip-eureka') {
           steps {
-            sh './gradlew :sip-eureka:build -x test -info'
+            sh './gradlew :sip-eureka:build -x test'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka sip-eureka'
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'
           }
         }
         stage('sip-getway') {
           steps {
-            sh './gradlew :sip-getway:build -x test -info'
+            sh './gradlew :sip-getway:build -x test'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway sip-getway'
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway'
           }
         }
         stage('sip-base') {
           steps {
-            sh './gradlew :sip-base:build -x test -info'
+            sh './gradlew :sip-base:build -x test'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base sip-base'
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base'
           }
         }
         stage('sip-dict') {
           steps {
-            sh './gradlew :sip-dict:build -x test -info'
+            sh './gradlew :sip-dict:build -x test'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict sip-dict'
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict'
           }
         }
         stage('sip-permission') {
           steps {
-            sh './gradlew :sip-permission:build -x test -info'
+            sh './gradlew :sip-permission:build -x test'
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission sip-permission'
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission'
           }
