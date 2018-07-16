@@ -1,6 +1,5 @@
 package com.basicfu.sip.dict.service
 
-import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -27,7 +26,7 @@ class DictService : BaseService<DictMapper, Dict>() {
 
     fun all(): DictDto {
         val all = to<DictDto>(mapper.selectByExample(example<Dict> {
-            andEqualTo(Dict::isdel, true)
+            andEqualTo(Dict::isdel, false)
         }))
         val root = all.filter { it.lvl == 0 }[0]
         chidren(root, all)
