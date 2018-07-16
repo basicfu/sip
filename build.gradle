@@ -77,6 +77,7 @@ project(":sip-getway") {
         compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-zuul")
+        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
         compile("mysql:mysql-connector-java:5.1.45")
     }
@@ -87,7 +88,7 @@ project(":sip-base") {
         compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
+        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
@@ -95,7 +96,7 @@ project(":sip-dict") {
     dependencies {
         compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
+        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
@@ -104,7 +105,7 @@ project(":sip-permission") {
         compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
+        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }

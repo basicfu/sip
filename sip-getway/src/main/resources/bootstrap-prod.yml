@@ -7,6 +7,13 @@ eureka:
 logging:
   level:
     com: info
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
 zuul:
   sensitiveHeaders: Cookie,Set-Cookie
   host:
