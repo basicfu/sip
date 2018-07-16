@@ -1,7 +1,7 @@
 package com.basicfu.sip.permission.service
 
 import com.alibaba.fastjson.JSON
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.util.HttpUtil
 import com.basicfu.sip.permission.model.vo.ResourceVo
 import org.junit.Assert

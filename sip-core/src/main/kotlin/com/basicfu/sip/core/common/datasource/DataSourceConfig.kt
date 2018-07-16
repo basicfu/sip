@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.datasource
+package com.basicfu.sip.core.common.datasource
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder
 import org.mybatis.spring.SqlSessionFactoryBean
@@ -36,7 +36,7 @@ class DataSourceConfig {
     }
 
     @Bean
-    fun sqlSessionFactoryBean(dataSource: DataSource): SqlSessionFactoryBean {
+    fun sqlSessionFactory(dataSource: DataSource): SqlSessionFactoryBean {
         val sqlSessionFactoryBean = SqlSessionFactoryBean()
         sqlSessionFactoryBean.setDataSource(dataSource)
         sqlSessionFactoryBean.setMapperLocations(PathMatchingResourcePatternResolver().getResources("classpath*:/mapper/*.xml"))

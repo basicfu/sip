@@ -3,8 +3,8 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.mapper.ServiceMapper
 import com.basicfu.sip.base.model.vo.ServiceVo
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.ApplicationDto
 import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.service.BaseService
@@ -48,14 +48,18 @@ class ServiceService : BaseService<ServiceMapper, Service>() {
                 appId = vo.appId
                 serverId = vo.serverId
             })
-            if (checkServiceId != null && checkServiceId.id != vo.id) throw CustomException(Enum.Service.SERVER_ID_EXISTS)
+            if (checkServiceId != null && checkServiceId.id != vo.id) throw CustomException(
+                Enum.Service.SERVER_ID_EXISTS
+            )
         }
         if (vo.url != null) {
             val checkUrl = mapper.selectOne(generate {
                 appId = vo.appId
                 url = vo.url
             })
-            if (checkUrl != null && checkUrl.id != vo.id) throw CustomException(Enum.Service.URL_EXISTS)
+            if (checkUrl != null && checkUrl.id != vo.id) throw CustomException(
+                Enum.Service.URL_EXISTS
+            )
         }
         val po = dealUpdate(to<Service>(vo))
         return mapper.updateByPrimaryKeySelective(po)

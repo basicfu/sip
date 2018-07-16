@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.datasource
+package com.basicfu.sip.core.common.datasource
 
 class DataSourceContextHolder {
     enum class DataSourceType {

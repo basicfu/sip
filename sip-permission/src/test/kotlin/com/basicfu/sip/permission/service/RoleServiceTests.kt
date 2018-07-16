@@ -1,8 +1,7 @@
 package com.basicfu.sip.permission.service
 
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.permission.model.vo.RoleVo
-import org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

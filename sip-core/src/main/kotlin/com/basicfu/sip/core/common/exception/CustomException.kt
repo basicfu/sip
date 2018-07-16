@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.exception
+package com.basicfu.sip.core.common.exception
 
 import org.springframework.util.ReflectionUtils
 

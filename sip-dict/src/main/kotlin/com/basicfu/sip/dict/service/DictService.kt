@@ -1,9 +1,9 @@
 package com.basicfu.sip.dict.service
 
-import com.basicfu.sip.core.Constant
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.DictDto
 import com.basicfu.sip.core.model.po.Dict
 import com.basicfu.sip.core.model.vo.DictVo
@@ -169,7 +169,9 @@ class DictService : BaseService<DictMapper, Dict>() {
         }
         for ((index, it) in list.withIndex()) {
             //第一条必须不能为子项
-            if (preParentDict == null && index == 0 && it.startsWith(splitDelimiter)) throw CustomException(Enum.Dict.IMPORT_FORMAT_ERROR)
+            if (preParentDict == null && index == 0 && it.startsWith(splitDelimiter)) throw CustomException(
+                Enum.Dict.IMPORT_FORMAT_ERROR
+            )
             val arrays = arrayListOf<String>()
             val level = if (preParentDict != null) {
                 arrays.addAll(it.drop(preParentDict.lvl!!).split(splitDelimiter))

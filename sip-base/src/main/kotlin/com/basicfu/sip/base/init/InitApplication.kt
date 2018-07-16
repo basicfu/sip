@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.init
 
 import com.basicfu.sip.base.service.ServiceService
-import com.basicfu.sip.core.Constant
+import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.util.RedisUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner

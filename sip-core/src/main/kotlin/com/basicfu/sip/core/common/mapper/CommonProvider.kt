@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.mapper
+package com.basicfu.sip.core.common.mapper
 
 import org.apache.ibatis.mapping.MappedStatement
 import tk.mybatis.mapper.mapperhelper.MapperHelper

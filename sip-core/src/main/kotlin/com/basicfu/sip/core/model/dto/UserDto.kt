@@ -16,5 +16,5 @@ class UserDto {
     var roleIds: List<Long>? = null
     var menuIds: List<Long>? = null
     var permissionIds: List<Long>? = null
-    var resources: Map<Long, List<String>>? = null
+    var resources:Map<Long,List<String>>? = null
 }

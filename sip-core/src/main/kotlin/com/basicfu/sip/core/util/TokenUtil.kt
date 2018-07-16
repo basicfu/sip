@@ -1,6 +1,6 @@
 package com.basicfu.sip.core.util
 
-import com.basicfu.sip.core.Constant
+import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.dto.UserDto
 import java.util.*
 

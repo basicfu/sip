@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.mapper
+package com.basicfu.sip.core.common.mapper
 
 import org.springframework.util.ReflectionUtils
 import tk.mybatis.mapper.MapperException

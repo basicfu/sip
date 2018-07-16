@@ -1,4 +1,4 @@
-package com.basicfu.sip.client;
+package com.basicfu.sip.client.common;
 
 /**
  * kotlin generate javadoc

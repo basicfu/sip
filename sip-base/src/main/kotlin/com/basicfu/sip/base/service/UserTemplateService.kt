@@ -5,9 +5,9 @@ import com.basicfu.sip.base.mapper.UserTemplateMapper
 import com.basicfu.sip.base.model.dto.UserTemplateDto
 import com.basicfu.sip.base.model.po.UserTemplate
 import com.basicfu.sip.base.model.vo.UserTemplateVo
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import org.springframework.stereotype.Service
 

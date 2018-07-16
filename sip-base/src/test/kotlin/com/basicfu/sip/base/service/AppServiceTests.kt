@@ -1,9 +1,7 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.model.vo.AppVo
-import com.basicfu.sip.base.model.vo.UserTemplateVo
-import com.basicfu.sip.core.mapper.generate
-import org.bouncycastle.asn1.x500.style.RFC4519Style.name
+import com.basicfu.sip.core.common.mapper.generate
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

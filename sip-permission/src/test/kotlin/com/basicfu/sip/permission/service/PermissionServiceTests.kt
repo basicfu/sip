@@ -1,10 +1,7 @@
 package com.basicfu.sip.permission.service
 
-import com.basicfu.sip.core.mapper.generate
-import com.basicfu.sip.permission.model.vo.MenuVo
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.permission.model.vo.PermissionVo
-import com.basicfu.sip.permission.model.vo.RoleVo
-import org.aspectj.weaver.tools.cache.SimpleCacheFactory.path
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

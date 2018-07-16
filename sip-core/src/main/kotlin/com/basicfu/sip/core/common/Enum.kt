@@ -1,4 +1,4 @@
-package com.basicfu.sip.core
+package com.basicfu.sip.core.common
 
 /**
  * Enum

@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.model.vo.ServiceVo
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.mapper.generate
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

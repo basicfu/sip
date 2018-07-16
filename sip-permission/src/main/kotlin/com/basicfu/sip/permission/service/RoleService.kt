@@ -1,10 +1,10 @@
 package com.basicfu.sip.permission.service
 
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.core.Constant
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.*
@@ -36,6 +36,8 @@ class RoleService : BaseService<RoleMapper, Role>() {
     lateinit var menuMapper: MenuMapper
     @Autowired
     lateinit var permissionMapper: PermissionMapper
+    @Autowired
+    lateinit var resourceMapper: ResourceMapper
 
     fun getPermissionByUid(uid: Long): JSONObject {
         val roleIds = urMapper.selectByExample(example<UserRole> {
@@ -43,9 +45,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andEqualTo(UserRole::userId, uid)
         }).mapNotNull { it.roleId }.toMutableList()
         //登录用户包含未登录用户的权限
-        val noLoginRoleId=mapper.selectOneByExample(example<Role> {
+        val noLoginRoleId = mapper.selectOneByExample(example<Role> {
             select(Role::id)
-            andEqualTo(Role::code,Constant.System.GUEST)
+            andEqualTo(Role::code, Constant.System.GUEST)
         }).id
         noLoginRoleId?.let { roleIds.add(it) }
         val menuIds = if (roleIds.isEmpty()) {
@@ -83,11 +85,12 @@ class RoleService : BaseService<RoleMapper, Role>() {
         val resourceIds = arrayListOf<Long>()
         resourceIds.addAll(menuResourceIds)
         resourceIds.addAll(permissionResourceIds)
+        val resources = resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ","))
         val result = JSONObject()
         result["roleIds"] = roleIds
         result["menuIds"] = menuIds
         result["permissionIds"] = permissionIds
-        result["resourceIds"] = resourceIds.distinct()
+        result["resources"] = resources
         return result
     }
 

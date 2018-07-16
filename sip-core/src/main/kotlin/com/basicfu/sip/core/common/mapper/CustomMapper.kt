@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.mapper
+package com.basicfu.sip.core.common.mapper
 
 import tk.mybatis.mapper.common.IdsMapper
 import tk.mybatis.mapper.common.Mapper

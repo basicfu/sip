@@ -1,6 +1,7 @@
-package com.basicfu.sip.core.handler
+package com.basicfu.sip.core.common.handler
 
-import com.basicfu.sip.core.exception.CustomException
+import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.model.Result
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,7 +32,7 @@ class GlobalExceptionHandler {
     private fun errorHandler(response: HttpServletResponse, e: Exception): Result<Any> {
         log.error("全局异常：", e)
         response.status = 500
-        return Result.error(com.basicfu.sip.core.Enum.SERVER_ERROR.msg, -1)
+        return Result.error(Enum.SERVER_ERROR.msg, -1)
     }
 
     /**
@@ -42,8 +43,8 @@ class GlobalExceptionHandler {
     private fun httpMessageNotReadableException(e: HttpMessageNotReadableException): Result<Any> {
         log.error("\${Enum.INVALID_PARAMETER.msg}-【msg】--" + e.message)
         return Result.error(
-            com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg,
-            com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
+            Enum.INVALID_PARAMETER.msg,
+            Enum.INVALID_PARAMETER.value
         )
     }
 
@@ -66,8 +67,8 @@ class GlobalExceptionHandler {
     private fun notValidException(e: Exception): Result<Any> {
         log.error(e.message)
         return Result.error(
-            com.basicfu.sip.core.Enum.INVALID_PARAMETER.msg,
-            com.basicfu.sip.core.Enum.INVALID_PARAMETER.value
+            Enum.INVALID_PARAMETER.msg,
+            Enum.INVALID_PARAMETER.value
         )
     }
 

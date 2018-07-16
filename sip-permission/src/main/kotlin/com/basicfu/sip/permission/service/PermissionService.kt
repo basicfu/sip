@@ -1,19 +1,17 @@
 package com.basicfu.sip.permission.service
 
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.PermissionMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.dto.PermissionDto
-import com.basicfu.sip.permission.model.po.MenuResource
 import com.basicfu.sip.permission.model.po.Permission
 import com.basicfu.sip.permission.model.po.PermissionResource
-import com.basicfu.sip.permission.model.po.Resource
-import com.basicfu.sip.permission.model.vo.MenuVo
+import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.permission.model.vo.PermissionVo
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang.StringUtils
@@ -65,7 +63,9 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         val checkPermission = mapper.selectOne(generate {
             name = vo.name
         })
-        if (checkPermission != null && checkPermission.id != vo.id) throw CustomException(Enum.Permission.EXIST_NAME)
+        if (checkPermission != null && checkPermission.id != vo.id) throw CustomException(
+            Enum.Permission.EXIST_NAME
+        )
         val po = dealUpdate(to<Permission>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }

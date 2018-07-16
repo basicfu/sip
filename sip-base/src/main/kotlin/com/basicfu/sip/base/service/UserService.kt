@@ -14,10 +14,11 @@ import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
-import com.basicfu.sip.core.Constant
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.TokenUtil
@@ -84,22 +85,28 @@ class UserService : BaseService<UserMapper, User>() {
             username=vo.username
             type=0
         }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
-        if(!PasswordUtil.matches(vo.username+vo.password!!,userAuth.password!!))throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+        if(!PasswordUtil.matches(vo.username+vo.password!!,userAuth.password!!))throw CustomException(
+            Enum.User.USERNAME_OR_PASSWORD_ERROR
+        )
         val user=to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
         val currentTime=(System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
             id=userAuth.id
             ldate=currentTime
         })
-        val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(Enum.User.LOGIN_ERROR)
+        val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(
+            Enum.User.LOGIN_ERROR
+        )
         user.ldate=currentTime
         user.roleIds=permission.getJSONArray("roleIds").toJavaList(Long::class.java)
         user.menuIds=permission.getJSONArray("menuIds").toJavaList(Long::class.java)
         user.permissionIds=permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
-        user.resourceIds=permission.getJSONArray("resourceIds").toJavaList(Long::class.java)
+        user.resources=permission.getJSONArray("resources").toJavaList(Resource::class.java).groupBy({it.serviceId!!},{it.url+"/"+it.method})
         val token=TokenUtil.generateToken()
         //TODO 系统设置登录过期时间
-        RedisUtil.set(Constant.Redis.TOKEN_PREFIX+token,user,Constant.System.SESSION_TIMEOUT)
+        RedisUtil.set(
+            Constant.Redis.TOKEN_PREFIX+token,user,
+            Constant.System.SESSION_TIMEOUT)
         val result = JSONObject()
         result["success"] = true
         result["token"] = token

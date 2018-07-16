@@ -1,13 +1,13 @@
 package com.basicfu.sip.permission.service
 
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.dto.ResourceDto
-import com.basicfu.sip.permission.model.po.Resource
+import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.permission.model.vo.ResourceVo
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service

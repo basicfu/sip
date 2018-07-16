@@ -5,9 +5,9 @@ import com.basicfu.sip.base.mapper.AppMapper
 import com.basicfu.sip.base.model.dto.AppDto
 import com.basicfu.sip.base.model.po.App
 import com.basicfu.sip.base.model.vo.AppVo
-import com.basicfu.sip.core.exception.CustomException
-import com.basicfu.sip.core.mapper.example
-import com.basicfu.sip.core.mapper.generate
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service
@@ -47,7 +47,9 @@ class AppService : BaseService<AppMapper, App>() {
         val checkDomain = mapper.selectOne(generate {
             domain = vo.domain
         })
-        if (checkDomain != null && checkDomain.id != vo.id) throw CustomException(Enum.App.DOMAIN_EXISTS)
+        if (checkDomain != null && checkDomain.id != vo.id) throw CustomException(
+            Enum.App.DOMAIN_EXISTS
+        )
         val po = dealUpdate(to<App>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }
