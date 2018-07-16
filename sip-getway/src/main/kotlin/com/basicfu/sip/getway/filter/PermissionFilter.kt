@@ -40,51 +40,50 @@ class PermissionFilter : ZuulFilter() {
         // TODO 系统设置主站域名
         val hostArray = host.split(".").reversed()
         var result = Result.error<String>("未授权")
-        if (hostArray.size >= 3 && hostArray[0] == "cn" && hostArray[1] == "dmka" && hostArray[2].startsWith("sip")) {
-            val domainPrefix = if (hostArray.size == 4) {
+        val domainPrefix =
+            if (hostArray.size >= 3 && hostArray[0] == "cn" && hostArray[1] == "dmka" && hostArray[2].startsWith("sip") && hostArray.size == 4) {
                 hostArray[3]
             } else {
                 "sip"
             }
-            val uri = request.requestURI
-            val services = RedisUtil.hGet<List<Service>>(Constant.Redis.APP, domainPrefix)
-            services?.let {
-                for (service in services) {
-                    if (antPathMatcher.match(service.path, uri)) {
-                        val serviceUrl = "/" + antPathMatcher.extractPathWithinPattern(service.path, uri)
-                        val authorization = request.getHeader(Constant.System.AUTHORIZATION)
-                        if (authorization == null || authorization.length != 32) {
-                            //未登录用户
-                            val noLoginUser = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
-                            if (noLoginUser != null) {
-                                noLoginUser.resources?.get(service.id)?.let { resources ->
-                                    if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
-                                        println(System.currentTimeMillis() - start)
-                                        return null
-                                    }
-                                }
-                            }
-                        } else {
-                            val user = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + authorization)
-                            if (user == null) {
-                                //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时
-                                result = Result.error("登录超时")
-                            } else {
-//                                auth存在并且redis存在无过期
-                                user.resources?.get(service.id)?.let { resources ->
-                                    if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
-                                        println(System.currentTimeMillis() - start)
-                                        RedisUtil.expire(
-                                            Constant.Redis.TOKEN_PREFIX + authorization,
-                                            Constant.System.SESSION_TIMEOUT
-                                        )
-                                        return null
-                                    }
+        val uri = request.requestURI
+        val services = RedisUtil.hGet<List<Service>>(Constant.Redis.APP, domainPrefix)
+        services?.let {
+            for (service in services) {
+                if (antPathMatcher.match(service.path, uri)) {
+                    val serviceUrl = "/" + antPathMatcher.extractPathWithinPattern(service.path, uri)
+                    val authorization = request.getHeader(Constant.System.AUTHORIZATION)
+                    if (authorization == null || authorization.length != 32) {
+                        //未登录用户
+                        val noLoginUser = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
+                        if (noLoginUser != null) {
+                            noLoginUser.resources?.get(service.id)?.let { resources ->
+                                if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
+                                    println(System.currentTimeMillis() - start)
+                                    return null
                                 }
                             }
                         }
-                        break
+                    } else {
+                        val user = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + authorization)
+                        if (user == null) {
+                            //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时
+                            result = Result.error("登录超时")
+                        } else {
+//                                auth存在并且redis存在无过期
+                            user.resources?.get(service.id)?.let { resources ->
+                                if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
+                                    println(System.currentTimeMillis() - start)
+                                    RedisUtil.expire(
+                                        Constant.Redis.TOKEN_PREFIX + authorization,
+                                        Constant.System.SESSION_TIMEOUT
+                                    )
+                                    return null
+                                }
+                            }
+                        }
                     }
+                    break
                 }
             }
         }
