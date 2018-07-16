@@ -3,7 +3,9 @@ package com.basicfu.sip.getway.init
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Resource
+import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.util.RedisUtil
+import com.basicfu.sip.getway.common.datasource.DataSourceContextHolder
 import com.basicfu.sip.getway.mapper.Mapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
@@ -19,14 +21,31 @@ class InitConfig : CommandLineRunner {
     lateinit var mapper: Mapper
 
     override fun run(vararg strings: String) {
+        initAppService()
         initNoLoginToken()
-        //TODO 初始化app和app下的service
+    }
+
+    /**
+     * 初始化app和app下的service
+     */
+    fun initAppService() {
+        DataSourceContextHolder.base()
+        val apps = mapper.selectApp()
+        val services = mapper.selectService()
+        val serviceMap = services.groupBy({ it.appId!! }, { it })
+        val appServiceMap = HashMap<String, List<Service>>()
+        apps.forEach {
+            val list = serviceMap[it.id] ?: arrayListOf()
+            appServiceMap[it.domain!!] = list
+        }
+        RedisUtil.hMSet(Constant.Redis.APP, appServiceMap)
     }
 
     /**
      * 初始化未登录用户token永不过期
      */
     fun initNoLoginToken() {
+        DataSourceContextHolder.permission()
         val user = UserDto()
         val menuResources = mapper.selectMenuResourceIdByRoleCode(Constant.System.GUEST)
         val permissionResources = mapper.selectPermissionResourceIdByRoleCode(Constant.System.GUEST)

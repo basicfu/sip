@@ -27,7 +27,7 @@ class DictService : BaseService<DictMapper, Dict>() {
 
     fun all(): DictDto {
         val all = to<DictDto>(mapper.selectByExample(example<Dict> {
-            andEqualTo(Dict::isdel, Constant.N)
+            andEqualTo(Dict::isdel, true)
         }))
         val root = all.filter { it.lvl == 0 }[0]
         chidren(root, all)

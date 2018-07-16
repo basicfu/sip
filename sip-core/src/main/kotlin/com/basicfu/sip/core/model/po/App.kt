@@ -1,4 +1,4 @@
-package com.basicfu.sip.base.model.po
+package com.basicfu.sip.core.model.po
 
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
