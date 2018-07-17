@@ -139,7 +139,7 @@ object HttpUtil {
     }
 
     private fun post(url: String, headers: Map<String, String>?, params: Map<String, String>?, json: Any?, requestEncoding: String?, randomUa: Boolean, needEntity: Boolean, needHeaders: Boolean): Response? {
-        var response: CloseableHttpResponse? = null
+        val response: CloseableHttpResponse?
         val httpClient = HttpClients.createDefault()
         val httpPost = HttpPost(url)
         try {
@@ -165,7 +165,7 @@ object HttpUtil {
     }
 
     fun postFile(url: String, header: Map<String, String>, postData: Map<String, Any>): String? {
-        var response: CloseableHttpResponse? = null
+        val response: CloseableHttpResponse?
         val httpClient = HttpClients.createDefault()
         val httpPost = HttpPost(url)
         try {

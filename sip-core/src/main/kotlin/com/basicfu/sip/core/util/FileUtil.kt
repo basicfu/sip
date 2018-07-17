@@ -14,7 +14,7 @@ object FileUtil {
     }
 
     fun copyFile(f1: File, f2: File) {
-        var length = 2097152
+        var length: Int
         try {
             val `in` = FileInputStream(f1)
             val out = FileOutputStream(f2)
@@ -95,7 +95,7 @@ object FileUtil {
     fun byteToFile(buf: ByteArray, filePath: String, fileName: String) {
         var bos: BufferedOutputStream? = null
         var fos: FileOutputStream? = null
-        var file: File? = null
+        val file: File?
         try {
             val dir = File(filePath)
             if (!dir.exists() && dir.isDirectory) {
@@ -183,7 +183,7 @@ object FileUtil {
 
     fun writeTxtFile(text: String, file: String) {
         val mm: RandomAccessFile? = null
-        var o: FileOutputStream? = null
+        val o: FileOutputStream?
         try {
             o = FileOutputStream(file)
             o.write(text.toByteArray(charset("GBK")))
