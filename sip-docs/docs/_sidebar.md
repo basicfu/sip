@@ -5,7 +5,7 @@
 	- 字典服务
 	- 字典服务
 	- 权限服务
-- 服务端
-  - [网关](/docs/erp/api/warehouse.md)
-- 客户端
-- [日志](/docs/erp/api/warehouse.md)
+- [服务端](/docs/server/index.md)
+- [客户端](/docs/client/index.md)
+	- [用户模块](/docs/client/user.md)
+	- [字典模块](/docs/client/dict.md)
