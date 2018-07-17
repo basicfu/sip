@@ -111,6 +111,7 @@ class UserService : BaseService<UserMapper, User>() {
         result["success"] = true
         result["token"] = token
         result["time"] = System.currentTimeMillis()
+        result["username"]=user.username
         return result
     }
     /**
