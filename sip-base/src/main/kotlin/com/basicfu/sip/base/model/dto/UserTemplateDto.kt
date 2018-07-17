@@ -2,7 +2,7 @@ package com.basicfu.sip.base.model.dto
 
 class UserTemplateDto {
     var id: Long? = null
-    var tenantId: Long? = null
+    var appId: Long? = null
     var name: String? = null
     var enName: String? = null
     var type: String? = null

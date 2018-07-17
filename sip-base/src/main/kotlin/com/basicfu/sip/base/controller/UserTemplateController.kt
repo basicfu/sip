@@ -16,9 +16,14 @@ class UserTemplateController {
     @Autowired
     lateinit var userTemplateService: UserTemplateService
 
-    @GetMapping("/all")
+    @GetMapping("/list")
     fun all(vo: UserTemplateVo): Result<Any> {
-        return Result.success(userTemplateService.all(vo))
+        return Result.success(userTemplateService.list(vo))
+    }
+
+    @GetMapping("/all")
+    fun all(): Result<Any> {
+        return Result.success(userTemplateService.all())
     }
 
     @PostMapping("/insert")

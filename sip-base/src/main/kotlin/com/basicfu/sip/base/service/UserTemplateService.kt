@@ -18,10 +18,15 @@ import org.springframework.stereotype.Service
 @Service
 class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
 
-    fun all(vo: UserTemplateVo): List<UserTemplateDto> {
+    fun list(vo: UserTemplateVo): List<UserTemplateDto> {
         val sortedBy = mapper.selectByExample(example<UserTemplate> {
             andLike(UserTemplate::name, vo.name)
         }).sortedBy { it.sort }
+        return to(sortedBy)
+    }
+
+    fun all(): List<UserTemplateDto> {
+        val sortedBy = mapper.selectAll().sortedBy { it.sort }
         return to(sortedBy)
     }
 
