@@ -38,12 +38,17 @@ class ResourceTests {
             val resource=JSON.parseObject(it.toString())
             val url=resource.getJSONArray("url")
             url.forEach {
-                val vo = generate<ResourceVo> {
-                    serviceId=4
-                    this.url=it.toString()
-                    name=""
+                if(it.toString()!="/error"){
+                    resource.getJSONArray("requestMethod").forEach { method->
+                        val vo = generate<ResourceVo> {
+                            serviceId=4
+                            this.url=it.toString()
+                            name=""
+                            this.method=method.toString()
+                        }
+                        resourceService.insert(vo)
+                    }
                 }
-                resourceService.insert(vo)
             }
         }
     }

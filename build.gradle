@@ -57,6 +57,7 @@ subprojects {
 project(":sip-core") {
     dependencies {
         compile("com.alibaba:druid-spring-boot-starter:1.1.9")
+        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("tk.mybatis:mapper-spring-boot-starter:2.0.2")
         compile("com.github.pagehelper:pagehelper-spring-boot-starter:1.2.3")
         compile("org.apache.commons:commons-lang3:3.6")
@@ -64,8 +65,6 @@ project(":sip-core") {
         compile("org.apache.httpcomponents:httpmime:4.5.1")
         compile("io.protostuff:protostuff-core:1.5.9")
         compile("io.protostuff:protostuff-runtime:1.5.9")
-        compile("org.springframework:spring-aspects")
-        compile("org.springframework:spring-orm")
     }
 }
 project(":sip-eureka") {
@@ -78,7 +77,6 @@ project(":sip-getway") {
         compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-zuul")
-        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
         compile("mysql:mysql-connector-java:5.1.45")
     }
@@ -88,31 +86,29 @@ project(":sip-base") {
         compile project(':sip-core')
         compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
-        compile("org.springframework.cloud:spring-cloud-starter-feign")
-        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
 project(":sip-dict") {
     dependencies {
         compile project(':sip-core')
+        compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
-        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
 project(":sip-permission") {
     dependencies {
         compile project(':sip-core')
+        compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
-        compile("org.springframework.cloud:spring-cloud-starter-feign")
-        compile("org.springframework.cloud:spring-cloud-starter-hystrix")
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
 project(":sip-client") {
     dependencies {
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
+        compile("org.springframework.cloud:spring-cloud-starter-feign")
     }
 }
 project(":sip-api") {
