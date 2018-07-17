@@ -32,9 +32,12 @@ class UtilController {
             hashMap["methodName"] = methodName
             hashMap["returnClassName"] = handlerMethod.method.returnType.name
             hashMap["parameterType"] = handlerMethod.method.parameterTypes
-            hashMap["parameterName"] =
-                    LocalVariableTableParameterNameDiscoverer().getParameterNames(handlerMethod.method)
-            result.add(hashMap)
+            if (hashMap["url"].toString() != "[/error]") {
+                hashMap["parameterName"] =
+                        LocalVariableTableParameterNameDiscoverer().getParameterNames(handlerMethod.method)
+                result.add(hashMap)
+            }
+
         }
         return result
     }
