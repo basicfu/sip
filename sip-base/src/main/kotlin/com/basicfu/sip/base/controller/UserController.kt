@@ -2,6 +2,7 @@ package com.basicfu.sip.base.controller
 
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.service.UserService
+import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -34,6 +35,11 @@ class UserController {
     @PostMapping("/login")
     fun login(@RequestBody vo: UserVo): Result<Any> {
         return Result.success(userService.login(vo))
+    }
+
+    @GetMapping("/logout")
+    fun logout(): Result<Any> {
+        return Result.success(userService.logout(),Constant.System.LOGOUT)
     }
 
     @PostMapping("/insert")

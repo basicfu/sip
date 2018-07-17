@@ -14,6 +14,13 @@ object TokenUtil {
     }
 
     /**
+     * 获取当前token
+     */
+    fun getCurrentToken(): String? {
+        return RequestUtil.getHeader(Constant.System.AUTHORIZATION) ?: return null
+    }
+
+    /**
      * 获取当前用户
      */
     fun getCurrentUser(): UserDto? {

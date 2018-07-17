@@ -101,7 +101,7 @@ class UserService : BaseService<UserMapper, User>() {
         user.roleIds=permission.getJSONArray("roleIds").toJavaList(Long::class.java)
         user.menuIds=permission.getJSONArray("menuIds").toJavaList(Long::class.java)
         user.permissionIds=permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
-        user.resources=permission.getJSONArray("resources").toJavaList(Resource::class.java).groupBy({it.serviceId!!},{it.url+"/"+it.method})
+        user.resources=permission.getJSONArray("resources").toJavaList(Resource::class.java).groupBy({it.serviceId!!},{"/"+it.method+it.url})
         val token=TokenUtil.generateToken()
         //TODO 系统设置登录过期时间
         RedisUtil.set(
@@ -113,6 +113,15 @@ class UserService : BaseService<UserMapper, User>() {
         result["time"] = System.currentTimeMillis()
         result["username"]=user.username
         return result
+    }
+
+    /**
+     * 登出
+     */
+    fun logout(){
+        TokenUtil.getCurrentToken()?.let {
+            RedisUtil.del(Constant.Redis.TOKEN_PREFIX+it)
+        }
     }
     /**
      * 用户模板需要在添加时强制限制好格式

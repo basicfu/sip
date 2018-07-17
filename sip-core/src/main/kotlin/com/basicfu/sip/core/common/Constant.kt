@@ -12,6 +12,7 @@ object Constant {
         const val GUEST = "GUEST"
         const val AUTHORIZATION = "Authorization"
         const val SESSION_TIMEOUT: Long = 24 * 60 * 60 * 1000
+        const val LOGOUT="注销成功"
     }
 
     object Redis {
