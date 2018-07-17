@@ -8,6 +8,7 @@ package com.basicfu.sip.core.common
  */
 object Constant {
     object System {
+        const val NAME = "sip"
         const val GUEST = "GUEST"
         const val AUTHORIZATION = "Authorization"
         const val SESSION_TIMEOUT: Long = 24 * 60 * 60 * 1000
