@@ -1,11 +1,13 @@
-- 首页
-- [API](/docs/api/index.md)
-	- [基础服务](/docs/api/base/index.md)
-		- [用户管理](/docs/api/base/user.md)
-	- 字典服务
-	- 字典服务
-	- 权限服务
-- [服务端](/docs/server/index.md)
-- [客户端](/docs/client/index.md)
-	- [用户模块](/docs/client/user.md)
-	- [字典模块](/docs/client/dict.md)
+- API
+	- [API使用](/api/index.md)
+	- 基础模块
+		- [模块说明](/api/base/index.md)
+		- [用户管理](/api/base/user.md)
+	- 字典管理
+	- 权限管理
+- 服务端
+	- [服务端使用](/server/index.md)
+- 客户端
+	- [客户端使用](/client/index.md)
+	- [用户模块](/client/user.md)
+	- [字典模块](/client/dict.md)
