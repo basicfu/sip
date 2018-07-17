@@ -7,20 +7,6 @@ eureka:
 logging:
   level:
     com: debug
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 10000
-zuul:
-  sensitiveHeaders: Cookie,Set-Cookie
-  host:
-    connect-timeout-millis: 10000
-    socket-timeout-millis: 10000
-    max-per-route-connections: 3000
-    max-total-connections: 3000
 spring:
   datasource:
     url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-permission?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false

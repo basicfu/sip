@@ -35,15 +35,21 @@ class RoleService : BaseService<RoleMapper, Role>() {
     @Autowired
     lateinit var menuMapper: MenuMapper
     @Autowired
+    lateinit var roleMapper: RoleMapper
+    @Autowired
     lateinit var permissionMapper: PermissionMapper
     @Autowired
     lateinit var resourceMapper: ResourceMapper
 
     fun getPermissionByUid(uid: Long): JSONObject {
         val roleIds = urMapper.selectByExample(example<UserRole> {
-            select(UserRole::roleId)
+            select(UserRole::roleId,UserRole::id)
             andEqualTo(UserRole::userId, uid)
         }).mapNotNull { it.roleId }.toMutableList()
+        val roleCodes=roleMapper.selectByExample(example<Role> {
+            select(Role::code)
+            andIn(Role::id, roleIds)
+        }).mapNotNull { it.code }
         //登录用户包含未登录用户的权限
         val noLoginRoleId = mapper.selectOneByExample(example<Role> {
             select(Role::id)
@@ -87,7 +93,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         resourceIds.addAll(permissionResourceIds)
         val resources = resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ","))
         val result = JSONObject()
-        result["roleIds"] = roleIds
+        result["roleCodes"] = roleCodes
         result["menuIds"] = menuIds
         result["permissionIds"] = permissionIds
         result["resources"] = resources

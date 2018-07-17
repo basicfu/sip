@@ -7,10 +7,8 @@ import com.basicfu.sip.base.common.Enum.FieldType.*
 import com.basicfu.sip.base.feign.RoleFeign
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.po.UserAuth
-import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
@@ -18,6 +16,7 @@ import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
@@ -56,15 +55,16 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     fun getByToken(token: String): UserDto? {
-        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX+token)
+        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + token)
     }
 
     fun listUsernameByIds(ids: List<Long>): List<UserDto> {
         return to(mapper.selectByExample(example<User> {
-            select(User::id,User::username)
-            andIn(User::id,ids)
+            select(User::id, User::username)
+            andIn(User::id, ids)
         }))
     }
+
     fun suggest(vo: UserVo): List<UserDto> {
         val list = to<UserDto>(mapper.selectByExample(example<User> {
             andLike {
@@ -81,48 +81,57 @@ class UserService : BaseService<UserMapper, User>() {
      * TODO 登录后清除该用户其他token
      */
     fun login(vo: UserVo): JSONObject? {
-        val userAuth= userAuthMapper.selectOne(generate {
-            username=vo.username
-            type=0
+        val userAuth = userAuthMapper.selectOne(generate {
+            username = vo.username
+            type = 0
         }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
-        if(!PasswordUtil.matches(vo.username+vo.password!!,userAuth.password!!))throw CustomException(
+        if (!PasswordUtil.matches(vo.username + vo.password!!, userAuth.password!!)) throw CustomException(
             Enum.User.USERNAME_OR_PASSWORD_ERROR
         )
-        val user=to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
-        val currentTime=(System.currentTimeMillis() / 1000).toInt()
+        val user = to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
+        val currentTime = (System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
-            id=userAuth.id
-            ldate=currentTime
+            id = userAuth.id
+            ldate = currentTime
         })
         val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(
             Enum.User.LOGIN_ERROR
         )
-        user.ldate=currentTime
-        user.roleIds=permission.getJSONArray("roleIds").toJavaList(Long::class.java)
-        user.menuIds=permission.getJSONArray("menuIds").toJavaList(Long::class.java)
-        user.permissionIds=permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
-        user.resources=permission.getJSONArray("resources").toJavaList(Resource::class.java).groupBy({it.serviceId!!},{"/"+it.method+it.url})
-        val token=TokenUtil.generateToken()
+        user.ldate = currentTime
+        user.roleCodes = permission.getJSONArray("roleCodes").toJavaList(String::class.java)
+        user.menuIds = permission.getJSONArray("menuIds").toJavaList(Long::class.java)
+        user.permissionIds = permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
+        user.resources = permission.getJSONArray("resources").toJavaList(Resource::class.java)
+            .groupBy({ it.serviceId!! }, { "/" + it.method + it.url })
+        val token = TokenUtil.generateToken()
         //TODO 系统设置登录过期时间
         RedisUtil.set(
-            Constant.Redis.TOKEN_PREFIX+token,user,
-            Constant.System.SESSION_TIMEOUT)
+            Constant.Redis.TOKEN_PREFIX + token, user,
+            Constant.System.SESSION_TIMEOUT
+        )
         val result = JSONObject()
-        result["success"] = true
         result["token"] = token
         result["time"] = System.currentTimeMillis()
-        result["username"]=user.username
+        user.resources = null
+        user.permissionIds = null
+        user.menuIds = null
+        user.status = null
+        user.id = null
+        result.putAll(JSON.parseObject(user.content))
+        user.content = null
+        result.putAll(JSON.parseObject(JSON.toJSONString(user)))
         return result
     }
 
     /**
      * 登出
      */
-    fun logout(){
+    fun logout() {
         TokenUtil.getCurrentToken()?.let {
-            RedisUtil.del(Constant.Redis.TOKEN_PREFIX+it)
+            RedisUtil.del(Constant.Redis.TOKEN_PREFIX + it)
         }
     }
+
     /**
      * 用户模板需要在添加时强制限制好格式
      */
@@ -133,7 +142,7 @@ class UserService : BaseService<UserMapper, User>() {
             }) > 0) throw CustomException(Enum.User.EXIST_USER)
         val contentJson = vo.content
         //获取该租户下的用户模板信息,传过来空值也要根据模板处理默认值
-        val userTemplateList = userTemplateService.all(UserTemplateVo())
+        val userTemplateList = userTemplateService.all()
         val contentResult = JSONObject()
         userTemplateList.forEach { it ->
             val extra = it.extra!!
@@ -200,11 +209,11 @@ class UserService : BaseService<UserMapper, User>() {
                         }
                     }
                 }
-                //不支持默认值、必选
+            //不支持默认值、必选
                 CHECK -> {
-                    if(value==null){
-                        contentResult[enName]="[]"
-                    }else{
+                    if (value == null) {
+                        contentResult[enName] = "[]"
+                    } else {
                         val dictMap = DictUtil.getMap(extra)
                         JSON.parseArray(value).forEach { item ->
                             if (!dictMap.containsKey(item.toString())) {
@@ -214,11 +223,11 @@ class UserService : BaseService<UserMapper, User>() {
                         contentResult[enName] = value
                     }
                 }
-                //不支持默认值、必选
+            //不支持默认值、必选
                 RADIO -> {
-                    if(value==null){
+                    if (value == null) {
                         contentResult[enName] = ""
-                    }else{
+                    } else {
                         val dictMap = DictUtil.getMap(extra)
                         if (!dictMap.containsKey(value.toString())) {
                             throw CustomException("找不到字典[$extra]下为[$value]的值")
@@ -226,14 +235,14 @@ class UserService : BaseService<UserMapper, User>() {
                         contentResult[enName] = value
                     }
                 }
-                //下拉不支持默认值，支持必选
+            //下拉不支持默认值，支持必选
                 SELECT -> {
                     if (value == null) {
-                        if(required){
+                        if (required) {
                             throw CustomException("字段名[$name]不能为空")
                         }
                         contentResult[enName] = ""
-                    }else{
+                    } else {
                         val dictMap = DictUtil.getMap(extra)
                         if (!dictMap.containsKey(value.toString())) {
                             throw CustomException("找不到字典[$extra]下为[$value]的值")
@@ -247,8 +256,8 @@ class UserService : BaseService<UserMapper, User>() {
                             throw CustomException("字段名[$name]不能为空")
                         }
                         contentResult[enName] = ""
-                    }else{
-                        val sdf=SimpleDateFormat(extra)
+                    } else {
+                        val sdf = SimpleDateFormat(extra)
                         contentResult[enName] = sdf.format(sdf.parse(value))
                     }
                 }
