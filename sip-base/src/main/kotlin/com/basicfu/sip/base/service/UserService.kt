@@ -56,7 +56,7 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     fun getByToken(token: String): UserDto? {
-        return RedisUtil.get<UserDto>(token)
+        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX+token)
     }
 
     fun listUsernameByIds(ids: List<Long>): List<UserDto> {
