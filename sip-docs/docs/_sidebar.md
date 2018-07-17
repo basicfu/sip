@@ -1,8 +1,11 @@
 - 首页
-- 使用文档
-  - [网关](/docs/common/api/common.md)
-  - [日期](/docs/common/api/interfaceRule.md)
-- 接入文档
+- [API](/docs/api/index.md)
+	- [基础服务](/docs/api/base/index.md)
+		- [用户管理](/docs/api/base/user.md)
+	- 字典服务
+	- 字典服务
+	- 权限服务
+- 服务端
   - [网关](/docs/erp/api/warehouse.md)
-- API接口
+- 客户端
 - [日志](/docs/erp/api/warehouse.md)
