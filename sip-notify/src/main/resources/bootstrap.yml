@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sip-notify
+  profiles:
+    active: ${ENV:dev}
