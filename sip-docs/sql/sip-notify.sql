@@ -19,4 +19,3 @@ CREATE TABLE mail_temp(
   udate int not null default 0 comment '更新时间',
   UNIQUE KEY (app_id,code)
 )COMMENT '邮件模板'
-
