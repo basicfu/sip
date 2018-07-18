@@ -2,6 +2,7 @@ package com.basicfu.sip.client.util
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
+import com.basicfu.sip.client.feign.RoleFeign
 import com.basicfu.sip.client.feign.UserFeign
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -12,16 +13,25 @@ import javax.annotation.PostConstruct
 class UserUtil {
     @Autowired
     private lateinit var userFeignTmp: UserFeign
+    @Autowired
+    private lateinit var roleFeignTmp: RoleFeign
 
     @PostConstruct
     fun init() {
         UserUtil.userFeign = userFeignTmp
+        UserUtil.roleFeign = roleFeignTmp
+
     }
 
     companion object {
         @PublishedApi
         internal
         lateinit var userFeign: UserFeign
+
+        @PublishedApi
+        internal
+        lateinit var roleFeign: RoleFeign
+
 
         /**
          * 获取当前登录用户信息
@@ -62,6 +72,19 @@ class UserUtil {
             return dealUser(userFeign.suggest(name, limit).data)
         }
 
+        /**
+         * 根据用户id获取用户拥有的roles/menus/permissions/resources
+         */
+        inline fun <reified T> getPermissionByUid(uid: Long): T? {
+            return dealUser(roleFeign.getPermissionByUid(uid).data)
+        }
+
+        /**
+         * 根据用户id获取用户拥有的roles/menus/permissions/resources
+         */
+        fun getPermissionByUidJson(uid: Long): JSONObject? {
+            return roleFeign.getPermissionByUid(uid).data
+        }
 
         /**
          * 服务器端用户对象转换为用户提供对象

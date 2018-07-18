@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.common.Enum.FieldType.*
-import com.basicfu.sip.base.feign.RoleFeign
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
 import com.basicfu.sip.base.model.po.User
@@ -41,8 +40,6 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var userAuthMapper: UserAuthMapper
     @Autowired
     lateinit var userTemplateService: UserTemplateService
-    @Autowired
-    lateinit var roleFeign: RoleFeign
 
     fun get(id: Long): JSONObject? {
         return UserUtil.toJson(to<UserDto>(mapper.selectByPrimaryKey(id)))
@@ -108,9 +105,10 @@ class UserService : BaseService<UserMapper, User>() {
             id = userAuth.id
             ldate = currentTime
         })
-        val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(
-            Enum.User.LOGIN_ERROR
-        )
+        val permission =
+            com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user!!.id!!) ?: throw CustomException(
+                Enum.User.LOGIN_ERROR
+            )
         user.ldate = currentTime
         user.roles = permission.getJSONArray("roles")
         user.menus = permission.getJSONArray("menus")
