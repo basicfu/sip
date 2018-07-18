@@ -46,7 +46,11 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     fun getCurrentUser(): JSONObject? {
-        return UserUtil.toJson(TokenUtil.getCurrentUser())
+        var user=TokenUtil.getCurrentUser()
+        if(user==null){
+            user=TokenUtil.getGuestUser()
+        }
+        return UserUtil.toJson(user)
     }
 
     fun list(vo: UserVo): PageInfo<JSONObject> {
@@ -125,6 +129,7 @@ class UserService : BaseService<UserMapper, User>() {
         result["token"] = token
         result["time"] = System.currentTimeMillis() / 1000
         result["username"] = user.username
+        result["roles"]=user.roles
         return result
     }
 

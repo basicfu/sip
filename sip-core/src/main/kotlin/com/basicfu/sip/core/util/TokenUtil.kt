@@ -19,6 +19,12 @@ object TokenUtil {
     fun getCurrentToken(): String? {
         return RequestUtil.getHeader(Constant.System.AUTHORIZATION) ?: return null
     }
+    /**
+     * 获取访客对象
+     */
+    fun getGuestUser(): UserDto? {
+        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
+    }
 
     /**
      * 获取当前用户
