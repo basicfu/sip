@@ -3,6 +3,7 @@
 	- 基础模块
 		- [模块说明](/api/base/index.md)
 		- [用户管理](/api/base/user.md)
+		- [用户模板](/api/base/user-template.md)
 	- 字典管理
 	- 权限管理
 - 服务端
