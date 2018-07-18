@@ -85,6 +85,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
                 andIn(PermissionResource::permissionId, permissionIds)
             }).mapNotNull { it.resourceId }
         }
+        roleIds.remove(noLoginRoleId)
         val roles = to<RoleDto>(roleMapper.selectByExample(example<Role> {
             andIn(Role::id, roleIds)
         }))
