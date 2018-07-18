@@ -111,7 +111,7 @@ class UserService : BaseService<UserMapper, User>() {
         )
         val result = JSONObject()
         result["token"] = token
-        result["time"] = System.currentTimeMillis()
+        result["time"] = System.currentTimeMillis()/1000
         user.resources = null
         user.permissionIds = null
         user.menuIds = null
