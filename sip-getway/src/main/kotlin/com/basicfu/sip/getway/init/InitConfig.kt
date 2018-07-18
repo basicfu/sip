@@ -1,9 +1,11 @@
 package com.basicfu.sip.getway.init
 
+import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.model.po.Service
+import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.getway.common.datasource.DataSourceContextHolder
 import com.basicfu.sip.getway.mapper.Mapper
@@ -49,12 +51,13 @@ class InitConfig : CommandLineRunner {
         val user = UserDto()
         val menuResources = mapper.selectMenuResourceIdByRoleCode(Constant.System.GUEST)
         val permissionResources = mapper.selectPermissionResourceIdByRoleCode(Constant.System.GUEST)
-        mapper.selectMenuByRoleCode(Constant.System.GUEST)
+        val menus = MenuUtil.recursive(null, mapper.selectMenuByRoleCode(Constant.System.GUEST))
         val list = arrayListOf<Resource>()
         list.addAll(menuResources)
         list.addAll(permissionResources)
-        user.username=Constant.System.GUEST
+        user.username = Constant.System.GUEST
         user.resources = list.distinct().groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
+        user.menus = JSON.parseArray(JSON.toJSONString(menus))
         RedisUtil.set(Constant.Redis.TOKEN_GUEST, user)
     }
 }

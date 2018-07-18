@@ -3,17 +3,17 @@ package com.basicfu.sip.permission.service
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
-import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.permission.model.po.Menu
 import com.basicfu.sip.permission.model.po.MenuResource
 import com.basicfu.sip.permission.model.vo.MenuVo
-import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -29,18 +29,8 @@ class MenuService : BaseService<MenuMapper, Menu>() {
     lateinit var resourceMapper: ResourceMapper
 
     fun all(): List<Any> {
-        val result = arrayListOf<MenuDto>()
         val menus = to<MenuDto>(mapper.selectAll())
-        menus.forEach { e ->
-            if (0L == e.pid) {
-                val dto = to<MenuDto>(e)
-                result.add(dto!!)
-            }
-        }
-        result.forEach { e ->
-            e.children = chidren(e, menus)
-        }
-        return result
+        return MenuUtil.recursive(null,menus)
     }
 
     fun insert(vo: MenuVo): Int {
@@ -84,29 +74,5 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             andEqualTo(MenuResource::menuId, vo.id)
             andIn(MenuResource::resourceId, vo.resourceIds!!)
         })
-    }
-
-    private fun chidren(m: MenuDto, menus: List<MenuDto>): List<MenuDto> {
-        val childList = arrayListOf<MenuDto>()
-        var flag = true
-        menus.forEach { e ->
-            if (e.pid == m.id) {
-                flag = false
-                val split = e.path?.split('/')
-                m.path = split?.get(split.size - 2)
-                val menu = MenuDto()
-                BeanUtils.copyProperties(e, menu)
-                menu.path = split?.get(split.size - 1)
-                menu.children = chidren(menu, menus)
-                childList.add(menu)
-            }
-        }
-        if (flag) {
-            val split = m.path?.split('/')
-            m.path = split?.get(split.size - 1)
-        } else {
-            if (m.path == null) m.path = ""
-        }
-        return childList
     }
 }

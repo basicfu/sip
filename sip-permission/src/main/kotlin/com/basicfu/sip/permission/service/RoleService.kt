@@ -5,10 +5,11 @@ import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.*
-import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
 import com.basicfu.sip.permission.model.vo.RoleVo
@@ -89,9 +90,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
         val roles = to<RoleDto>(roleMapper.selectByExample(example<Role> {
             andIn(Role::id, roleIds)
         }))
-        val menus = to<MenuDto>(menuMapper.selectByExample(example<Menu> {
+        val menus = MenuUtil.recursive(null, to<MenuDto>(menuMapper.selectByExample(example<Menu> {
             andIn(Menu::id, menuIds)
-        }))
+        })))
         val permissions = to<MenuDto>(permissionMapper.selectByExample(example<Permission> {
             andIn(Permission::id, permissionIds)
         }))
