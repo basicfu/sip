@@ -32,7 +32,7 @@ pipeline {
 	      stage('sip-docs') {
 	        steps {
 	          sh 'docker login -u ${ALIYUN_DOCKER_REPO_USR} -p ${ALIYUN_DOCKER_REPO_PSW} registry-vpc.cn-beijing.aliyuncs.com'
-	          sh './gradlew -x test :sip-eureka:build :sip-getway:build :sip-base:build :sip-dict:build :sip-permission:build'
+	          sh './gradlew -x test :sip-eureka:build :sip-getway:build :sip-base:build :sip-dict:build :sip-permission:build :sip-notify:build'
 	        }
 	      }
 	    }
@@ -76,6 +76,12 @@ pipeline {
           steps {
             sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission sip-permission'
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission'
+          }
+        }
+        stage('sip-notify') {
+          steps {
+            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify sip-notify'
+            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify'
           }
         }
       }
