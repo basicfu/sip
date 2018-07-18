@@ -52,7 +52,7 @@ class InitConfig : CommandLineRunner {
         val list = arrayListOf<Resource>()
         list.addAll(menuResources)
         list.addAll(permissionResources)
-        user.resources = list.distinct().groupBy({ it.serviceId!! }, { "/" + it.method + it.url })
+        user.resources = list.distinct().groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
         RedisUtil.set(Constant.Redis.TOKEN_GUEST, user)
     }
 }

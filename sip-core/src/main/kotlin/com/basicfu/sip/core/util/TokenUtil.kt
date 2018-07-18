@@ -25,7 +25,6 @@ object TokenUtil {
      */
     fun getCurrentUser(): UserDto? {
         val token = RequestUtil.getHeader(Constant.System.AUTHORIZATION) ?: return null
-        return RedisUtil.get<UserDto>(token)
+        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + token)
     }
-
 }

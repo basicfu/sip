@@ -3,3 +3,10 @@ spring:
     name: sip-getway
   profiles:
     active: ${ENV:dev}
+zuul:
+  sensitiveHeaders: Cookie,Set-Cookie
+  host:
+    connect-timeout-millis: 30000
+    socket-timeout-millis: 30000
+    max-per-route-connections: 10000
+    max-total-connections: 10000

@@ -8,6 +8,7 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.*
+import com.basicfu.sip.permission.model.dto.MenuDto
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
 import com.basicfu.sip.permission.model.vo.RoleVo
@@ -43,13 +44,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
 
     fun getPermissionByUid(uid: Long): JSONObject {
         val roleIds = urMapper.selectByExample(example<UserRole> {
-            select(UserRole::roleId,UserRole::id)
+            select(UserRole::roleId, UserRole::id)
             andEqualTo(UserRole::userId, uid)
         }).mapNotNull { it.roleId }.toMutableList()
-        val roleCodes=roleMapper.selectByExample(example<Role> {
-            select(Role::code)
-            andIn(Role::id, roleIds)
-        }).mapNotNull { it.code }
         //登录用户包含未登录用户的权限
         val noLoginRoleId = mapper.selectOneByExample(example<Role> {
             select(Role::id)
@@ -88,14 +85,23 @@ class RoleService : BaseService<RoleMapper, Role>() {
                 andIn(PermissionResource::permissionId, permissionIds)
             }).mapNotNull { it.resourceId }
         }
+        val roles = to<RoleDto>(roleMapper.selectByExample(example<Role> {
+            andIn(Role::id, roleIds)
+        }))
+        val menus = to<MenuDto>(menuMapper.selectByExample(example<Menu> {
+            andIn(Menu::id, menuIds)
+        }))
+        val permissions = to<MenuDto>(permissionMapper.selectByExample(example<Permission> {
+            andIn(Permission::id, permissionIds)
+        }))
         val resourceIds = arrayListOf<Long>()
         resourceIds.addAll(menuResourceIds)
         resourceIds.addAll(permissionResourceIds)
         val resources = resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ","))
         val result = JSONObject()
-        result["roleCodes"] = roleCodes
-        result["menuIds"] = menuIds
-        result["permissionIds"] = permissionIds
+        result["roles"] = roles
+        result["menus"] = menus
+        result["permissions"] = permissions
         result["resources"] = resources
         return result
     }

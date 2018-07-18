@@ -6,7 +6,6 @@ import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.util.RedisUtil
-import com.google.common.collect.Lists
 import com.netflix.zuul.ZuulFilter
 import com.netflix.zuul.context.RequestContext
 import org.springframework.util.AntPathMatcher
@@ -33,8 +32,8 @@ class PermissionFilter : ZuulFilter() {
         return true
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun run(): Any? {
-        val start = System.currentTimeMillis()
         val ctx = RequestContext.getCurrentContext()
         val request = ctx.request
         val host = URI(request.requestURL.toString()).host
@@ -60,9 +59,8 @@ class PermissionFilter : ZuulFilter() {
                     //未登录用户
                     val noLoginUser = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
                     if (noLoginUser != null) {
-                        noLoginUser.resources?.get(service.id)?.let { resources ->
+                        noLoginUser.resources?.get(service.id.toString())?.let { resources ->
                             if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
-                                println(System.currentTimeMillis() - start)
                                 return null
                             }
                         }
@@ -74,9 +72,8 @@ class PermissionFilter : ZuulFilter() {
                         result = Result.error("登录超时")
                     } else {
                         //auth存在并且redis存在无过期
-                        user.resources?.get(service.id)?.let { resources ->
+                        user.resources?.get(service.id.toString())?.let { resources ->
                             if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
-                                println(System.currentTimeMillis() - start)
                                 RedisUtil.expire(
                                     Constant.Redis.TOKEN_PREFIX + authorization,
                                     Constant.System.SESSION_TIMEOUT

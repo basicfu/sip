@@ -37,7 +37,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      * obj源对象,R目标对象
      * 如果T和R是同一个类型是否能优化省性能
      */
-    inline fun <reified R> to(list: List<T>): MutableList<R> {
+    inline fun <reified R> to(list: List<Any>): MutableList<R> {
         val clazz = R::class.java
         val result = arrayListOf<R>()
         list.forEach {
@@ -111,7 +111,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
         val page = BaseVo().setInfo()
         PageHelper.startPage<Any>(page.pageNum, page.pageSize)
         val result = mapper.selectAll()
-        val to = to<R>(result)
+        val to = to<R>(result as List<Any>)
         return PageInfo(to)
     }
 
@@ -123,7 +123,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
         val page = BaseVo().setInfo()
         PageHelper.startPage<Any>(page.pageNum, page.pageSize)
         val result = mapper.selectByExample(example)
-        val to = to<R>(result)
+        val to = to<R>(result as List<Any>)
         return PageInfo(to)
     }
 }
