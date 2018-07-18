@@ -18,7 +18,7 @@ CREATE TABLE mail_temp(
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   UNIQUE KEY (app_id,code)
-)COMMENT '邮件模板';
+)COMMENT '邮件模板' engine=InnoDB;
 
 DROP TABLE IF EXISTS mail_sender;
 CREATE TABLE mail_sender(
@@ -30,4 +30,4 @@ CREATE TABLE mail_sender(
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   UNIQUE KEY (app_id,from_uname)
-)COMMENT '邮件发送人配置';
+)COMMENT '邮件发送人配置' engine=InnoDB;

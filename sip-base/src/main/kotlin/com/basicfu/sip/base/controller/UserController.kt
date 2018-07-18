@@ -17,19 +17,34 @@ class UserController {
     @Autowired
     lateinit var userService: UserService
 
+    @GetMapping
+    fun getCurrentUser(): Result<Any> {
+        return Result.success(userService.getCurrentUser())
+    }
+
     @GetMapping("/get/{id}")
     fun get(@PathVariable id: Long): Result<Any> {
         return Result.success(userService.get(id))
     }
 
-    @GetMapping("/get/token/{token}")
-    fun getByToken(@PathVariable token: String): Result<Any> {
-        return Result.success(userService.getByToken(token))
+    @GetMapping("/list")
+    fun list(vo: UserVo): Result<Any> {
+        return Result.success(userService.list(vo))
+    }
+
+    @GetMapping("/list/{ids}")
+    fun listByIds(@PathVariable ids: List<Long>): Result<Any> {
+        return Result.success(userService.listByIds(ids))
     }
 
     @GetMapping("/list/username/{ids}")
     fun listUsernameByIds(@PathVariable ids: List<Long>): Result<Any> {
         return Result.success(userService.listUsernameByIds(ids))
+    }
+
+    @GetMapping("/suggest/{name}")
+    fun suggest(@PathVariable name: String, @RequestParam(defaultValue = Constant.System.PAGE_SIZE_STR) limit: Int): Result<Any> {
+        return Result.success(userService.suggest(name, limit))
     }
 
     @PostMapping("/login")
@@ -39,7 +54,7 @@ class UserController {
 
     @GetMapping("/logout")
     fun logout(): Result<Any> {
-        return Result.success(userService.logout(),Constant.System.LOGOUT)
+        return Result.success(userService.logout(), Constant.System.LOGOUT)
     }
 
     @PostMapping("/insert")

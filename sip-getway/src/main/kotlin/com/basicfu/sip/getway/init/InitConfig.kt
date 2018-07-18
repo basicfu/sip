@@ -49,10 +49,12 @@ class InitConfig : CommandLineRunner {
         val user = UserDto()
         val menuResources = mapper.selectMenuResourceIdByRoleCode(Constant.System.GUEST)
         val permissionResources = mapper.selectPermissionResourceIdByRoleCode(Constant.System.GUEST)
+        mapper.selectMenuByRoleCode(Constant.System.GUEST)
         val list = arrayListOf<Resource>()
         list.addAll(menuResources)
         list.addAll(permissionResources)
-        user.resources = list.distinct().groupBy({ it.serviceId!! }, { "/" + it.method + it.url })
+        user.username=Constant.System.GUEST
+        user.resources = list.distinct().groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
         RedisUtil.set(Constant.Redis.TOKEN_GUEST, user)
     }
 }

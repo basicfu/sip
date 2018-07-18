@@ -22,17 +22,17 @@ class AppController {
     }
 
     @PostMapping("/insert")
-    fun insert(vo: AppVo): Result<Any> {
+    fun insert(@RequestBody vo: AppVo): Result<Any> {
         return Result.success(appService.insert(vo))
     }
 
     @PostMapping("/update")
-    fun update(vo: AppVo): Result<Any> {
+    fun update(@RequestBody vo: AppVo): Result<Any> {
         return Result.success(appService.update(vo))
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(appService.delete(ids))
     }
 }

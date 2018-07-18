@@ -27,17 +27,17 @@ class UserTemplateController {
     }
 
     @PostMapping("/insert")
-    fun insert(vo: UserTemplateVo): Result<Any> {
+    fun insert(@RequestBody vo: UserTemplateVo): Result<Any> {
         return Result.success(userTemplateService.insert(vo))
     }
 
     @PostMapping("/update")
-    fun update(vo: UserTemplateVo): Result<Any> {
+    fun update(@RequestBody vo: UserTemplateVo): Result<Any> {
         return Result.success(userTemplateService.update(vo))
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(userTemplateService.delete(ids))
     }
 }

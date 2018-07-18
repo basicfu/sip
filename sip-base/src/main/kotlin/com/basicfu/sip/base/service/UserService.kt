@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.common.Enum.FieldType.*
-import com.basicfu.sip.base.feign.RoleFeign
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
 import com.basicfu.sip.base.model.po.User
@@ -21,7 +20,10 @@ import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.TokenUtil
+import com.basicfu.sip.core.util.UserUtil
 import com.github.pagehelper.PageInfo
+import org.apache.ibatis.session.RowBounds
+import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
@@ -38,40 +40,53 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var userAuthMapper: UserAuthMapper
     @Autowired
     lateinit var userTemplateService: UserTemplateService
-    @Autowired
-    lateinit var roleFeign: RoleFeign
 
-    fun list(vo: UserVo): PageInfo<UserDto> {
-        val list = selectPage<UserDto>(example<User> {
+    fun get(id: Long): JSONObject? {
+        return UserUtil.toJson(to<UserDto>(mapper.selectByPrimaryKey(id)))
+    }
+
+    fun getCurrentUser(): JSONObject? {
+        var user=TokenUtil.getCurrentUser()
+        if(user==null){
+            user=TokenUtil.getGuestUser()
+        }
+        return UserUtil.toJson(user)
+    }
+
+    fun list(vo: UserVo): PageInfo<JSONObject> {
+        val pageList = selectPage<UserDto>(example<User> {
             andLike {
                 username = vo.username
             }
         })
-        return list
+        val result = PageInfo<JSONObject>()
+        BeanUtils.copyProperties(pageList, result)
+        result.list = UserUtil.toJson(pageList.list)
+        return result
     }
 
-    fun get(id: Long): UserDto? {
-        return to(mapper.selectByPrimaryKey(id))
+    fun listByIds(ids: List<Long>): List<JSONObject>? {
+        val users = to<UserDto>(mapper.selectByExample(example<User> {
+            andIn(User::id, ids)
+        }))
+        return UserUtil.toJson(users)
     }
 
-    fun getByToken(token: String): UserDto? {
-        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + token)
-    }
-
-    fun listUsernameByIds(ids: List<Long>): List<UserDto> {
-        return to(mapper.selectByExample(example<User> {
+    fun listUsernameByIds(ids: List<Long>): List<JSONObject>? {
+        val users = to<UserDto>(mapper.selectByExample(example<User> {
             select(User::id, User::username)
             andIn(User::id, ids)
         }))
+        return UserUtil.toJson(users)
     }
 
-    fun suggest(vo: UserVo): List<UserDto> {
-        val list = to<UserDto>(mapper.selectByExample(example<User> {
+    fun suggest(q: String, size: Int): List<JSONObject>? {
+        val users = to<UserDto>(mapper.selectByExampleAndRowBounds(example<User> {
             andLike {
-                username = vo.username
+                username = q
             }
-        }))
-        return list
+        }, RowBounds(0, size)))
+        return UserUtil.toJson(users)
     }
 
     /**
@@ -94,15 +109,16 @@ class UserService : BaseService<UserMapper, User>() {
             id = userAuth.id
             ldate = currentTime
         })
-        val permission = roleFeign.getPermissionByUid(user!!.id!!).data ?: throw CustomException(
-            Enum.User.LOGIN_ERROR
-        )
+        val permission =
+            com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user!!.id!!) ?: throw CustomException(
+                Enum.User.LOGIN_ERROR
+            )
         user.ldate = currentTime
-        user.roleCodes = permission.getJSONArray("roleCodes").toJavaList(String::class.java)
-        user.menuIds = permission.getJSONArray("menuIds").toJavaList(Long::class.java)
-        user.permissionIds = permission.getJSONArray("permissionIds").toJavaList(Long::class.java)
+        user.roles = permission.getJSONArray("roles")
+        user.menus = permission.getJSONArray("menus")
+        user.permissions = permission.getJSONArray("permissions")
         user.resources = permission.getJSONArray("resources").toJavaList(Resource::class.java)
-            .groupBy({ it.serviceId!! }, { "/" + it.method + it.url })
+            .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
         val token = TokenUtil.generateToken()
         //TODO 系统设置登录过期时间
         RedisUtil.set(
@@ -111,15 +127,9 @@ class UserService : BaseService<UserMapper, User>() {
         )
         val result = JSONObject()
         result["token"] = token
-        result["time"] = System.currentTimeMillis()
-        user.resources = null
-        user.permissionIds = null
-        user.menuIds = null
-        user.status = null
-        user.id = null
-        result.putAll(JSON.parseObject(user.content))
-        user.content = null
-        result.putAll(JSON.parseObject(JSON.toJSONString(user)))
+        result["time"] = System.currentTimeMillis() / 1000
+        result["username"] = user.username
+        result["roles"]=user.roles
         return result
     }
 

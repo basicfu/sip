@@ -13,6 +13,8 @@ object Constant {
         const val AUTHORIZATION = "Authorization"
         const val SESSION_TIMEOUT: Long = 24 * 60 * 60 * 1000
         const val LOGOUT="注销成功"
+        const val PAGE_SIZE=20
+        const val PAGE_SIZE_STR= PAGE_SIZE.toString()
     }
 
     object Redis {

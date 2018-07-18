@@ -28,8 +28,6 @@ class UserTests {
 
     @Test
     fun get() {
-        val user = userService.get(1)
-        Assert.assertEquals(user?.username,"basicfu")
     }
 
     @Test

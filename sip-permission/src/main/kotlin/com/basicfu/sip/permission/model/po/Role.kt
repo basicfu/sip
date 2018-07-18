@@ -61,5 +61,5 @@ class Role {
      *
      * @param enalbe 是否启用
      */
-    var enalbe: Int? = null
+    var enalbe: Boolean? = null
 }

@@ -5,11 +5,11 @@ import org.springframework.web.context.request.ServletRequestAttributes
 
 object RequestUtil {
 
-
     fun getHeader(name: String): String? {
         val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
         return request.getHeader(name)
     }
+
     fun getParameter(name: String): String? {
         val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
         return request.getParameter(name)

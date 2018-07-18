@@ -9,6 +9,7 @@ import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
+import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service
 
 /**
@@ -18,11 +19,12 @@ import org.springframework.stereotype.Service
 @Service
 class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
 
-    fun list(vo: UserTemplateVo): List<UserTemplateDto> {
-        val sortedBy = mapper.selectByExample(example<UserTemplate> {
+    fun list(vo: UserTemplateVo): PageInfo<UserTemplateDto> {
+        val pageInfo = selectPage<UserTemplateDto>(example<UserTemplate> {
             andLike(UserTemplate::name, vo.name)
-        }).sortedBy { it.sort }
-        return to(sortedBy)
+        })
+        pageInfo.list.sortBy { it.sort }
+        return pageInfo
     }
 
     fun all(): List<UserTemplateDto> {

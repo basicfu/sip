@@ -1,5 +1,8 @@
 package com.basicfu.sip.core.model.dto
 
+import com.alibaba.fastjson.JSONArray
+import com.basicfu.sip.core.model.po.Resource
+
 class UserDto {
     var id: Long? = null
     var appId: Long? = null
@@ -13,8 +16,8 @@ class UserDto {
     var type: Int? = null
     var status: Int? = null
 
-    var roleCodes: List<String>? = null
-    var menuIds: List<Long>? = null
-    var permissionIds: List<Long>? = null
-    var resources:Map<Long,List<String>>? = null
+    var roles: JSONArray? = null
+    var menus: JSONArray? = null
+    var permissions: JSONArray? = null
+    var resources: Map<String, List<String>>? = null
 }

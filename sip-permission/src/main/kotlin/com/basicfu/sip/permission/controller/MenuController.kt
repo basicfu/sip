@@ -37,12 +37,12 @@ class MenuController {
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(menuService.delete(ids))
     }
 
     @DeleteMapping("/delete/resource")
-    fun deleteMenu(vo: MenuVo): Result<Any> {
+    fun deleteMenu(@RequestBody vo: MenuVo): Result<Any> {
         return Result.success(menuService.deleteResource(vo))
     }
 }

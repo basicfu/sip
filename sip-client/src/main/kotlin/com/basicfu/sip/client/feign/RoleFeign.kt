@@ -1,4 +1,4 @@
-package com.basicfu.sip.base.feign
+package com.basicfu.sip.client.feign
 
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.client.model.Result

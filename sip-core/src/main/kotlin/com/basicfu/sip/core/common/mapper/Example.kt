@@ -210,7 +210,7 @@ open class Sqls<T> {
 
     inline fun <reified T> Sqls<T>.andLike(op: T.() -> Unit = {}) {
         for ((k, v) in this.getValues(op)) {
-            this.andLike(k, v)
+            this.andLike(k, dealLikeValue(v.toString()))
         }
     }
 
@@ -405,8 +405,8 @@ open class Sqls<T> {
         this.criteria.criterions.add(Criterion(k, v, "not like", "or"))
     }
 
-
-    private fun dealLikeValue(v: String?): String? {
+    @PublishedApi
+    internal fun dealLikeValue(v: String?): String? {
         if (v == null) {
             return null
         }

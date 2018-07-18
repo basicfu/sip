@@ -3,15 +3,15 @@ package com.basicfu.sip.permission.service
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
-import com.basicfu.sip.permission.model.dto.MenuDto
+import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.permission.model.po.Menu
 import com.basicfu.sip.permission.model.po.MenuResource
-import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.permission.model.vo.MenuVo
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,31 +26,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
     @Autowired
     lateinit var mrMapper: MenuResourceMapper
     @Autowired
-    lateinit var resourceMapper:ResourceMapper
-
-//    fun list(token:String?): List<Any> {
-//        val token = RedisUtil.get(Constant.Redis.TOKEN + token,Token::class.java)
-//        if(token!=null) {
-//            val menus=selectByIds(token.menus)
-//            val result = arrayListOf<MenuDto>()
-//            menus.sortBy { it.pid }
-//            menus.sortBy { it.sort }
-//            menus.forEach { e ->
-//                if (0L == e.pid) {
-//                    val dto = MenuDto()
-//                    BeanUtils.copyProperties(e, dto)
-//                    if(dto.url==null)dto.url=""
-//                    result.add(dto)
-//                }
-//            }
-//            result.forEach { e ->
-//                e.children = getChildren(e, menus)
-//            }
-//            return result
-//        }else{
-//            return emptyList()
-//        }
-//    }
+    lateinit var resourceMapper: ResourceMapper
 
     fun all(): List<Any> {
         val result = arrayListOf<MenuDto>()
@@ -120,7 +96,6 @@ class MenuService : BaseService<MenuMapper, Menu>() {
                 m.path = split?.get(split.size - 2)
                 val menu = MenuDto()
                 BeanUtils.copyProperties(e, menu)
-//                menu.value=e.id.toString()
                 menu.path = split?.get(split.size - 1)
                 menu.children = chidren(menu, menus)
                 childList.add(menu)
