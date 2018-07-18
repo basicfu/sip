@@ -1,10 +1,14 @@
 
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.cloud.client.SpringCloudApplication
+import org.springframework.cloud.netflix.feign.EnableFeignClients
+import tk.mybatis.spring.annotation.MapperScan
 
-@SpringBootApplication
-class SipApplication
+@MapperScan(basePackages = ["com.basicfu.sip.notify.mapper"])
+@EnableFeignClients
+@SpringCloudApplication
+class Application
 
 fun main(args: Array<String>) {
-    SpringApplication.run(SipApplication::class.java, *args)
+    SpringApplication.run(Application::class.java, *args)
 }
