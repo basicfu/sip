@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.basicfu.sip.notify.mapper.MailSenderMapper" >
+    <resultMap id="BaseResultMap" type="com.basicfu.sip.notify.model.po.MailSender" >
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="app_id" property="appId" jdbcType="BIGINT" />
+        <result column="from_uname" property="fromUname" jdbcType="VARCHAR" />
+        <result column="from_upwd" property="fromUpwd" jdbcType="VARCHAR" />
+        <result column="description" property="description" jdbcType="VARCHAR" />
+        <result column="cdate" property="cdate" jdbcType="INTEGER" />
+        <result column="udate" property="udate" jdbcType="INTEGER" />
+    </resultMap>
+</mapper>
