@@ -14,6 +14,10 @@ import org.springframework.core.type.AnnotationMetadata
 class BeanRegistrar : ImportBeanDefinitionRegistrar {
 
     override fun registerBeanDefinitions(metadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
+        //register feign config set request heads
+        val fc = BeanDefinitionBuilder.genericBeanDefinition(FeignConfiguration::class.java)
+        registry.registerBeanDefinition(FeignConfiguration::class.java.simpleName, fc.beanDefinition)
+
         val attrs = metadata.getAnnotationAttributes(EnableSipClient::class.java.name, true)
         if (attrs != null) {
             val enable = attrs["enable"] as Array<Function>

@@ -6,7 +6,6 @@ import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import javax.ws.rs.DefaultValue
 
 /**
  * @author basicfu
@@ -17,18 +16,22 @@ import javax.ws.rs.DefaultValue
 class UserController {
     @Autowired
     lateinit var userService: UserService
-    @GetMapping("/get/{id}")
-    fun get(@PathVariable id: Long): Result<Any> {
-        return Result.success(userService.get(id))
-    }
+
     @GetMapping
     fun getCurrentUser(): Result<Any> {
         return Result.success(userService.getCurrentUser())
     }
+
+    @GetMapping("/get/{id}")
+    fun get(@PathVariable id: Long): Result<Any> {
+        return Result.success(userService.get(id))
+    }
+
     @GetMapping("/list")
     fun list(vo: UserVo): Result<Any> {
         return Result.success(userService.list(vo))
     }
+
     @GetMapping("/list/{ids}")
     fun listByIds(@PathVariable ids: List<Long>): Result<Any> {
         return Result.success(userService.listByIds(ids))
@@ -40,8 +43,8 @@ class UserController {
     }
 
     @GetMapping("/suggest/{name}")
-    fun suggest(@PathVariable name:String,@RequestParam(defaultValue = Constant.System.PAGE_SIZE_STR) limit:Int): Result<Any> {
-        return Result.success(userService.suggest(name,limit))
+    fun suggest(@PathVariable name: String, @RequestParam(defaultValue = Constant.System.PAGE_SIZE_STR) limit: Int): Result<Any> {
+        return Result.success(userService.suggest(name, limit))
     }
 
     @PostMapping("/login")
@@ -51,7 +54,7 @@ class UserController {
 
     @GetMapping("/logout")
     fun logout(): Result<Any> {
-        return Result.success(userService.logout(),Constant.System.LOGOUT)
+        return Result.success(userService.logout(), Constant.System.LOGOUT)
     }
 
     @PostMapping("/insert")
