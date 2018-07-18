@@ -22,17 +22,17 @@ class ServiceController {
     }
 
     @PostMapping("/insert")
-    fun insert(vo: ServiceVo): Result<Any> {
+    fun insert(@RequestBody vo: ServiceVo): Result<Any> {
         return Result.success(serviceService.insert(vo))
     }
 
     @PostMapping("/update")
-    fun update(vo: ServiceVo): Result<Any> {
+    fun update(@RequestBody vo: ServiceVo): Result<Any> {
         return Result.success(serviceService.update(vo))
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(serviceService.delete(ids))
     }
 }

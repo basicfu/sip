@@ -9,7 +9,7 @@ import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
-import com.basicfu.sip.permission.model.dto.MenuDto
+import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.permission.model.po.Menu
 import com.basicfu.sip.permission.model.po.MenuResource
 import com.basicfu.sip.permission.model.vo.MenuVo

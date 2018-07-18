@@ -1,4 +1,4 @@
-package com.basicfu.sip.permission.model.dto
+package com.basicfu.sip.core.model.dto
 
 class MenuDto {
     var id: Long? = null

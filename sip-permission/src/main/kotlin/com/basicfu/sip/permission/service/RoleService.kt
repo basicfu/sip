@@ -8,7 +8,7 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.*
-import com.basicfu.sip.permission.model.dto.MenuDto
+import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
 import com.basicfu.sip.permission.model.vo.RoleVo
