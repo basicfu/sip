@@ -86,6 +86,18 @@ pipeline {
         }
       }
     }
+    stage('test build') {
+	    when {
+        not { branch 'master' }
+      }
+	    parallel {
+	      stage('all build') {
+	        steps {
+	          sh './gradlew -x test :sip-eureka:build :sip-getway:build :sip-base:build :sip-dict:build :sip-permission:build :sip-notify:build'
+	        }
+	      }
+	    }
+	  }
     stage('production') {
       when {
         branch 'production'
