@@ -42,8 +42,8 @@ class MailTemplate {
      *
      * @param toSendType 收件人发送类型,alone:单独发送,mass:群发
      */
-    @Column(name = "to_send_type")
-    var toSendType: String? = null
+    @Column(name = "send_type")
+    var sendType: String? = null
     /**
      * 设置抄送人
      *
@@ -51,13 +51,6 @@ class MailTemplate {
      */
     @Column(name = "copy_user")
     var copyUser: String? = null
-    /**
-     * 设置抄送人发送类型,alone:单独发送,mass:群发
-     *
-     * @param copySendType 抄送人发送类型,alone:单独发送,mass:群发
-     */
-    @Column(name = "copy_send_type")
-    var copySendType: String? = null
     /**
      * 设置邮件主题
      *
@@ -75,7 +68,7 @@ class MailTemplate {
      *
      * @param enable 是否启用,0:禁用,1:启用
      */
-    var enable: Byte? = null
+    var enable: Boolean? = null
     /**
      * 设置创建时间
      *

@@ -10,9 +10,8 @@
         <result column="sender_id" property="senderId" jdbcType="BIGINT" />
         <result column="code" property="code" jdbcType="VARCHAR" />
         <result column="to_user" property="toUser" jdbcType="VARCHAR" />
-        <result column="to_send_type" property="toSendType" jdbcType="VARCHAR" />
+        <result column="send_type" property="sendType" jdbcType="VARCHAR" />
         <result column="copy_user" property="copyUser" jdbcType="VARCHAR" />
-        <result column="copy_send_type" property="copySendType" jdbcType="VARCHAR" />
         <result column="subject" property="subject" jdbcType="VARCHAR" />
         <result column="description" property="description" jdbcType="VARCHAR" />
         <result column="enable" property="enable" jdbcType="TINYINT" />
