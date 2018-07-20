@@ -16,7 +16,9 @@ class BeanRegistrar : ImportBeanDefinitionRegistrar {
     override fun registerBeanDefinitions(metadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
         //register feign config set request heads
         val fc = BeanDefinitionBuilder.genericBeanDefinition(FeignConfiguration::class.java)
+        val fh = BeanDefinitionBuilder.genericBeanDefinition(FeignHystrixConcurrencyStrategyIntellif::class.java)
         registry.registerBeanDefinition(FeignConfiguration::class.java.simpleName, fc.beanDefinition)
+        registry.registerBeanDefinition(FeignHystrixConcurrencyStrategyIntellif::class.java.simpleName, fh.beanDefinition)
 
         val attrs = metadata.getAnnotationAttributes(EnableSipClient::class.java.name, true)
         if (attrs != null) {
