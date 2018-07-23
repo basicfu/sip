@@ -4,9 +4,9 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka
-logging:
-  level:
-    com: debug
+sip:
+  notify:
+    url: http://localhost:7700/
 spring:
   datasource:
     url: jdbc:mysql://${ENV_MYSQL_HOST:mysql-dev.dmka.cn}:${ENV_MYSQL_PORT:4306}/sip-notify?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false

@@ -27,7 +27,9 @@ object EmailUtil {
      * @param attachments 附件
      * @param inlineImgs 邮件中嵌套的图片
      */
-    fun sendMail(vo: MailUtilVo):Boolean {
+    fun sendMail(vo: MailUtilVo): Map<String, Any> {
+        val map = mutableMapOf<String, Any>()
+        map["success"] = true
         val senderImpl = JavaMailSenderImpl()
         try {
             // 设定mail server
@@ -82,9 +84,11 @@ object EmailUtil {
             logger.info("=============发送邮件成功=============")
         } catch (e: Exception) {
             logger.info("=============发送邮件失败，异常信息为：$e.message")
-            return false
+            map["success"] = false
+            map["message"] = e.message!!
+            return map
         }
-        return true
+        return map
     }
 
     private fun checkFileType(file: File): Boolean {
