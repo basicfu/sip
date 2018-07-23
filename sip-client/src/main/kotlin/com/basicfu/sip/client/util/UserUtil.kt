@@ -52,7 +52,7 @@ class UserUtil {
          * 根据用户Id获取用户信息
          */
         inline fun <reified T> listByIds(ids: List<Long>): List<T> {
-            val user = userFeign.listByIds(ids).data
+            val user = userFeign.listByIds(ids.toTypedArray()).data
             return dealUser(user)
         }
 
@@ -60,7 +60,7 @@ class UserUtil {
          * 根据用户Ids获取用户名(返回Map<Id,Username>)
          */
         fun listUsernameByIds(ids: List<Long>): Map<Long, String> {
-            return userFeign.listUsernameByIds(ids).data?.associateBy(
+            return userFeign.listUsernameByIds(ids.toTypedArray()).data?.associateBy(
                 { it.getLong("id") },
                 { it.getString("username") }) ?: HashMap()
         }

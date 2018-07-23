@@ -20,10 +20,10 @@ interface UserFeign {
     fun getPermission(@PathVariable("id") id: Long): Result<JSONObject>
 
     @GetMapping("/user/list/{ids}")
-    fun listByIds(@PathVariable("ids") ids: List<Long>): Result<List<JSONObject>>
+    fun listByIds(@PathVariable("ids") ids: Array<Long>): Result<List<JSONObject>>
 
     @GetMapping("/user/list/username/{ids}")
-    fun listUsernameByIds(@PathVariable("ids") ids: List<Long>): Result<List<JSONObject>>
+    fun listUsernameByIds(@PathVariable("ids") ids: Array<Long>): Result<List<JSONObject>>
 
     @GetMapping("/user/suggest/{name}")
     fun suggest(@PathVariable("name") name:String, @RequestParam(value = "limit",required = false) limit: Int): Result<List<JSONObject>>
