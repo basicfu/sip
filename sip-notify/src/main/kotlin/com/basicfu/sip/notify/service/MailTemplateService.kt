@@ -1,5 +1,6 @@
 package com.basicfu.sip.notify.service
 
+import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.service.BaseService
@@ -15,7 +16,6 @@ import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.Executors
 
 /**
@@ -33,23 +33,27 @@ class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
     lateinit var mailSenderMapper: MailSenderMapper
 
 
-    @Transactional
-    fun sendMail(vo: SendMailVo): Boolean {
+    fun insert(vo: SendMailVo): JSONObject {
+        val jsonObj = JSONObject()
         //异步发送邮件
         return if (vo.async){
             val excutor = Executors.newCachedThreadPool()
             excutor.execute {
                 dealSendMail(vo)
             }
-            true
+            val resp = dealSendMail(vo)
+            jsonObj.putAll(resp)
+            jsonObj
         }else{
-            dealSendMail(vo)
+            val resp = dealSendMail(vo)
+            jsonObj.putAll(resp)
+            jsonObj
         }
     }
 
 
 
-    fun dealSendMail(vo: SendMailVo): Boolean{
+    fun dealSendMail(vo: SendMailVo): Map<String, Any>{
         if (null == vo.appId) throw CustomException(Enum.INVALID_MAIL_APPID)
         val sendExample = example<MailSender> {
             andEqualTo(MailSender::appId,vo.appId)
