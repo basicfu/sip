@@ -37,8 +37,8 @@ class MailUtil {
            return UseTemplate()
        }
 
-       fun disUseTemp(): DisUseTemp {
-           return DisUseTemp()
+       fun disUseTemp(): DisUseTemplate {
+           return DisUseTemplate()
        }
 
        class UseTemplate {
@@ -164,7 +164,7 @@ class MailUtil {
 
        }
 
-       class DisUseTemp {
+       class DisUseTemplate {
            private var appId: Long? = null
            private var subject: String? = null
            private var toUser: MutableList<String>? = null
@@ -174,12 +174,12 @@ class MailUtil {
            private var files: MutableList<File>? = null
            private var images: Map<String, File>? = null
 
-           fun appId(appId: Long?): DisUseTemp {
+           fun appId(appId: Long?): DisUseTemplate {
                this.appId = appId
                return this
            }
 
-           fun addReceiver(receiver: String): DisUseTemp {
+           fun addReceiver(receiver: String): DisUseTemplate {
                if (CollectionUtils.isEmpty(toUser)) {
                    toUser = mutableListOf()
                }
@@ -187,7 +187,7 @@ class MailUtil {
                return this
            }
 
-           fun addReceiver(receiver: List<String>): DisUseTemp {
+           fun addReceiver(receiver: List<String>): DisUseTemplate {
                if (CollectionUtils.isEmpty(toUser)) {
                    toUser = mutableListOf()
                }
@@ -195,7 +195,7 @@ class MailUtil {
                return this
            }
 
-           fun addCopyer(copyer: String): DisUseTemp {
+           fun addCopyer(copyer: String): DisUseTemplate {
                if (CollectionUtils.isEmpty(copyUser)) {
                    copyUser = mutableListOf()
                }
@@ -203,7 +203,7 @@ class MailUtil {
                return this
            }
 
-           fun addCopyer(copyer: List<String>): DisUseTemp {
+           fun addCopyer(copyer: List<String>): DisUseTemplate {
                if (CollectionUtils.isEmpty(copyUser)) {
                    copyUser = mutableListOf()
                }
@@ -211,24 +211,24 @@ class MailUtil {
                return this
            }
 
-           fun subject(subject: String): DisUseTemp {
+           fun subject(subject: String): DisUseTemplate {
                this.subject = subject
                return this
            }
 
 
-           fun content(content: String): DisUseTemp {
+           fun content(content: String): DisUseTemplate {
                this.content = content
                return this
            }
 
 
-           fun async(async: Boolean): DisUseTemp {
+           fun async(async: Boolean): DisUseTemplate {
                this.async = async
                return this
            }
 
-           fun addFile(file: File): DisUseTemp {
+           fun addFile(file: File): DisUseTemplate {
                if (CollectionUtils.isEmpty(this.files)) {
                    this.files = mutableListOf()
                }
@@ -236,7 +236,7 @@ class MailUtil {
                return this
            }
 
-           fun addFile(files: List<File>): DisUseTemp {
+           fun addFile(files: List<File>): DisUseTemplate {
                if (CollectionUtils.isEmpty(this.files)) {
                    this.files = mutableListOf()
                }
@@ -244,7 +244,7 @@ class MailUtil {
                return this
            }
 
-           fun addImages(images: Map<String, File>): DisUseTemp {
+           fun addImages(images: Map<String, File>): DisUseTemplate {
                this.images = images
                return this
            }
