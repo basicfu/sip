@@ -37,7 +37,7 @@ class MailUtil {
            return UseTemplate()
        }
 
-       fun disUseTemp(): DisUseTemplate {
+       fun disUseTemplate(): DisUseTemplate {
            return DisUseTemplate()
        }
 

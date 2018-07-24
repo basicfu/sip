@@ -34,6 +34,7 @@ object EmailUtil {
         try {
             // 设定mail server
             senderImpl.host = vo.host
+            senderImpl.port = vo.port!!
             // 建立邮件消息
             val mailMessage = senderImpl.createMimeMessage()
             var messageHelper: MimeMessageHelper? = null
@@ -70,14 +71,14 @@ object EmailUtil {
             senderImpl.username = vo.fromUname
             senderImpl.password = vo.fromUpwd
             val prop = Properties()
-            prop["mail.smtp.port"] = vo.port
-            prop["mail.smtp.auth"] = "true" // 将这个参数设为true，让服务器进行认证,认证用户名和密码是否正确
-            prop["mail.smtp.timeout"] = "6000"
-            // 如果是QQ邮箱需要这样做 密码为加密后的
-//            prop["mail.smtp.starttls.enable"] = "true"
-//            prop["mail.smtp.socketFactory.port"] = "465"
-//            prop["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
-//            prop["mail.smtp.socketFactory.fallback"] = "false"
+//            prop["mail.smtp.port"] = vo.port
+//            prop["mail.smtp.auth"] = "true" // 将这个参数设为true，让服务器进行认证,认证用户名和密码是否正确
+//            prop["mail.smtp.timeout"] = "6000"
+            // SSL
+            prop["mail.smtp.auth "] = "true" // 将这个参数设为true，让服务器进行认证,认证用户名和密码是否正确
+            prop["mail.smtp.starttls.enable"] = "true"
+            prop["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory" //使用ssl协议来保证连接安全
+            prop["mail.smtp.timeout"] = "25000" //传输超时时间
             senderImpl.javaMailProperties = prop
             // 发送邮件
             senderImpl.send(mailMessage)
@@ -100,3 +101,4 @@ object EmailUtil {
     }
 
 }
+
