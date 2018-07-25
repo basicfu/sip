@@ -159,6 +159,7 @@ class MailUtil {
                    vo.code = code
                    vo.useTemplate = true
                    vo.async = async
+                   vo.cover = true
                    vo.properties = properties
                    vo.files = files
                    vo.images = images
