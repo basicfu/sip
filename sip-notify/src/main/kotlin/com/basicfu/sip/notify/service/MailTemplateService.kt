@@ -25,13 +25,10 @@ import java.util.concurrent.Executors
 @Service
 class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
 
-
     @Autowired
     lateinit var mailTemplateMapper: MailTemplateMapper
-
     @Autowired
     lateinit var mailSenderMapper: MailSenderMapper
-
 
     fun insert(vo: SendMailVo): JSONObject {
         val jsonObj = JSONObject()
@@ -51,7 +48,6 @@ class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
             jsonObj
         }
     }
-
 
     fun dealSendMail(vo: SendMailVo): Map<String, Any> {
         if (null == vo.appId) throw CustomException(Enum.INVALID_MAIL_APPID)
@@ -118,8 +114,7 @@ class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
             return result
         }
     }
-
-
+  
     fun dealProperties(properties: Map<String, String>, content: String): String {
         var str = content
         properties.forEach { k, v ->
@@ -127,5 +122,5 @@ class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
         }
         return str
     }
-
+  
 }
