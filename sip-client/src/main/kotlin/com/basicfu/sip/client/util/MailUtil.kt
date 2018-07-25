@@ -44,6 +44,7 @@ class MailUtil {
        class UseTemplate {
            private var appId: Long? = null
            private var code: String? = null
+           private var subject: String? = null
            private var async: Boolean = false
            private var properties: MutableMap<String, String>? = null
            private var files: MutableList<File>? = null
@@ -58,6 +59,11 @@ class MailUtil {
                return this
            }
 
+           fun subject(subject: String): UseTemplate{
+               this.subject = subject
+               return this
+           }
+
            fun addProperties(k: String, v: String): UseTemplate {
                if (null == this.properties) {
                    this.properties = mutableMapOf()
@@ -67,7 +73,7 @@ class MailUtil {
            }
 
            fun cover(): Cover {
-               return cover()
+               return Cover()
            }
 
            fun async(async: Boolean): UseTemplate {
