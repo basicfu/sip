@@ -16,4 +16,10 @@ enum class Enum constructor(val value: Int, val msg:String){
     INVALID_PERMISSION(4,"无权操作"),
     LOGIN_TIMEOUT(5,"登录超时"),
     ILLEGAL_REQUEST(6,"非法请求");
+
+
+    enum class SendType constructor(val value: String,val msg:String) {
+        MASS("MASS","群发"),
+        ALONE("ALONE", "单独发送")
+    }
 }
