@@ -76,20 +76,19 @@ class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
                 val filter = senders.filter { it.appId == template.senderId }
                 BeanUtils.copyProperties(filter[0],mailVo)
             }
+            if (vo.subject.isNullOrBlank()) mailVo.subject = template.subject else mailVo.subject = vo.subject
             val properties = vo.properties
             var content = if(template.content.isNullOrBlank()) throw CustomException(Enum.EMPTY_CONTENT_TEMPLATE) else template.content
             if (null ==  properties|| properties.isEmpty()) throw CustomException(Enum.EMPTY_CONTENT)
             //覆盖模板收件人抄送人
             return if (vo.cover){
                 BeanUtils.copyProperties(vo,mailVo)
-                mailVo.subject = template.subject
                 mailVo.content = dealProperties(properties,content!!)
                 EmailUtil.sendMail(mailVo)
             }else{
                 mailVo.toUser = template.toUser!!.split(",").toTypedArray()
                 mailVo.copyUser = template.copyUser!!.split(",").toTypedArray()
                 mailVo.content = dealProperties(properties,content!!)
-                mailVo.subject = template.subject
                 EmailUtil.sendMail(mailVo)
             }
         } else {
