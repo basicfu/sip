@@ -46,9 +46,9 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     fun getCurrentUser(): JSONObject? {
-        var user=TokenUtil.getCurrentUser()
-        if(user==null){
-            user=TokenUtil.getGuestUser()
+        var user = TokenUtil.getCurrentUser()
+        if (user == null) {
+            user = TokenUtil.getGuestUser()
         }
         return UserUtil.toJson(user)
     }
@@ -81,11 +81,31 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     fun suggest(q: String, size: Int): List<JSONObject>? {
-        val users = to<UserDto>(mapper.selectByExampleAndRowBounds(example<User> {
+        //可测试性能
+//        mapper.selectBySql("SELECT u.id,u.tenant_id,u.content,u.cdate,u.udate,status,ua.username,ua.type from user u LEFT JOIN user_auth ua on u.id=ua.uid INNER JOIN (select DISTINCT(uid) from user_auth WHERE username like '%1%' limit 10) as sub on u.id=sub.uid;")
+        val userIds = userAuthMapper.selectByExampleAndRowBounds(example<UserAuth> {
+            select(UserAuth::uid)
+            distinct()
             andLike {
                 username = q
             }
-        }, RowBounds(0, size)))
+        }, RowBounds(0, size)).mapNotNull { it.uid }
+        val users = to<UserDto>(selectByIds(userIds))
+        if (users.isNotEmpty()) {
+            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
+                select(UserAuth::uid, UserAuth::type, UserAuth::username, UserAuth::ldate)
+                andIn(UserAuth::uid, users.map { it.id })
+            }).groupBy({ it.uid }, { it })
+            users.forEach {
+                val userAuth = userAuths[it.id]
+                if (userAuth != null) {
+                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
+                    it.mobile = userAuthMap[1]?.username
+                    it.email = userAuthMap[2]?.username
+                    it.ldate=userAuth.map { it.ldate!! }.max()
+                }
+            }
+        }
         return UserUtil.toJson(users)
     }
 
@@ -115,11 +135,11 @@ class UserService : BaseService<UserMapper, User>() {
             com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user!!.id!!) ?: throw CustomException(
                 Enum.User.LOGIN_ERROR
             )
-        val userAuths=userAuthMapper.select(generate {
-            uid=userAuth.uid
-        }).associateBy({it.type},{it})
-        user.mobile=userAuths[1]?.username
-        user.email=userAuths[2]?.username
+        val userAuths = userAuthMapper.select(generate {
+            uid = userAuth.uid
+        }).associateBy({ it.type }, { it })
+        user.mobile = userAuths[1]?.username
+        user.email = userAuths[2]?.username
         user.ldate = currentTime
         user.roles = permission.getJSONArray("roles")
         user.menus = permission.getJSONArray("menus")
@@ -136,7 +156,7 @@ class UserService : BaseService<UserMapper, User>() {
         result["token"] = token
         result["time"] = System.currentTimeMillis() / 1000
         result["username"] = user.username
-        result["roles"]=user.roles
+        result["roles"] = user.roles
         return result
     }
 
@@ -162,8 +182,8 @@ class UserService : BaseService<UserMapper, User>() {
         val userTemplateList = userTemplateService.all()
         val contentResult = JSONObject()
         //mobile、phone特殊处理
-        val mobile=contentJson.getString(UserDto::mobile.name)
-        val email=contentJson.getString(UserDto::email.name)
+        val mobile = contentJson.getString(UserDto::mobile.name)
+        val email = contentJson.getString(UserDto::email.name)
         userTemplateList.forEach { it ->
             val extra = it.extra!!
             val enName = it.enName!!
@@ -296,7 +316,7 @@ class UserService : BaseService<UserMapper, User>() {
             type = 0
         })
         userAuthMapper.insertSelective(userAuth)
-        if(mobile!=null){
+        if (mobile != null) {
             userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
                 uid = user.id
                 username = mobile
@@ -304,7 +324,7 @@ class UserService : BaseService<UserMapper, User>() {
                 type = 1
             }))
         }
-        if(email!=null){
+        if (email != null) {
             userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
                 uid = user.id
                 username = email
