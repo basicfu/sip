@@ -3,11 +3,13 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.mapper.UserTemplateMapper
 import com.basicfu.sip.base.model.dto.UserTemplateDto
+import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.po.UserTemplate
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service
@@ -32,10 +34,8 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
         return to(sortedBy)
     }
 
-    /**
-     * //TODO 系统级字段做校验限制不能添加
-     */
     fun insert(vo: UserTemplateVo): Int {
+        if(UserDto::class.java.declaredFields.map { it.name }.contains(vo.enName))throw CustomException(Enum.UserTemplate.SYSTEM_FIELD)
         if (mapper.selectCount(generate {
                 name = vo.name
             }) != 0) throw CustomException(Enum.UserTemplate.FIELD_NAME_EXISTS)
@@ -47,6 +47,7 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
     }
 
     fun update(vo: UserTemplateVo): Int {
+        if(UserDto::class.java.declaredFields.map { it.name }.contains(vo.enName))throw CustomException(Enum.UserTemplate.SYSTEM_FIELD)
         val po = dealUpdate(to<UserTemplate>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }
