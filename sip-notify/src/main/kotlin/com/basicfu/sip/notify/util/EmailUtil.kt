@@ -17,16 +17,6 @@ import javax.mail.internet.InternetAddress
 object EmailUtil {
     private val logger = LoggerFactory.getLogger(MessageUtil::class.java)
 
-
-    /**
-     * Description: 发送携带附件和图片的邮件
-     * @param receivers 收件人邮箱
-     * @param cc 抄送人邮箱
-     * @param subject 邮件主题
-     * @param content 邮件内容
-     * @param attachments 附件
-     * @param inlineImgs 邮件中嵌套的图片
-     */
     fun sendMail(vo: MailUtilVo): Map<String, Any> {
         val map = mutableMapOf<String, Any>()
         map["success"] = true
@@ -37,8 +27,7 @@ object EmailUtil {
             senderImpl.port = vo.port!!
             // 建立邮件消息
             val mailMessage = senderImpl.createMimeMessage()
-            var messageHelper: MimeMessageHelper? = null
-            messageHelper = MimeMessageHelper(mailMessage, true, "UTF-8")
+            val messageHelper = MimeMessageHelper(mailMessage, true, "UTF-8")
             // 设置发件人邮箱
             //            messageHelper.setFrom(from)
             messageHelper.setFrom(InternetAddress(javax.mail.internet.MimeUtility.encodeText(vo.fromName) + " <" + vo.fromUname + ">"))
