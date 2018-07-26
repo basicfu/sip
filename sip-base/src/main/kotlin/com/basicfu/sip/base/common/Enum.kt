@@ -29,7 +29,7 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class UserTemplate constructor(val value: Int,val msg: String){
         FIELD_NAME_EXISTS(1,"字段名已存在"),
         FIELD_EN_NAME_EXISTS(1,"字段英文名已存在"),
-        SERVER(2,"服务端")
+        SYSTEM_FIELD(2,"系统字段无法添加")
     }
     enum class User constructor(val value: Int,val msg: String){
         EXIST_USER(1,"用户名已存在"),

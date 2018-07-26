@@ -87,15 +87,27 @@ class RoleService : BaseService<RoleMapper, Role>() {
             }).mapNotNull { it.resourceId }
         }
         roleIds.remove(noLoginRoleId)
-        val roles = to<RoleDto>(roleMapper.selectByExample(example<Role> {
-            andIn(Role::id, roleIds)
-        }))
-        val menus = MenuUtil.recursive(null, to<MenuDto>(menuMapper.selectByExample(example<Menu> {
-            andIn(Menu::id, menuIds)
-        })))
-        val permissions = to<MenuDto>(permissionMapper.selectByExample(example<Permission> {
-            andIn(Permission::id, permissionIds)
-        }))
+        val roles=if(roleIds.isNotEmpty()){
+            to<RoleDto>(roleMapper.selectByExample(example<Role> {
+                andIn(Role::id, roleIds)
+            }))
+        }else{
+            arrayListOf()
+        }
+        val menus = if(menuIds.isNotEmpty()){
+            MenuUtil.recursive(null, to(menuMapper.selectByExample(example<Menu> {
+                andIn(Menu::id, menuIds)
+            })))
+        }else{
+            arrayListOf()
+        }
+        val permissions = if(permissionIds.isEmpty()){
+            to<MenuDto>(permissionMapper.selectByExample(example<Permission> {
+                andIn(Permission::id, permissionIds)
+            }))
+        }else{
+            arrayListOf()
+        }
         val resourceIds = arrayListOf<Long>()
         resourceIds.addAll(menuResourceIds)
         resourceIds.addAll(permissionResourceIds)

@@ -94,6 +94,8 @@ class UserService : BaseService<UserMapper, User>() {
      * 用户名登录
      * 后期密码使用加密后的值
      * TODO 登录后清除该用户其他token
+     * TODO 校验手机和邮箱拥有者后可开启手机或邮箱登录
+     * TODO 登录查询表过多，可优化连为连表查询
      */
     fun login(vo: UserVo): JSONObject? {
         val userAuth = userAuthMapper.selectOne(generate {
@@ -113,6 +115,11 @@ class UserService : BaseService<UserMapper, User>() {
             com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user!!.id!!) ?: throw CustomException(
                 Enum.User.LOGIN_ERROR
             )
+        val userAuths=userAuthMapper.select(generate {
+            uid=userAuth.uid
+        }).associateBy({it.type},{it})
+        user.mobile=userAuths[1]?.username
+        user.email=userAuths[2]?.username
         user.ldate = currentTime
         user.roles = permission.getJSONArray("roles")
         user.menus = permission.getJSONArray("menus")
@@ -154,6 +161,9 @@ class UserService : BaseService<UserMapper, User>() {
         //获取该租户下的用户模板信息,传过来空值也要根据模板处理默认值
         val userTemplateList = userTemplateService.all()
         val contentResult = JSONObject()
+        //mobile、phone特殊处理
+        val mobile=contentJson.getString(UserDto::mobile.name)
+        val email=contentJson.getString(UserDto::email.name)
         userTemplateList.forEach { it ->
             val extra = it.extra!!
             val enName = it.enName!!
@@ -286,6 +296,22 @@ class UserService : BaseService<UserMapper, User>() {
             type = 0
         })
         userAuthMapper.insertSelective(userAuth)
+        if(mobile!=null){
+            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
+                uid = user.id
+                username = mobile
+                password = BCryptPasswordEncoder().encode(vo.username + vo.password)
+                type = 1
+            }))
+        }
+        if(email!=null){
+            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
+                uid = user.id
+                username = email
+                password = BCryptPasswordEncoder().encode(vo.username + vo.password)
+                type = 2
+            }))
+        }
         return 1
     }
 
