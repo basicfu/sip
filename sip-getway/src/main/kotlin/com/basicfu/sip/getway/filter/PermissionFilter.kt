@@ -68,7 +68,15 @@ class PermissionFilter : ZuulFilter() {
                 } else {
                     val user = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + authorization)
                     if (user == null) {
-                        //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时
+                        //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
+                        val noLoginUser = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
+                        if (noLoginUser != null) {
+                            noLoginUser.resources?.get(service.id.toString())?.let { resources ->
+                                if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
+                                    return null
+                                }
+                            }
+                        }
                         result = Result.error("登录超时")
                     } else {
                         //auth存在并且redis存在无过期
