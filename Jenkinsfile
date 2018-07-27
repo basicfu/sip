@@ -12,7 +12,6 @@ pipeline {
       )
     }
     success {
-      sh 'curl https://cs.console.aliyun.com/hook/trigger?triggerUrl=Y2ViNDdiMjYwNjlkMDQ3Y2U5YzcyNzQ1MTk3NzZjZTUzfHNpcC1kZXZ8cmVkZXBsb3l8MWFmNGlyMHR0cGtxZHw=&secret=4232685778416d346743677755445168e059741cb712b406bafc7ddf83b7c7c9'
       emailext (
         subject: "'${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}'构建成功",
         body: """
@@ -37,7 +36,7 @@ pipeline {
 	      }
 	    }
 	  }
-    stage('develop') {
+    stage('dev') {
       when {
         branch 'master'
       }
@@ -84,6 +83,14 @@ pipeline {
             sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify'
           }
         }
+      }
+    }
+		stage('delpoy dev') {
+      when {
+        not { branch 'master' }
+      }
+      steps {
+        sh 'curl https://cs.console.aliyun.com/hook/trigger?triggerUrl=Y2ViNDdiMjYwNjlkMDQ3Y2U5YzcyNzQ1MTk3NzZjZTUzfHNpcC1kZXZ8cmVkZXBsb3l8MWFmNGlyMHR0cGtxZHw=&secret=4232685778416d346743677755445168e059741cb712b406bafc7ddf83b7c7c9'
       }
     }
     stage('test build') {

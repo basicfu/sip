@@ -29,7 +29,7 @@ class UserTemplateServiceTests {
     fun insert() {
         val vo= UserTemplateVo()
         vo.name="昵称"
-        vo.enName="nickname"
+        vo.enName="id"
         vo.type="Text"
         vo.extra="5"
         vo.defaultValue="小明"
