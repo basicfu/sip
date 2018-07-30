@@ -2,6 +2,7 @@ package com.basicfu.sip.core.service
 
 import com.basicfu.sip.core.common.mapper.CustomMapper
 import com.basicfu.sip.core.model.vo.BaseVo
+import com.github.pagehelper.Page
 import com.github.pagehelper.PageHelper
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
@@ -124,6 +125,9 @@ abstract class BaseService<M : CustomMapper<T>, T> {
         PageHelper.startPage<Any>(page.pageNum, page.pageSize)
         val result = mapper.selectByExample(example)
         val to = to<R>(result as List<Any>)
-        return PageInfo(to)
+        val pageList=result as Page<R>
+        pageList.clear()
+        pageList.addAll(to)
+        return PageInfo(pageList)
     }
 }

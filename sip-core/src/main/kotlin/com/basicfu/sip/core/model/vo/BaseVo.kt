@@ -6,7 +6,7 @@ open class BaseVo {
     var pageNum: Int = 1
     var pageSize: Int = 20
         set(value) {
-            field = if (pageSize > 100) 100 else value
+            field = if (value > 100) 100 else value
         }
 
     /**
