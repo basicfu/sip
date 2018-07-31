@@ -1,7 +1,6 @@
 package com.basicfu.sip.core.model.dto
 
 import com.alibaba.fastjson.JSONArray
-import com.basicfu.sip.core.model.po.Resource
 
 class UserDto {
     var id: Long? = null

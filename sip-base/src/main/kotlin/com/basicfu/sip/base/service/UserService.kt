@@ -23,6 +23,7 @@ import com.basicfu.sip.core.util.TokenUtil
 import com.basicfu.sip.core.util.UserUtil
 import com.github.pagehelper.PageInfo
 import org.apache.ibatis.session.RowBounds
+import org.bouncycastle.asn1.x500.style.RFC4519Style.uid
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -42,7 +43,17 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var userTemplateService: UserTemplateService
 
     fun get(id: Long): JSONObject? {
-        return UserUtil.toJson(to<UserDto>(mapper.selectByPrimaryKey(id)))
+        val result=to<UserDto>(mapper.selectByPrimaryKey(id))
+        result?.let {
+            val userAuths = userAuthMapper.select(generate {
+                uid=id
+            })
+            val userAuthMap=userAuths.associateBy({ it.type }, { it })
+            it.mobile=userAuthMap[1]?.username
+            it.email=userAuthMap[2]?.username
+            it.ldate=userAuths.map { it.ldate!! }.max()
+        }
+        return UserUtil.toJson(result)
     }
 
     fun getCurrentUser(): JSONObject? {
@@ -59,9 +70,24 @@ class UserService : BaseService<UserMapper, User>() {
                 username = vo.username
             }
         })
+        val users=pageList.list
+        if(users.isNotEmpty()){
+            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
+                andIn(UserAuth::uid,users.map { it.id })
+            }).groupBy({ it.uid }, { it })
+            users.forEach {
+                val userAuth = userAuths[it.id]
+                if (userAuth != null) {
+                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
+                    it.mobile = userAuthMap[1]?.username
+                    it.email = userAuthMap[2]?.username
+                    it.ldate=userAuth.map { it.ldate!! }.max()
+                }
+            }
+        }
         val result = PageInfo<JSONObject>()
         BeanUtils.copyProperties(pageList, result)
-        result.list = UserUtil.toJson(pageList.list)
+        result.list = UserUtil.toJson(users)
         return result
     }
 
@@ -69,6 +95,20 @@ class UserService : BaseService<UserMapper, User>() {
         val users = to<UserDto>(mapper.selectByExample(example<User> {
             andIn(User::id, ids)
         }))
+        if(users.isNotEmpty()){
+            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
+                andIn(UserAuth::uid,users.map { it.id })
+            }).groupBy({ it.uid }, { it })
+            users.forEach {
+                val userAuth = userAuths[it.id]
+                if (userAuth != null) {
+                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
+                    it.mobile = userAuthMap[1]?.username
+                    it.email = userAuthMap[2]?.username
+                    it.ldate=userAuth.map { it.ldate!! }.max()
+                }
+            }
+        }
         return UserUtil.toJson(users)
     }
 
