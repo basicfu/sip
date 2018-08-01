@@ -17,7 +17,7 @@ class UserTemplateController {
     lateinit var userTemplateService: UserTemplateService
 
     @GetMapping("/list")
-    fun all(vo: UserTemplateVo): Result<Any> {
+    fun list(vo: UserTemplateVo): Result<Any> {
         return Result.success(userTemplateService.list(vo))
     }
 
