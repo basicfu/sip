@@ -116,7 +116,8 @@ class DictService : BaseService<DictMapper, Dict>() {
                 throw CustomException(Enum.Dict.NO_DELETE_ROOT)
             }
             val example = Example(Dict::class.java)
-            example.selectProperties("lft,rgt").isForUpdate = true
+            example.selectProperties("lft","rgt")
+            example.isForUpdate = true
             example.createCriteria().andEqualTo("id", id).andEqualTo("isdel", 0)
             val one = mapper.selectByExample(example)
             if (!one.isEmpty()) {
