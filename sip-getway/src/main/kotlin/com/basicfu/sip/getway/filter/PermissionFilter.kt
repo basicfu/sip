@@ -41,7 +41,7 @@ class PermissionFilter : ZuulFilter() {
         val hostArray = host.split(".").reversed()
         var result = Result.error<String>("未授权")
         val domainPrefix =
-            if (hostArray.size >= 3 && hostArray[0] == "cn" && hostArray[1] == "dmka" && hostArray[2].startsWith("sip") && hostArray.size == 4) {
+            if (hostArray.size >= 3 && hostArray[0] == "cn" && hostArray[1] == "dmka" && hostArray[2].startsWith("api") && hostArray.size == 4) {
                 hostArray[3]
             } else {
                 Constant.System.NAME
