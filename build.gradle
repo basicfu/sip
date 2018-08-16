@@ -21,7 +21,7 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
     sourceCompatibility = 1.8
-    group='com.basicfu.sip'
+    group = 'com.basicfu.sip'
     version = '0.0.1'
     dependencies {
         compile("org.springframework.boot:spring-boot-starter-web",
@@ -113,6 +113,16 @@ project(":sip-permission") {
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
+project(":sip-tools") {
+    dependencies {
+        compile project(':sip-core')
+        compile("org.springframework.cloud:spring-cloud-starter-eureka")
+        compile("mysql:mysql-connector-java:5.1.45")
+        compile('org.microbean:microbean-helm:2.8.2.1.1.1') {
+            exclude group: 'io.netty', module: 'netty-tcnative-boringssl-static'
+        }
+    }
+}
 project(":sip-client") {
     dependencies {
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
@@ -126,7 +136,6 @@ project(":sip-api") {
 project(":sip-log") {
     dependencies {
     }
-
 
 
 }

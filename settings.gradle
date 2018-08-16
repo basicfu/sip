@@ -9,4 +9,5 @@ include "sip-core",
         "sip-eureka",
         "sip-notify",
         "sip-schedule",
+        "sip-tools",
         "sip-client"

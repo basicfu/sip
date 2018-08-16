@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: sip-tools
+  profiles:
+    active: ${ENV:dev}
+kube:
+  url: ${KUBE_URL}
+  client:
+    key: ${KUBE_CLIENT_KEY}
+    cert: ${KUBE_CLIENT_CERT}
+  ca:
+    cert: ${KUBE_CA_CERT}
