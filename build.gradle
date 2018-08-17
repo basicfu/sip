@@ -1,7 +1,7 @@
 buildscript {
     ext {
         springBootVersion = '1.5.13.RELEASE'
-        springCloudVersion = 'Edgware.SR3'
+        springCloudVersion = 'Edgware.SR4'
         kotlinVersion = '1.2.41'
         fastjsonVersion = '1.2.47'
     }
