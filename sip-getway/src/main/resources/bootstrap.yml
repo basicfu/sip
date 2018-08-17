@@ -3,6 +3,10 @@ spring:
     name: sip-getway
   profiles:
     active: ${ENV:dev}
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
 zuul:
   sensitiveHeaders: Cookie,Set-Cookie
   host:
