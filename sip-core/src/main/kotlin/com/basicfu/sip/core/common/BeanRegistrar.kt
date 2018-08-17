@@ -14,6 +14,10 @@ import org.springframework.core.type.AnnotationMetadata
 class BeanRegistrar : ImportBeanDefinitionRegistrar {
 
     override fun registerBeanDefinitions(metadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
+        //register close project eureka throw exception
+        val fc = BeanDefinitionBuilder.genericBeanDefinition(FeignBeanFactoryPostProcessor::class.java)
+        registry.registerBeanDefinition(FeignBeanFactoryPostProcessor::class.java.simpleName, fc.beanDefinition)
+
         val attrs = metadata.getAnnotationAttributes(EnableSipCore::class.java.name, true)
         if (attrs != null) {
             val enable = attrs["enable"] as Array<Function>
