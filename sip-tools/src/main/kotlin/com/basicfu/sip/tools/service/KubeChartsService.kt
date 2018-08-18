@@ -1,6 +1,5 @@
 package com.basicfu.sip.tools.service
 
-import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -9,7 +8,8 @@ import com.basicfu.sip.tools.common.Enum
 import com.basicfu.sip.tools.mapper.KubeChartsMapper
 import com.basicfu.sip.tools.model.po.KubeCharts
 import com.basicfu.sip.tools.model.vo.KubeChartsVo
-import com.basicfu.sip.tools.util.KubeUtil
+import com.basicfu.sip.tools.util.HelmUtil
+import org.apache.commons.lang.StringUtils
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -20,28 +20,27 @@ import java.util.*
 @Service
 class KubeChartsService : BaseService<KubeChartsMapper, KubeCharts>() {
 
-    fun install(name: String, set: Array<String>?): JSONObject {
+    fun install(name: String, set: Array<String>?): String {
         val kubeChart = mapper.selectOneByExample(example<KubeCharts> {
             andEqualTo(KubeCharts::name, name)
         })
-        val result = JSONObject()
-        result["rid"] = UUID.randomUUID()
+        val result=LinkedList<String>()
+        result.add("rid:${UUID.randomUUID()}")
         if (kubeChart == null) {
-            result["success"] = false
-            result["reason"] = "not found chart name is $name"
+            result.add("success:false")
+            result.add("message:not found chart name is $name")
         } else {
-            val exists = KubeUtil.exists(name)
-            println("chart exists:$exists")
-            result["success"] = true
-            if (!exists) {
-                KubeUtil.install(name, kubeChart.namespace!!, kubeChart.values!!, set)
-                result["reason"] = "$name install success"
+            val exists = HelmUtil.exists(name)
+            result.add("success:true")
+            if (exists) {
+                result.add("message:$name update success")
+                result.add("desc:"+HelmUtil.update(name,kubeChart.values!!,set))
             } else {
-                KubeUtil.update(name,kubeChart.values!!,set)
-                result["reason"] = "$name update success"
+                result.add("message:$name install success")
+                result.add("desc:"+HelmUtil.install(name, kubeChart.namespace!!, kubeChart.values!!, set))
             }
         }
-        return result
+        return StringUtils.join(result,"\n")+"\n"
     }
 
     fun insert(vo: KubeChartsVo): Int {

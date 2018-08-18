@@ -124,6 +124,16 @@ object FileUtil {
             }
         }
     }
+    fun inputToString(inStream: InputStream): String {
+        val buf = BufferedReader(InputStreamReader(inStream))
+        var line =buf.readLine()
+        val sb=StringBuffer()
+        while (line != null) {
+            sb.append(line+"\n")
+            line=buf.readLine()
+        }
+        return sb.toString()
+    }
 
     fun inputToByte(inStream: InputStream): ByteArray {
         val swapStream = ByteArrayOutputStream()

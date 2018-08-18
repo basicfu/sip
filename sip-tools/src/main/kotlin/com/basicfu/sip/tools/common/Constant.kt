@@ -11,27 +11,27 @@ import javax.annotation.PostConstruct
  */
 @Component
 class Constant {
-    @Value("\${kube.url}")
-    var kubeUrl: String? = null
-    @Value("\${kube.client.key}")
-    var kubeClientKey: String? = null
-    @Value("\${kube.client.cert}")
-    var kubeClientCert: String? = null
-    @Value("\${kube.ca.cert}")
-    var kubeCaCert: String? = null
+    @Value("\${ssh.hostname}")
+    var sshHostname: String? = null
+    @Value("\${ssh.username}")
+    var sshUsername: String? = null
+    @Value("\${ssh.password}")
+    var sshPassword: String? = null
+    @Value("\${ssh.port}")
+    var sshPort: Int? = null
 
     @PostConstruct
     fun init() {
-        KUBE_URL = kubeUrl
-        KUBE_CLIENT_KEY = kubeClientKey
-        KUBE_CLIENT_CERT = kubeClientCert
-        KUBE_CA_CERT = kubeCaCert
+        SSH_HOSTNAME = sshHostname
+        SSH_USERNAME = sshUsername
+        SSH_PASSWORD = sshPassword
+        SSH_PORT = sshPort
     }
 
     companion object {
-        var KUBE_URL: String? = null
-        var KUBE_CLIENT_KEY: String? = null
-        var KUBE_CLIENT_CERT: String? = null
-        var KUBE_CA_CERT: String? = null
+        var SSH_HOSTNAME: String? = null
+        var SSH_USERNAME: String? = null
+        var SSH_PASSWORD: String? = null
+        var SSH_PORT: Int? = null
     }
 }

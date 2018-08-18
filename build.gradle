@@ -118,9 +118,7 @@ project(":sip-tools") {
         compile project(':sip-core')
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("mysql:mysql-connector-java:5.1.45")
-        compile('org.microbean:microbean-helm:2.8.2.1.1.1') {
-            exclude group: 'io.netty', module: 'netty-tcnative-boringssl-static'
-        }
+        compile("ch.ethz.ganymed:ganymed-ssh2:262")
     }
 }
 project(":sip-client") {

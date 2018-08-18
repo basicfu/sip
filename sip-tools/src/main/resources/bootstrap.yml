@@ -7,10 +7,8 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ipAddress}:${server.port}
-kube:
-  url: ${KUBE_URL}
-  client:
-    key: ${KUBE_CLIENT_KEY}
-    cert: ${KUBE_CLIENT_CERT}
-  ca:
-    cert: ${KUBE_CA_CERT}
+ssh:
+  hostname: ${SSH_HOSTNAME}
+  username: ${SSH_USERNAME}
+  password: ${SSH_PASSWORD}
+  port: ${SSH_PORT}

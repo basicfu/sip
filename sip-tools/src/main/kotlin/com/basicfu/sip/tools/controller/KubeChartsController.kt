@@ -19,7 +19,7 @@ class KubeChartsController {
 
     @PostMapping
     fun install(name:String,set:Array<String>?): String {
-      return kubeChartsService.install(name,set).toJSONString()+"\n"
+      return kubeChartsService.install(name,set)
     }
 
 }
