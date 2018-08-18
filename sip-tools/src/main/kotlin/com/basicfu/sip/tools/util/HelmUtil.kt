@@ -14,7 +14,7 @@ object HelmUtil{
     fun install(name:String,namespace:String,values:String,set:Array<String>?):String{
         var param=""
         set?.let {
-            param="--set "+StringUtils.join(set," ")
+            param="--set "+StringUtils.join(set," --set ")
         }
         return SSHUtil.execShell(
             "cat <<< '" + values +
@@ -25,7 +25,7 @@ object HelmUtil{
     fun update(name:String,values:String,set:Array<String>?):String{
         var param=""
         set?.let {
-            param="--set "+StringUtils.join(set," ")
+            param="--set "+StringUtils.join(set," --set ")
         }
         return SSHUtil.execShell("cat <<< '" + values +
                 "' > values.yaml &&\n" +
