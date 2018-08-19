@@ -1,28 +1,10 @@
 server:
   port: ${ENV_SERVER_PORT:7000}
 eureka:
-  server:
-    #关闭自我保护机制：如果在15分钟内超过85%的客户端节点都没有正常的心跳，那么Eureka就认为客户端与注册中心出现了网络故障，Eureka Server自动进入自我保护机制
-    #1、Eureka Server不再从注册列表中移除因为长时间没收到心跳而应该过期的服务。
-    #2、Eureka Server仍然能够接受新服务的注册和查询请求，但是不会被同步到其它节点上，保证当前节点依然可用。
-    #3、当网络稳定时，当前Eureka Server新的注册信息会被同步到其它节点中
-    enable-self-preservation: false
-    #启用主动失效，并且每次主动失效检测间隔为3s
-    eviction-interval-timer-in-ms: 3000
-    #禁用readOnlyCacheMap
-    use-read-only-response-cache: false
-    #服务端缓存刷新时间3s
-#    response-cache-update-interval-ms: 3000
-#    waitTimeInMsWhenSyncEmpty: 0
   client:
-    #由于该应用为注册中心，所以设置为false，代表不向注册中心注册自己
     registerWithEureka: false
-    #由于注册中心的职责就是维护服务实例，他并不需要去检索服务，所以也设置为false
     fetchRegistry: false
     serviceUrl:
       defaultZone: http://localhost:${server.port}/eureka/
-  instance:
-    #没有接收心跳剔除间隔为10s，需要eureka.server.eviction-interval-timer-in-ms否则无效
-    lease-expiration-duration-in-seconds: 10
-    #主动检查心跳时间
-    lease-renewal-interval-in-seconds: 5
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
