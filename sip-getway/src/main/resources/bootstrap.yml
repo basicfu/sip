@@ -14,3 +14,4 @@ zuul:
     socket-timeout-millis: 30000
     max-per-route-connections: 10000
     max-total-connections: 10000
+  retryable: true

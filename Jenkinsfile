@@ -23,77 +23,35 @@ pipeline {
     }
   }
   stages {
-    stage('dev build') {
-	    when {
-	      branch 'master'
-	    }
-	    parallel {
-	      stage('sip-docs') {
-	        steps {
-	          sh 'docker login -u ${ALIYUN_DOCKER_REPO_USR} -p ${ALIYUN_DOCKER_REPO_PSW} registry-vpc.cn-beijing.aliyuncs.com'
-	          sh './gradlew -x test :sip-eureka:build :sip-getway:build :sip-base:build :sip-dict:build :sip-permission:build :sip-notify:build'
-	        }
-	      }
-	    }
-	  }
+    stage('aliyun login'){
+      steps{
+        sh 'docker login -u ${ALIYUN_DOCKER_REPO_USR} -p ${ALIYUN_DOCKER_REPO_PSW} registry-vpc.cn-beijing.aliyuncs.com'
+      }
+    }
     stage('dev') {
       when {
         branch 'master'
       }
-      parallel {
-        stage('sip-docs') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-docs sip-docs/docs'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-docs'
-          }
-        }
-        stage('sip-eureka') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka sip-eureka'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka'
-          }
-        }
-        stage('sip-getway') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway sip-getway'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway'
-          }
-        }
-        stage('sip-base') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base sip-base'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base'
-          }
-        }
-        stage('sip-dict') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict sip-dict'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict'
-          }
-        }
-        stage('sip-permission') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission sip-permission'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission'
-          }
-        }
-        stage('sip-notify') {
-          steps {
-            sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify sip-notify'
-            sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify'
-          }
-        }
-      }
-    }
-		stage('delpoy dev') {
-      when {
-        not { branch 'master' }
-      }
       steps {
-        sh 'curl https://cs.console.aliyun.com/hook/trigger?triggerUrl=Y2ViNDdiMjYwNjlkMDQ3Y2U5YzcyNzQ1MTk3NzZjZTUzfHNpcC1kZXZ8cmVkZXBsb3l8MWFmNGlyMHR0cGtxZHw=&secret=4232685778416d346743677755445168e059741cb712b406bafc7ddf83b7c7c9'
+        sh './gradlew -x test :sip-eureka:build :sip-getway:build :sip-base:build :sip-dict:build :sip-permission:build :sip-notify:build'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-docs:${IMAGE_VERSION} sip-docs/docs'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka:${IMAGE_VERSION} sip-eureka'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway:${IMAGE_VERSION} sip-getway'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base:${IMAGE_VERSION} sip-base'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict:${IMAGE_VERSION} sip-dict'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission:${IMAGE_VERSION} sip-permission'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify:${IMAGE_VERSION} sip-notify'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-docs:${IMAGE_VERSION}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka:${IMAGE_VERSION}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway:${IMAGE_VERSION}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-base:${IMAGE_VERSION}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict:${IMAGE_VERSION}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission:${IMAGE_VERSION}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify:${IMAGE_VERSION}'
+	      sh 'curl -d "name=sip-dev&set=docs.tag=${IMAGE_VERSION}&set=eureka.tag=${IMAGE_VERSION}&set=getway.tag=${IMAGE_VERSION}&set=base.tag=${IMAGE_VERSION}&set=dict.tag=${IMAGE_VERSION}&set=permission.tag=${IMAGE_VERSION}&set=notify.tag=${IMAGE_VERSION}" api.dmka.cn/tools/kube'
       }
     }
-    stage('test build') {
+    stage('test') {
 	    when {
         not { branch 'master' }
       }
@@ -128,6 +86,7 @@ pipeline {
     }
   }
   environment {
+    IMAGE_VERSION="${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
     ALIYUN_DOCKER_REPO = credentials('aliyun-docker-repo')
   }
 }

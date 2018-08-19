@@ -10,8 +10,11 @@ eureka:
     #没有接收心跳剔除间隔为10s，需要eureka.server.eviction-interval-timer-in-ms否则无效
     lease-expiration-duration-in-seconds: 10
     #主动检查心跳时间
-    lease-renewal-interval-in-seconds: 4
+    lease-renewal-interval-in-seconds: 5
 ribbon:
+  MaxAutoRetries: 1
+  MaxAutoRetriesNextServer: 3
+  OkToRetryOnAllOperations: true
   #eureka客户端ribbon刷新时间
   ServerListRefreshInterval: 3000
 logging:

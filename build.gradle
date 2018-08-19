@@ -79,6 +79,7 @@ project(":sip-getway") {
         compile("org.springframework.cloud:spring-cloud-starter-zuul")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
         compile("mysql:mysql-connector-java:5.1.45")
+        compile("org.springframework.retry:spring-retry")
     }
 }
 project(":sip-base") {
@@ -119,6 +120,7 @@ project(":sip-tools") {
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("mysql:mysql-connector-java:5.1.45")
         compile("ch.ethz.ganymed:ganymed-ssh2:262")
+        compile("de.odysseus.staxon:staxon:1.3")
     }
 }
 project(":sip-client") {
