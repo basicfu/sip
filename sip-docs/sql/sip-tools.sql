@@ -8,6 +8,7 @@ create table kube_charts(
 	name varchar(64) not null default '' comment 'chart名',
 	namespace varchar(64) not null default '' comment '命名空间',
   `values` text not null comment 'chart values',
+  param varchar(255) not null default '' comment 'chart param',
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
 	unique key (name)

@@ -46,7 +46,7 @@ class KubeChartsService : BaseService<KubeChartsMapper, KubeCharts>() {
             }
             var param=""
             jsonParam.keys.forEach {
-                param="--set $it=${jsonParam[it]} "
+                param+="--set $it=${jsonParam[it]} "
             }
             result.add("param:$param")
             if (exists) {
