@@ -11,5 +11,6 @@
     <result column="cdate" property="cdate" jdbcType="INTEGER" />
     <result column="udate" property="udate" jdbcType="INTEGER" />
     <result column="values" property="values" jdbcType="LONGVARCHAR" />
+    <result column="param" property="param" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>

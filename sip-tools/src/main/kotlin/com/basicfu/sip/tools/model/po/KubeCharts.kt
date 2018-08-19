@@ -89,4 +89,6 @@ class KubeCharts {
      */
     @Column(name="`values`")
     var values: String? = null
+
+    var param: String? = null
 }
