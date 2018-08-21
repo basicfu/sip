@@ -43,8 +43,12 @@ class UserController {
     }
 
     @GetMapping("/suggest/{name}")
-    fun suggest(@PathVariable name: String, @RequestParam(defaultValue = Constant.System.PAGE_SIZE_STR) limit: Int): Result<Any> {
-        return Result.success(userService.suggest(name, limit))
+    fun suggest(
+        @PathVariable name: String,
+        @RequestParam(required = false) roleCode: String?,
+        @RequestParam(defaultValue = Constant.System.PAGE_SIZE_STR) limit: Int
+    ): Result<Any> {
+        return Result.success(userService.suggest(name, roleCode, limit))
     }
 
     @PostMapping("/login")

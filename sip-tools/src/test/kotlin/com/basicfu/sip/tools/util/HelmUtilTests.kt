@@ -30,7 +30,7 @@ class HelmUtilTests {
     }
     @Test
     fun install() {
-        val install = kubeChartsService.install("test", arrayOf("base.tag=develop-462"))
+        val install = kubeChartsService.install("test", arrayOf("web.tag=latest"))
         println(install)
     }
 }

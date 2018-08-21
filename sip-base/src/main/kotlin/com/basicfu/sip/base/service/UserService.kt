@@ -120,16 +120,35 @@ class UserService : BaseService<UserMapper, User>() {
         return UserUtil.toJson(users)
     }
 
-    fun suggest(q: String, size: Int): List<JSONObject>? {
+    /**
+     * type
+     * ROLE:按照角色code查询,如果使用按角色查询需保证permission和base在一个数据库地址中
+     * ALL:(default)包含以下三种登录方式
+     * USERNAME:只按照用户名
+     * MOBILE:只按照手机号
+     * EMAIL:只按照邮箱
+     */
+    fun suggest(q: String,roleCode:String?, size: Int): List<JSONObject>? {
         //可测试性能
 //        mapper.selectBySql("SELECT u.id,u.tenant_id,u.content,u.cdate,u.udate,status,ua.username,ua.type from user u LEFT JOIN user_auth ua on u.id=ua.uid INNER JOIN (select DISTINCT(uid) from user_auth WHERE username like '%1%' limit 10) as sub on u.id=sub.uid;")
-        val userIds = userAuthMapper.selectByExampleAndRowBounds(example<UserAuth> {
-            select(UserAuth::uid)
-            distinct()
-            andLike {
-                username = q
-            }
-        }, RowBounds(0, size)).mapNotNull { it.uid }
+        val userIds: List<Long>
+        if(roleCode.isNullOrBlank()) {
+            userIds = userAuthMapper.selectByExampleAndRowBounds(example<UserAuth> {
+                select(UserAuth::uid)
+                distinct()
+                andLike {
+                    username = q
+                }
+            }, RowBounds(0, size)).mapNotNull { it.uid }
+        }else{
+            val users = mapper.selectBySql(
+                "SELECT DISTINCT uid as id FROM `sip-base`.user_auth ua " +
+                        "RIGHT JOIN `sip-permission`.user_role ur on ua.uid=ur.user_id " +
+                        "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
+                        "WHERE ua.username LIKE '%$q%' AND r.code='$roleCode' LIMIT 0,$size"
+            )
+            userIds=users.map { it.id!! }
+        }
         val users = to<UserDto>(selectByIds(userIds))
         if (users.isNotEmpty()) {
             val userAuths = userAuthMapper.selectByExample(example<UserAuth> {

@@ -26,6 +26,7 @@ subprojects {
     dependencies {
         compile("org.springframework.boot:spring-boot-starter-web",
                 "com.fasterxml.jackson.module:jackson-module-kotlin",
+                "org.springframework.boot:spring-boot-starter-actuator",
                 "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
                 "org.jetbrains.kotlin:kotlin-reflect",
                 "com.alibaba:fastjson:${fastjsonVersion}"
@@ -120,7 +121,6 @@ project(":sip-tools") {
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("mysql:mysql-connector-java:5.1.45")
         compile("ch.ethz.ganymed:ganymed-ssh2:262")
-        compile("de.odysseus.staxon:staxon:1.3")
     }
 }
 project(":sip-client") {
