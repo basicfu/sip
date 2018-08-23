@@ -32,4 +32,6 @@ SIP服务集成平台描述
 ├── sip-api                // API服务(TODO)
 
 TODO
+- notify接入短信、webhook
 - 邮件、短信发送量统计
+- 日志报警项在调用发送EMAIL、SMS时该条日志数据所有字段当做变量传入
