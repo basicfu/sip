@@ -28,7 +28,7 @@ interface UserFeign {
     @GetMapping("/user/suggest/{name}")
     fun suggest(
         @PathVariable("name") name: String,
-        @RequestParam(required = false) roleCode: String?,
+        @RequestParam(value = "roleCode", required = false) roleCode: String?,
         @RequestParam(value = "limit", required = false) limit: Int
     ): Result<List<JSONObject>>
 
