@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: sip-logs
+  profiles:
+    active: ${ENV:dev}
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}

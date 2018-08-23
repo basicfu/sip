@@ -133,8 +133,11 @@ project(":sip-api") {
     dependencies {
     }
 }
-project(":sip-log") {
+project(":sip-logs") {
     dependencies {
+        compile project(':sip-core')
+        compile("org.springframework.cloud:spring-cloud-starter-eureka")
+        compile("mysql:mysql-connector-java:5.1.45")
     }
 
 

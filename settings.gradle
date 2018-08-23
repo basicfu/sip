@@ -1,13 +1,13 @@
 rootProject.name = 'sip'
 include "sip-core",
-        "sip-base",
+        "sip-eureka",
         "sip-getway",
+        "sip-base",
         "sip-dict",
         "sip-permission",
-        "sip-api",
-        "sip-log",
-        "sip-eureka",
         "sip-notify",
-        "sip-schedule",
+        "sip-logs",
         "sip-tools",
+        "sip-schedule",
+        "sip-api",
         "sip-client"

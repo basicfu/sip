@@ -10,10 +10,6 @@ SIP服务集成平台描述
 - kotlin
 - gradle
 - tkmapper
-### 功能特点
-- a
-- b
-- c
 ### 项目结构
 - 租户、应用
 ```
@@ -28,11 +24,12 @@ SIP服务集成平台描述
 ├── sip-getway             // 网关
 ├── sip-base               // SIP基础(租户、应用、用户)
 ├── sip-dict               // 字典服务
-├── sip-sso                // 单点登录
 ├── sip-permission         // 权限管理
 ├── sip-notify             // 通知服务
+├── sip-logs               // Logs服务
+├── sip-tools              // 常用工具服务(IP查询、Kubernetes Webhook)
 ├── sip-schedule           // 调度服务
-├── sip-api                // API服务
-├── sip-log                // LOG服务
-### 环境变量
-kubernetes集群地址 KUBE_URL
+├── sip-api                // API服务(TODO)
+
+TODO
+- 邮件、短信发送量统计
