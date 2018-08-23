@@ -69,7 +69,14 @@ class UserUtil {
          * 用户suggest
          */
         inline fun <reified T> suggest(name: String, limit: Int): List<T> {
-            return dealUser(userFeign.suggest(name, limit).data)
+            return dealUser(userFeign.suggest(name, null, limit).data)
+        }
+
+        /**
+         * 用户suggest并根据roleCode
+         */
+        inline fun <reified T> suggestByRoleCode(name: String, roleCode: String, limit: Int): List<T> {
+            return dealUser(userFeign.suggest(name, roleCode, limit).data)
         }
 
         /**
