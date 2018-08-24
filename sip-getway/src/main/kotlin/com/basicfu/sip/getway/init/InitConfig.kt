@@ -29,6 +29,7 @@ class InitConfig : CommandLineRunner {
 
     /**
      * 初始化app和app下的service
+     * 此处已经包装路由由domain+prefix组成
      */
     fun initAppService() {
         DataSourceContextHolder.base()
@@ -36,9 +37,12 @@ class InitConfig : CommandLineRunner {
         val services = mapper.selectService()
         val serviceMap = services.groupBy({ it.appId!! }, { it })
         val appServiceMap = HashMap<String, List<Service>>()
-        apps.forEach {
-            val list = serviceMap[it.id] ?: arrayListOf()
-            appServiceMap[it.domain!!] = list
+        apps.forEach {app->
+            val list = serviceMap[app.id] ?: arrayListOf()
+            list.forEach {service->
+                service.path="/"+app.domain+service.path
+            }
+            appServiceMap[app.domain!!] = list
         }
         RedisUtil.hMSet(Constant.Redis.APP, appServiceMap)
     }

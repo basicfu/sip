@@ -36,17 +36,13 @@ class PermissionFilter : ZuulFilter() {
     override fun run(): Any? {
         val ctx = RequestContext.getCurrentContext()
         val request = ctx.request
-        val host = URI(request.requestURL.toString()).host
-        // TODO 系统设置主站域名
-        val hostArray = host.split(".").reversed()
-        var result = Result.error<String>("未授权")
-        val domainPrefix =
-            if (hostArray.size >= 3 && hostArray[0] == "cn" && hostArray[1] == "dmka" && hostArray[2].startsWith("api") && hostArray.size == 4) {
-                hostArray[3]
-            } else {
-                Constant.System.NAME
-            }
         val uri = request.requestURI
+        val pathArray=uri.split("/")
+        var result = Result.error<String>("未授权")
+        var domainPrefix=""
+        if(pathArray.size>1){
+            domainPrefix=pathArray[1]
+        }
         val appServices = RedisUtil.hGetAll<List<Service>>(Constant.Redis.APP)
         val services = arrayListOf<Service>()
         services.addAll(appServices[Constant.System.NAME] ?: arrayListOf())

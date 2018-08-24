@@ -20,19 +20,18 @@ class CustomRouteLocator(servletPath: String, private val properties: ZuulProper
         val routesMap = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         routesMap.putAll(super.locateRoutes())
         val appServices = RedisUtil.hGetAll<List<Service>>(Constant.Redis.APP)
-        val services = arrayListOf<Service>()
-        appServices.forEach {
-            services.addAll(it.value!!)
-        }
-        services.forEach { v ->
-            val zuulRoute = ZuulProperties.ZuulRoute()
-            zuulRoute.id = v.id.toString()
-            zuulRoute.path = v.path
-            zuulRoute.serviceId = v.serverId
-            zuulRoute.url = v.url
-            zuulRoute.isStripPrefix = v.stripPrefix!!
-            zuulRoute.retryable = v.retryable
-            routesMap[zuulRoute.path] = zuulRoute
+        //初始化路由时加入app domain，所有url由domain+prefix+url组成
+        appServices.forEach { app ->
+            app.value?.forEach { v ->
+                val zuulRoute = ZuulProperties.ZuulRoute()
+                zuulRoute.id = v.id.toString()
+                zuulRoute.path = v.path
+                zuulRoute.serviceId = v.serverId
+                zuulRoute.url = v.url
+                zuulRoute.isStripPrefix = v.stripPrefix!!
+                zuulRoute.retryable = v.retryable
+                routesMap[zuulRoute.path] = zuulRoute
+            }
         }
         val values = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         for (entry in routesMap.entries) {

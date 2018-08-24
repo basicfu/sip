@@ -25,11 +25,13 @@ class RedisUtil {
             val serialize = SerializationUtil.serialize(v)
             redisTemplate.opsForValue().set(k, serialize)
         }
-        fun set(k: Any, v: Any?,expireMilliseconds:Long) {
+
+        fun set(k: Any, v: Any?, expireMilliseconds: Long) {
             val serialize = SerializationUtil.serialize(v)
             redisTemplate.opsForValue().set(k, serialize)
-            expire(k,expireMilliseconds)
+            expire(k, expireMilliseconds)
         }
+
         inline fun <reified T> get(k: Any): T? {
             val data = redisTemplate.opsForValue().get(k)
             return SerializationUtil.deserialize(data)
@@ -99,5 +101,9 @@ class RedisUtil {
             return redisTemplate.boundSetOps(key).size()
         }
 
+        fun rpush(k: Any, v: Any?) {
+            val serialize = SerializationUtil.serialize(v)
+            redisTemplate.opsForList().rightPush(k, serialize)
+        }
     }
 }
