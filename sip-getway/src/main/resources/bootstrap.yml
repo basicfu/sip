@@ -15,7 +15,7 @@ eureka:
     #主动检查心跳时间
     lease-renewal-interval-in-seconds: 5
 ribbon:
-  ReadTimeout: 6000
+  ReadTimeout: 15000
   ConnectTimeout: 500
   MaxAutoRetries: 1
   MaxAutoRetriesNextServer: 3
