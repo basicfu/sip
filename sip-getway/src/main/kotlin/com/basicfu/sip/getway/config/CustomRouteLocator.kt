@@ -2,6 +2,7 @@ package com.basicfu.sip.getway.config
 
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.dto.ApplicationDto
+import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.util.RedisUtil
 import org.springframework.cloud.netflix.zuul.filters.RefreshableRouteLocator
 import org.springframework.cloud.netflix.zuul.filters.SimpleRouteLocator
@@ -18,18 +19,20 @@ class CustomRouteLocator(servletPath: String, private val properties: ZuulProper
     override fun locateRoutes(): Map<String, ZuulProperties.ZuulRoute> {
         val routesMap = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         routesMap.putAll(super.locateRoutes())
-        val all = RedisUtil.hGetAll<ApplicationDto>(Constant.Redis.SERVICE)
-        all.forEach { _, v ->
-            if (v != null) {
-                val zuulRoute = ZuulProperties.ZuulRoute()
-                zuulRoute.id = v.id.toString()
-                zuulRoute.path = v.path
-                zuulRoute.serviceId = v.serverId
-                zuulRoute.url = v.url
-                zuulRoute.isStripPrefix = v.stripPrefix!!
-                zuulRoute.retryable = v.retryable
-                routesMap[zuulRoute.path] = zuulRoute
-            }
+        val appServices = RedisUtil.hGetAll<List<Service>>(Constant.Redis.APP)
+        val services = arrayListOf<Service>()
+        appServices.forEach {
+            services.addAll(it.value!!)
+        }
+        services.forEach { v ->
+            val zuulRoute = ZuulProperties.ZuulRoute()
+            zuulRoute.id = v.id.toString()
+            zuulRoute.path = v.path
+            zuulRoute.serviceId = v.serverId
+            zuulRoute.url = v.url
+            zuulRoute.isStripPrefix = v.stripPrefix!!
+            zuulRoute.retryable = v.retryable
+            routesMap[zuulRoute.path] = zuulRoute
         }
         val values = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         for (entry in routesMap.entries) {
