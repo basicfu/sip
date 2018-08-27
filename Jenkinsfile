@@ -48,7 +48,7 @@ pipeline {
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict:${IMAGE_VERSION}'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission:${IMAGE_VERSION}'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify:${IMAGE_VERSION}'
-	      sh 'curl -d "name=sip-dev&set=docs.tag=${IMAGE_VERSION}&set=eureka.tag=${IMAGE_VERSION}&set=getway.tag=${IMAGE_VERSION}&set=base.tag=${IMAGE_VERSION}&set=dict.tag=${IMAGE_VERSION}&set=permission.tag=${IMAGE_VERSION}&set=notify.tag=${IMAGE_VERSION}" api.dmka.cn/tools/kube'
+	      sh 'curl -d "name=sip-dev&set=docs.tag=${IMAGE_VERSION}&set=eureka.tag=${IMAGE_VERSION}&set=getway.tag=${IMAGE_VERSION}&set=base.tag=${IMAGE_VERSION}&set=dict.tag=${IMAGE_VERSION}&set=permission.tag=${IMAGE_VERSION}&set=notify.tag=${IMAGE_VERSION}" ${KUBE_TRIGGER_URL}'
       }
     }
     stage('test') {
@@ -88,5 +88,6 @@ pipeline {
   environment {
     IMAGE_VERSION="${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
     ALIYUN_DOCKER_REPO = credentials('aliyun-docker-repo')
+    KUBE_TRIGGER_URL = credentials('kube-trigger-url')
   }
 }
