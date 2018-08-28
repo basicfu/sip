@@ -127,6 +127,7 @@ project(":sip-client") {
     dependencies {
         compile("org.springframework.cloud:spring-cloud-starter-eureka")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
+        compile("org.springframework.boot:spring-boot-starter-data-redis")
     }
 }
 project(":sip-api") {
