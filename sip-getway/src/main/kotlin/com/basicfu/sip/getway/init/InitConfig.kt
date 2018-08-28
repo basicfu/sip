@@ -40,9 +40,9 @@ class InitConfig : CommandLineRunner {
         apps.forEach {app->
             val list = serviceMap[app.id] ?: arrayListOf()
             list.forEach {service->
-                service.path="/"+app.domain+service.path
+                service.path="/"+app.code+service.path
             }
-            appServiceMap[app.domain!!] = list
+            appServiceMap[app.code!!] = list
         }
         RedisUtil.hMSet(Constant.Redis.APP, appServiceMap)
     }

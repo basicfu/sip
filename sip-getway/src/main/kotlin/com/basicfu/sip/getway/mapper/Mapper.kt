@@ -15,7 +15,7 @@ import org.apache.ibatis.annotations.Select
 @Mapper
 interface Mapper {
 
-    @Select("SELECT id,name,domain from app")
+    @Select("SELECT id,name,code from app")
     fun selectApp(): List<App>
 
     @Select("SELECT id,app_id as appId,name,path,server_id as serverId,url,strip_prefix as stripPrefix,retryable,sensitive_headers as sensitiveHeaders from service")
