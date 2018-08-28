@@ -23,7 +23,7 @@ class AppService : BaseService<AppMapper, App>() {
         return selectPage(example<App> {
             andLike {
                 name = vo.name
-                domain = vo.domain
+                code = vo.code
             }
         })
     }
@@ -33,7 +33,7 @@ class AppService : BaseService<AppMapper, App>() {
                 name = vo.name
             }) != 0) throw CustomException(Enum.App.NAME_EXISTS)
         if (mapper.selectCount(generate {
-                domain = vo.domain
+                code = vo.code
             }) != 0) throw CustomException(Enum.App.NAME_EXISTS)
         val po = dealInsert(to<App>(vo))
         return mapper.insertSelective(po)
@@ -45,7 +45,7 @@ class AppService : BaseService<AppMapper, App>() {
         })
         if (checkName != null && checkName.id != vo.id) throw CustomException(Enum.App.NAME_EXISTS)
         val checkDomain = mapper.selectOne(generate {
-            domain = vo.domain
+            code = vo.code
         })
         if (checkDomain != null && checkDomain.id != vo.id) throw CustomException(
             Enum.App.DOMAIN_EXISTS

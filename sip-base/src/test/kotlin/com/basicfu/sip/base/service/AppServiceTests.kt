@@ -23,7 +23,7 @@ class AppServiceTests {
     fun insert() {
         val vo=generate<AppVo> {
             name="梧桐招聘"
-            domain="wutong"
+            code="wutong"
         }
         Assert.assertEquals(appService.insert(vo),1)
     }
