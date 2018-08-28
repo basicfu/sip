@@ -5,11 +5,13 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 import javax.annotation.PostConstruct
+import javax.annotation.Resource
 
 
 @Component
 class RedisUtil {
     @Autowired
+    @Resource(name = "redisTemplate")
     private lateinit var redisTemplateTmp: RedisTemplate<Any, Any>
 
     @PostConstruct

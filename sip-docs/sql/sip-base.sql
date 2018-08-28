@@ -5,14 +5,25 @@ USE `sip-base`;
 drop table if exists app;
 create table app(
 	id bigint auto_increment primary key,
-	name varchar(64) not null default '' comment '应用名',
-	domain varchar(64) not null default '' comment '应用域名前缀',
+	name varchar(32) not null default '' comment '应用名',
+	code varchar(32) not null default '' comment '应用code',
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
-	unique key (name),
-	unique key (domain)
+	unique key (code)
 )
 comment '应用表' engine=InnoDB;
+
+drop table if exists app;
+create table app(
+	id bigint auto_increment primary key,
+	app_id bigint not null default 0 comment '应用ID',
+	secret varchar(32) not null default '' comment 'secret',
+	desc varchar(64) not null default '' comment '描述',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
+	unique key (app_id,secret)
+)
+comment '应用secret表' engine=InnoDB;
 
 drop table if exists service;
 create table service(
