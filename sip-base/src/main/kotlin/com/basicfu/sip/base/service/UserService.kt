@@ -19,11 +19,11 @@ import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
+import com.basicfu.sip.core.util.SqlUtil
 import com.basicfu.sip.core.util.TokenUtil
 import com.basicfu.sip.core.util.UserUtil
 import com.github.pagehelper.PageInfo
 import org.apache.ibatis.session.RowBounds
-import org.bouncycastle.asn1.x500.style.RFC4519Style.uid
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -145,7 +145,7 @@ class UserService : BaseService<UserMapper, User>() {
                 "SELECT DISTINCT uid as id FROM `sip-base`.user_auth ua " +
                         "RIGHT JOIN `sip-permission`.user_role ur on ua.uid=ur.user_id " +
                         "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
-                        "WHERE ua.username LIKE '%$q%' AND r.code='$roleCode' LIMIT 0,$size"
+                        "WHERE ua.username LIKE ${SqlUtil.dealLikeValue(q)} AND r.code='$roleCode' LIMIT 0,$size"
             )
             userIds=users.map { it.id!! }
         }
