@@ -1,5 +1,6 @@
 package com.basicfu.sip.core.common.mapper
 
+import com.basicfu.sip.core.util.SqlUtil.dealLikeValue
 import org.springframework.util.ReflectionUtils
 import tk.mybatis.mapper.MapperException
 import tk.mybatis.mapper.mapperhelper.EntityHelper
@@ -214,9 +215,11 @@ open class Sqls<T> {
         }
     }
 
+    //手动拼写条件，否则无法使用escape
+    //此处的v是condition可以sql注入
     @PublishedApi
     internal fun andLike(k: String, v: Any?) {
-        this.criteria.criterions.add(Criterion(k, v, "like", "and"))
+        this.andCondition(k,"like $v")
     }
 
     fun Sqls<T>.andNotLike(k: KMutableProperty1<T, *>, v: String) {
@@ -228,6 +231,12 @@ open class Sqls<T> {
         this.criteria.criterions.add(Criterion(k, v, "not like", "and"))
     }
 
+    fun andCondition(k:String,condition: String){
+        this.criteria.criterions.add(Criterion(k, condition, "and"))
+    }
+    fun orCondition(k:String,condition: String){
+        this.criteria.criterions.add(Criterion(k, condition, "or"))
+    }
     fun Sqls<T>.orIsNull(vararg k: KMutableProperty1<T, String?>) {
         k.forEach {
             this.orIsNull(it.name)
@@ -393,7 +402,7 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orLike(k: String, v: Any?) {
-        this.criteria.criterions.add(Criterion(k, v, "like", "or"))
+        this.orCondition(k,"like $v")
     }
 
     fun Sqls<T>.orNotLike(k: KMutableProperty1<T, *>, v: String) {
@@ -404,23 +413,6 @@ open class Sqls<T> {
     internal fun orNotLike(k: String, v: Any?) {
         this.criteria.criterions.add(Criterion(k, v, "not like", "or"))
     }
-
-    @PublishedApi
-    internal fun dealLikeValue(v: String?): String? {
-        if (v == null) {
-            return null
-        }
-        var value = v
-        if (value.contains("%") || value.contains("_")) {
-            value = value.replace("%", "/%").replace("_", "/_")
-            value = "%$value%"
-            value += " escape '/'"
-        } else {
-            value = "%$value%"
-        }
-        return value
-    }
-
 
     class Criteria {
         var andOr: String? = null
@@ -589,9 +581,9 @@ class Example<T> @JvmOverloads constructor(
                 val property = criterion.property
                 val values = criterion.values
                 //过滤value为NULL的
-                if(criterion.value!=null){
+//                if(criterion.value!=null){
                     transformCriterion(exampleCriteria, condition, property, values, andOr)
-                }
+//                }
             }
             oredCriteria!!.add(exampleCriteria)
         }
