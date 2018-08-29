@@ -8,32 +8,34 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut
 import org.springframework.aop.support.DefaultPointcutAdvisor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
+import org.springframework.stereotype.Component
 import org.springframework.transaction.interceptor.TransactionInterceptor
 import java.util.*
 import javax.sql.DataSource
 
 @Import(SqlInterceptor::class)
-@Configuration
+@Component
 class DataSourceConfig {
     @Autowired
     lateinit var sqlStatsInterceptor: SqlInterceptor
 
+    /**
+     * @Component形式注入beanName不同会默认覆盖dataSource，而手动注入的beanName不会覆盖默认注入的dataSource所以导致出现2个数据库连接池
+     */
     @Primary
     @Bean
-//    @ConfigurationProperties("spring.datasource.druid.master")
-    fun masterDataSource(): DataSource {
+    fun dataSource(): DataSource {
         return DruidDataSourceBuilder.create().build()
     }
 
     @Bean
     fun dynamicDataSource(): DataSource {
         val targetDataSources = HashMap<Any, Any>()
-        val masterDataSource = masterDataSource()
+        val masterDataSource = dataSource()
         targetDataSources[DataSourceContextHolder.DataSourceType.MASTER.name + "0"] = masterDataSource
         val dataSource = DynamicDataSource(1, 2)
         dataSource.setTargetDataSources(targetDataSources)
