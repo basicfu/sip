@@ -12,6 +12,9 @@ interface CommonMapper<T> {
     @SelectProvider(type = CommonProvider::class, method = "dynamicSQL")
     fun selectBySql(@Param("sql") sql: String): List<T>
 
+    @SelectProvider(type = CommonProvider::class, method = "dynamicSQL")
+    fun selectLastInsertId(): Long
+
     @UpdateProvider(type = CommonProvider::class, method = "dynamicSQL")
     fun updateBySql(@Param("sql") sql: String): Int
 }

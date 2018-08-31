@@ -15,7 +15,9 @@ class CommonProvider(mapperClass: Class<*>, mapperHelper: MapperHelper) : Mapper
     fun selectBySql(ms: MappedStatement): String {
         return "\${sql}"
     }
-
+    fun selectLastInsertId(ms: MappedStatement): String {
+        return "SELECT LAST_INSERT_ID()"
+    }
     fun updateBySql(ms: MappedStatement): String {
         val entityClass = getEntityClass(ms)
         val sql = StringBuilder()
