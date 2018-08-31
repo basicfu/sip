@@ -34,7 +34,7 @@ class AppService : BaseService<AppMapper, App>() {
             }) != 0) throw CustomException(Enum.App.NAME_EXISTS)
         if (mapper.selectCount(generate {
                 code = vo.code
-            }) != 0) throw CustomException(Enum.App.NAME_EXISTS)
+            }) != 0) throw CustomException(Enum.App.CODE_EXISTS)
         val po = dealInsert(to<App>(vo))
         return mapper.insertSelective(po)
     }
@@ -48,7 +48,7 @@ class AppService : BaseService<AppMapper, App>() {
             code = vo.code
         })
         if (checkDomain != null && checkDomain.id != vo.id) throw CustomException(
-            Enum.App.DOMAIN_EXISTS
+            Enum.App.CODE_EXISTS
         )
         val po = dealUpdate(to<App>(vo))
         return mapper.updateByPrimaryKeySelective(po)
