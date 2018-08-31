@@ -50,12 +50,17 @@ abstract class BaseService<M : CustomMapper<T>, T> {
     }
 
     /**
-     * 为添加对象处理cdate和udate值
+     * 为添加对象处理cdate和udate值,并且移除主键
      * 如果没有cdate和udate则不处理
      */
     inline fun <reified R> dealInsert(obj: R): R {
         val clazz = R::class.java
         val time = (System.currentTimeMillis() / 1000).toInt()
+        val id = ReflectionUtils.findField(clazz, "id")
+        if (id != null) {
+            ReflectionUtils.makeAccessible(id)
+            id.set(obj, null)
+        }
         val cdate = ReflectionUtils.findField(clazz, "cdate")
         if (cdate != null) {
             ReflectionUtils.makeAccessible(cdate)

@@ -9,16 +9,17 @@ create table app(
 	code varchar(32) not null default '' comment '应用code',
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
+	unique key (name),
 	unique key (code)
 )
 comment '应用表' engine=InnoDB;
 
-drop table if exists app;
-create table app(
+drop table if exists app_secret;
+create table app_secret(
 	id bigint auto_increment primary key,
 	app_id bigint not null default 0 comment '应用ID',
 	secret varchar(32) not null default '' comment 'secret',
-	desc varchar(64) not null default '' comment '描述',
+	description varchar(64) not null default '' comment '描述',
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
 	unique key (app_id,secret)
@@ -85,4 +86,4 @@ CREATE TABLE user_template (
 )comment '用户模板' engine=InnoDB;
 
 
-INSERT INTO `sip-base`.app (id,name, domain, cdate, udate) VALUES (1,'SIP', 'sip', 1531389485, 1531389485);
+INSERT INTO app (id,name, code, cdate, udate) VALUES (1,'SIP', 'sip', 1531389485, 1531389485);
