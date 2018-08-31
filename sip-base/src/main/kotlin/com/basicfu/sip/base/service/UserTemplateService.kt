@@ -3,7 +3,6 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.mapper.UserTemplateMapper
 import com.basicfu.sip.base.model.dto.UserTemplateDto
-import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.po.UserTemplate
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.core.common.exception.CustomException

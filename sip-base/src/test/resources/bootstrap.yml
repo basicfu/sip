@@ -1,0 +1,42 @@
+server:
+  port: ${ENV_SERVER_PORT:7200}
+spring:
+  application:
+    name: sip-base
+  datasource:
+    url: jdbc:tc:mysql:5.7.22://somehostname:someport/databasename?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&TC_INITSCRIPT=init.sql
+    username:
+    password:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    druid:
+      initial-size: 5
+      minIdle: 5
+      max-active: 20
+      max-wait: 10000
+      timeBetweenEvictionRunsMillis: 60000
+      validationQuery: select 1
+  redis:
+    host: localhost
+    port: 6379
+    pool:
+      max-idle: 8
+      min-idle: 0
+      max-active: 8
+      max-wait: -1
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+  client:
+    serviceUrl:
+      defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka
+sip:
+  logs:
+    redis:
+      host: redis-dev.dmka.cn
+      port: 4379
+      password: root
+logging:
+  level:
+    com.basicfu.sip: TRACE
+    org.springframework.jdbc.datasource: TRACE

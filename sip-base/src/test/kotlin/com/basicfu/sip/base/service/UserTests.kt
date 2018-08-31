@@ -1,40 +1,35 @@
 package com.basicfu.sip.base.service
 
+import com.basicfu.sip.base.BaseTests
+import com.basicfu.sip.base.mapper.UserMapper
+import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.vo.UserVo
+import com.basicfu.sip.core.common.mapper.generate
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
 
 /**
  * @author basicfu
  * @date 2018/6/30
  */
-@RunWith(SpringRunner::class)
-@SpringBootTest
-class UserTests {
+class UserTests:BaseTests<UserMapper,User>(){
     @Autowired
     lateinit var userService: UserService
 
-    @Test
-    fun list() {
-        val vo = UserVo()
-        vo.username = "basicfu"
-        val user = userService.list(vo)
-        Assert.assertEquals(user.size,1)
+    fun preInsert():Long{
+        val vo= generate<UserVo> {
+            username="basicfu"
+            password="123456"
+            mobile="18611110000"
+            email="basicfu@gmail.com"
+        }
+        Assert.assertEquals(1, userService.insert(vo))
+        return mapper.selectLastInsertId()
     }
 
     @Test
-    fun get() {
-    }
-
-    @Test
-    fun insert() {
-        val vo = UserVo()
-        vo.username = "basicfu"
-        vo.password = "123456"
-        Assert.assertEquals(userService.insert(vo), 1)
+    fun test(){
+        assert(true)
     }
 }

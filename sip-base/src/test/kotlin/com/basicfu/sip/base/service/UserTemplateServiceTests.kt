@@ -1,53 +1,106 @@
 package com.basicfu.sip.base.service
 
+import com.basicfu.sip.base.BaseTests
+import com.basicfu.sip.base.mapper.UserTemplateMapper
+import com.basicfu.sip.base.model.po.UserTemplate
 import com.basicfu.sip.base.model.vo.UserTemplateVo
+import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.mapper.generate
 import org.junit.Assert
+import org.junit.Assert.*
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
+
 
 /**
  * @author basicfu
  * @date 2018/6/30
  */
-@RunWith(SpringRunner::class)
-@SpringBootTest
-class UserTemplateServiceTests {
+class UserTemplateServiceTests:BaseTests<UserTemplateMapper,UserTemplate>() {
     @Autowired
     lateinit var userTemplateService: UserTemplateService
 
+    fun preInsert():Long{
+        val vo=generate<UserTemplateVo> {
+            name="姓名"
+            enName="name"
+            type="TEXT"
+            extra="2~10"
+            defaultValue="小明"
+            required=true
+            sort=1
+        }
+        assertEquals(1,userTemplateService.insert(vo))
+        return mapper.selectLastInsertId()
+    }
+
+    @Test
+    fun list() {
+        val id=preInsert()
+        val list = userTemplateService.list(generate {
+            name = "姓"
+        })
+        assertEquals(1,list.size)
+        userTemplateService.delete(listOf(id))
+    }
+
     @Test
     fun all() {
-//        val vo=UserTemplateVo()
-//        vo.name="昵"
-//        Assert.assertEquals(userTemplateService.all(vo).size,1)
+        val id=preInsert()
+        Assert.assertEquals(1,userTemplateService.all().size)
+        userTemplateService.delete(listOf(id))
     }
 
     @Test
     fun insert() {
-        val vo= UserTemplateVo()
-        vo.name="昵称"
-        vo.enName="id"
-        vo.type="Text"
-        vo.extra="5"
-        vo.defaultValue="小明"
-        Assert.assertEquals(userTemplateService.insert(vo),1)
+        val vo=generate<UserTemplateVo> {
+            name="姓名"
+            enName="name"
+            type="TEXT"
+            extra="2~10"
+            defaultValue="小明"
+            required=true
+            sort=1
+        }
+        assertEquals(1,userTemplateService.insert(vo))
+        try{
+            vo.name="姓名1"
+            userTemplateService.insert(vo)
+            fail()
+        }catch (e:CustomException){
+            assertTrue(true)
+        }
+        try{
+            vo.name="姓名"
+            vo.enName="name1"
+            userTemplateService.insert(vo)
+            fail()
+        }catch (e:CustomException){
+            assertTrue(true)
+        }
+        userTemplateService.delete(listOf(mapper.selectLastInsertId()))
     }
 
     @Test
     fun update() {
-//        val vo=UserTemplateVo()
-//        vo.id=3
-//        vo.name="昵称abc"
-//        vo.type="Text"
-//        vo.extra="5"
-//        Assert.assertEquals(userTemplateService.update(vo),1)
+        val id=preInsert()
+        val vo=generate<UserTemplateVo> {
+            this.id=id
+            name="姓名1"
+            enName="name1"
+            type="NUMBER"
+            extra="3~10"
+            defaultValue="0"
+            required=false
+            sort=2
+        }
+        assertEquals(1,userTemplateService.update(vo))
+        userTemplateService.delete(listOf(id))
     }
 
     @Test
     fun delete() {
-//        userTemplateService.delete(listOf(3))
+        val id=preInsert()
+        assertEquals(1,userTemplateService.delete(listOf(id)))
     }
 }

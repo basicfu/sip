@@ -66,6 +66,8 @@ project(":sip-core") {
         compile("org.apache.httpcomponents:httpmime:4.5.1")
         compile("io.protostuff:protostuff-core:1.5.9")
         compile("io.protostuff:protostuff-runtime:1.5.9")
+        compile 'org.testcontainers:testcontainers:1.8.3'
+        compile 'org.testcontainers:mysql:1.8.3'
     }
 }
 project(":sip-eureka") {
