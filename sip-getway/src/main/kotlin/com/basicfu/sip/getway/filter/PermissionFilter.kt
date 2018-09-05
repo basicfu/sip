@@ -6,42 +6,35 @@ import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.util.RedisUtil
-import com.netflix.zuul.ZuulFilter
-import com.netflix.zuul.context.RequestContext
+import org.springframework.http.HttpStatus
 import org.springframework.util.AntPathMatcher
-import java.net.URI
+import javax.servlet.*
+import javax.servlet.annotation.WebFilter
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 
 /**
  * @author basicfu
  * @date 2018/7/12
  */
-
-class PermissionFilter : ZuulFilter() {
+@WebFilter(filterName = "permissionFilter", urlPatterns = ["/*"])
+class PermissionFilter : Filter {
     private val antPathMatcher = AntPathMatcher()
 
-    override fun filterType(): String {
-        return "pre"
+    override fun init(filterConfig: FilterConfig) {
     }
 
-    override fun filterOrder(): Int {
-        return 0
-    }
-
-    override fun shouldFilter(): Boolean {
-        return true
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun run(): Any? {
-        val ctx = RequestContext.getCurrentContext()
-        val request = ctx.request
+    override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
+        val request = servletRequest as HttpServletRequest
+        val response = servletResponse as HttpServletResponse
+//        request.getRequestDispatcher("/123").forward(request,response)
         val uri = request.requestURI
-        val pathArray=uri.split("/")
+        val pathArray = uri.split("/")
         var result = Result.error<String>("未授权")
-        var domainPrefix=""
-        if(pathArray.size>1){
-            domainPrefix=pathArray[1]
+        var domainPrefix = ""
+        if (pathArray.size > 1) {
+            domainPrefix = pathArray[1]
         }
         val appServices = RedisUtil.hGetAll<List<Service>>(Constant.Redis.APP)
         val services = arrayListOf<Service>()
@@ -57,7 +50,8 @@ class PermissionFilter : ZuulFilter() {
                     if (noLoginUser != null) {
                         noLoginUser.resources?.get(service.id.toString())?.let { resources ->
                             if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
-                                return null
+                                filterChain.doFilter(request, response)
+                                return
                             }
                         }
                     }
@@ -69,7 +63,8 @@ class PermissionFilter : ZuulFilter() {
                         if (noLoginUser != null) {
                             noLoginUser.resources?.get(service.id.toString())?.let { resources ->
                                 if (resources.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) }) {
-                                    return null
+                                    filterChain.doFilter(request, response)
+                                    return
                                 }
                             }
                         }
@@ -82,7 +77,8 @@ class PermissionFilter : ZuulFilter() {
                                     Constant.Redis.TOKEN_PREFIX + authorization,
                                     Constant.System.SESSION_TIMEOUT
                                 )
-                                return null
+                                filterChain.doFilter(request, response)
+                                return
                             }
                         }
                     }
@@ -90,12 +86,13 @@ class PermissionFilter : ZuulFilter() {
                 break
             }
         }
-        //这里依旧返回200文字提示未授权
-        ctx.setSendZuulResponse(false)
-        ctx.responseStatusCode = 200
-        ctx.response.characterEncoding = "UTF-8"
-        ctx.response.contentType = "application/json"
-        ctx.responseBody = JSON.toJSONString(result)
-        return null
+        response.status = HttpStatus.OK.value()
+        response.characterEncoding = "UTF-8"
+        response.contentType = "application/json"
+        response.outputStream.write(JSON.toJSONString(result).toByteArray())
+        response.outputStream.flush()
+        response.outputStream.close()
     }
+
+    override fun destroy() {}
 }
