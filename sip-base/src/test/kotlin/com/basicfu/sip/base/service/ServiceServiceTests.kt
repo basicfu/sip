@@ -1,11 +1,11 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.BaseTests
-import com.basicfu.sip.base.mapper.ServiceMapper
+import com.basicfu.sip.base.mapper.AppServiceMapper
 import com.basicfu.sip.base.model.vo.ServiceVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.po.Service
+import com.basicfu.sip.core.model.po.AppService
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired
  * @author basicfu
  * @date 2018/7/12
  */
-class ServiceServiceTests : BaseTests<ServiceMapper, Service>() {
+class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
     @Autowired
-    lateinit var serviceService: ServiceService
+    lateinit var appServiceService: AppServiceService
 
     fun preInsert(): Long {
         val vo = generate<ServiceVo> {
@@ -28,16 +28,16 @@ class ServiceServiceTests : BaseTests<ServiceMapper, Service>() {
             retryable=true
             sensitiveHeaders=""
         }
-        Assert.assertEquals(1, serviceService.insert(vo))
+        Assert.assertEquals(1, appServiceService.insert(vo))
         return mapper.selectLastInsertId()
     }
 
     @Test
     fun list() {
         val id = preInsert()
-        val list = serviceService.all()
+        val list = appServiceService.all()
         Assert.assertEquals(1, list.size)
-        serviceService.delete(listOf(id))
+        appServiceService.delete(listOf(id))
     }
 
     @Test
@@ -51,10 +51,10 @@ class ServiceServiceTests : BaseTests<ServiceMapper, Service>() {
             retryable=true
             sensitiveHeaders=""
         }
-        Assert.assertEquals(1, serviceService.insert(vo))
+        Assert.assertEquals(1, appServiceService.insert(vo))
         try {
             vo.path = "/wbase/**"
-            serviceService.insert(vo)
+            appServiceService.insert(vo)
             Assert.fail()
         } catch (e: CustomException) {
             Assert.assertTrue(true)
@@ -62,7 +62,7 @@ class ServiceServiceTests : BaseTests<ServiceMapper, Service>() {
         try {
             vo.path = "/base/**"
             vo.serverId = "sip-base1"
-            serviceService.insert(vo)
+            appServiceService.insert(vo)
             Assert.fail()
         } catch (e: CustomException) {
             Assert.assertTrue(true)
@@ -70,12 +70,12 @@ class ServiceServiceTests : BaseTests<ServiceMapper, Service>() {
         try {
             vo.serverId = "sip-base"
             vo.url = "https://www.baidu.com1"
-            serviceService.insert(vo)
+            appServiceService.insert(vo)
             Assert.fail()
         } catch (e: CustomException) {
             Assert.assertTrue(true)
         }
-        serviceService.delete(listOf(mapper.selectLastInsertId()))
+        appServiceService.delete(listOf(mapper.selectLastInsertId()))
     }
 
     @Test
@@ -91,13 +91,13 @@ class ServiceServiceTests : BaseTests<ServiceMapper, Service>() {
             retryable=true
             sensitiveHeaders=""
         }
-        Assert.assertEquals(1, serviceService.update(vo))
-        serviceService.delete(listOf(id))
+        Assert.assertEquals(1, appServiceService.update(vo))
+        appServiceService.delete(listOf(id))
     }
 
     @Test
     fun delete() {
         val id = preInsert()
-        Assert.assertEquals(1, serviceService.delete(listOf(id)))
+        Assert.assertEquals(1, appServiceService.delete(listOf(id)))
     }
 }

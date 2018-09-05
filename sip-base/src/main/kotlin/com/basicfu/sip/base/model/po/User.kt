@@ -1,9 +1,6 @@
 package com.basicfu.sip.base.model.po
 
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
 class User {
     /**
@@ -22,15 +19,29 @@ class User {
     /**
      * 获取租户ID
      *
-     * @return tenant_id - 租户ID
+     * @return app_id - 租户ID
      */
     /**
      * 设置租户ID
      *
-     * @param tenantId 租户ID
+     * @param appId 租户ID
      */
-    @Column(name = "tenant_id")
-    var tenantId: Long? = null
+    @Column(name = "app_id")
+    var appId: Long? = null
+
+    /**
+     * 用户名
+     */
+    /**
+     * 获取用户名
+     *
+     * @return username - 用户名
+     */
+    /**
+     * 设置用户名
+     *
+     * @param username 用户名
+     */
     var username: String? = null
 
     /**
@@ -91,7 +102,7 @@ class User {
      *
      * @param type 用户类型0系统用户,1租户,2普通用户
      */
-    var type: Int? = null
+    var type: Byte? = null
 
     /**
      * 0正常,1删除,2黑名单
@@ -106,5 +117,5 @@ class User {
      *
      * @param status 0正常,1删除,2黑名单
      */
-    var status: Int? = null
+    var status: Byte? = null
 }

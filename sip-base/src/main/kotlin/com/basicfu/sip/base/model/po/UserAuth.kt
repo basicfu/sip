@@ -1,9 +1,6 @@
 package com.basicfu.sip.base.model.po
 
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Table(name = "user_auth")
 class UserAuth {
@@ -18,19 +15,13 @@ class UserAuth {
     var id: Long? = null
 
     /**
-     * 用户ID
+     * @return app_id
      */
     /**
-     * 获取用户ID
-     *
-     * @return uid - 用户ID
+     * @param appId
      */
-    /**
-     * 设置用户ID
-     *
-     * @param uid 用户ID
-     */
-    var uid: Long? = null
+    @Column(name = "app_id")
+    var appId: Long? = null
 
     /**
      * auth类型0用户名,1手机号,2字典(读取字典)
@@ -45,7 +36,7 @@ class UserAuth {
      *
      * @param type auth类型0用户名,1手机号,2字典(读取字典)
      */
-    var type: Int? = null
+    var type: Byte? = null
 
     /**
      * 登录标识
@@ -136,4 +127,19 @@ class UserAuth {
      * @param ldate 最后一次登录时间
      */
     var ldate: Int? = null
+
+    /**
+     * 用户ID
+     */
+    /**
+     * 获取用户ID
+     *
+     * @return uid - 用户ID
+     */
+    /**
+     * 设置用户ID
+     *
+     * @param uid 用户ID
+     */
+    var uid: Long? = null
 }

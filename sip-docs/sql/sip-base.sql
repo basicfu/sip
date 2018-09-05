@@ -26,8 +26,8 @@ create table app_secret(
 )
 comment '应用secret表' engine=InnoDB;
 
-drop table if exists service;
-create table service(
+drop table if exists app_service;
+create table app_service(
 	id bigint auto_increment primary key,
 	app_id bigint not null default 0 comment '应用ID',
 	name varchar(64) not null default '' comment '应用名',
@@ -46,7 +46,7 @@ comment '服务表' engine=InnoDB;
 drop table if exists user;
 create table user(
   id bigint auto_increment primary key,
-  tenant_id bigint not null default 0 comment '租户ID',
+  app_id bigint not null default 0 comment '租户ID',
   username varchar(32) not null default '' comment '用户名',
   content varchar(20000) null default '' comment '用户json信息(mysql8)',
   cdate int not null default 0 comment '创建时间',
@@ -58,6 +58,7 @@ create table user(
 drop table if exists user_auth;
 CREATE TABLE user_auth (
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '租户ID(虽有关联但有部分需求只查此表)',
   uid bigint not null comment '用户ID',
   type tinyint not null default 0 comment 'auth类型0用户名,1手机号,2字典(读取字典)',
   username varchar(100) not null default '' comment '登录标识',
@@ -72,7 +73,7 @@ CREATE TABLE user_auth (
 drop table if exists user_template;
 CREATE TABLE user_template (
   id bigint auto_increment primary key,
-  tenant_id bigint not null default 0 comment '租户ID',
+  app_id bigint not null default 0 comment '租户ID',
   name varchar(64) not null default '' comment '字段名',
   en_name varchar(64) not null default '' comment '字段英文名',
   type varchar(64) not null default '' comment '字段类型(0TEXT,1NUMBER,2CHECK,3RADIO,4SELECT,5DATE)',

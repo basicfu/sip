@@ -1,20 +1,21 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.common.Enum
-import com.basicfu.sip.base.mapper.ServiceMapper
+import com.basicfu.sip.base.mapper.AppServiceMapper
 import com.basicfu.sip.base.model.vo.ServiceVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.ApplicationDto
-import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.service.BaseService
+import org.springframework.stereotype.Service
+import com.basicfu.sip.core.model.po.AppService
 
 /**
  * @author basicfu
  * @date 2018/6/22
  */
-@org.springframework.stereotype.Service
-class ServiceService : BaseService<ServiceMapper, Service>() {
+@Service
+class AppServiceService : BaseService<AppServiceMapper, AppService>() {
 
     fun all(): List<ApplicationDto> {
         return to(mapper.selectAll())
@@ -33,7 +34,7 @@ class ServiceService : BaseService<ServiceMapper, Service>() {
                 appId = vo.appId
                 url = vo.url
             }) != 0) throw CustomException(Enum.Service.URL_EXISTS)
-        val po = dealInsert(to<Service>(vo))
+        val po = dealInsert(to<AppService>(vo))
         return mapper.insertSelective(po)
     }
 
@@ -61,7 +62,7 @@ class ServiceService : BaseService<ServiceMapper, Service>() {
                 Enum.Service.URL_EXISTS
             )
         }
-        val po = dealUpdate(to<Service>(vo))
+        val po = dealUpdate(to<AppService>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.basicfu.sip.base.mapper.AppServiceMapper">
+  <resultMap id="BaseResultMap" type="com.basicfu.sip.core.model.po.AppService">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="app_id" jdbcType="BIGINT" property="appId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="path" jdbcType="VARCHAR" property="path" />
+    <result column="server_id" jdbcType="VARCHAR" property="serverId" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="strip_prefix" jdbcType="TINYINT" property="stripPrefix" />
+    <result column="retryable" jdbcType="TINYINT" property="retryable" />
+    <result column="sensitive_headers" jdbcType="VARCHAR" property="sensitiveHeaders" />
+    <result column="cdate" jdbcType="INTEGER" property="cdate" />
+    <result column="udate" jdbcType="INTEGER" property="udate" />
+  </resultMap>
+</mapper>

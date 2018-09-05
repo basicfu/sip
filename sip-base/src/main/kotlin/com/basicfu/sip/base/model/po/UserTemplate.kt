@@ -1,10 +1,6 @@
 package com.basicfu.sip.base.model.po
 
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Table(name = "user_template")
 class UserTemplate {
@@ -24,15 +20,15 @@ class UserTemplate {
     /**
      * 获取租户ID
      *
-     * @return tenant_id - 租户ID
+     * @return app_id - 租户ID
      */
     /**
      * 设置租户ID
      *
-     * @param tenantId 租户ID
+     * @param appId 租户ID
      */
-    @Column(name = "tenant_id")
-    var tenantId: Long? = null
+    @Column(name = "app_id")
+    var appId: Long? = null
 
     /**
      * 字段名
@@ -48,39 +44,97 @@ class UserTemplate {
      * @param name 字段名
      */
     var name: String? = null
+
+    /**
+     * 字段英文名
+     */
+    /**
+     * 获取字段英文名
+     *
+     * @return en_name - 字段英文名
+     */
+    /**
+     * 设置字段英文名
+     *
+     * @param enName 字段英文名
+     */
+    @Column(name = "en_name")
     var enName: String? = null
 
     /**
-     * 字段类型(0Text,1Number,2Check,3Radio,4Date,5Time,6DateTime,7Dict)
+     * 字段类型(0TEXT,1NUMBER,2CHECK,3RADIO,4SELECT,5DATE)
      */
     /**
-     * 获取字段类型(0Text,1Number,2Check,3Radio,4Date,5Time,6DateTime,7Dict)
+     * 获取字段类型(0TEXT,1NUMBER,2CHECK,3RADIO,4SELECT,5DATE)
      *
-     * @return type - 字段类型(0Text,1Number,2Check,3Radio,4Date,5Time,6DateTime,7Dict)
+     * @return type - 字段类型(0TEXT,1NUMBER,2CHECK,3RADIO,4SELECT,5DATE)
      */
     /**
-     * 设置字段类型(0Text,1Number,2Check,3Radio,4Date,5Time,6DateTime,7Dict)
+     * 设置字段类型(0TEXT,1NUMBER,2CHECK,3RADIO,4SELECT,5DATE)
      *
-     * @param type 字段类型(0Text,1Number,2Check,3Radio,4Date,5Time,6DateTime,7Dict)
+     * @param type 字段类型(0TEXT,1NUMBER,2CHECK,3RADIO,4SELECT,5DATE)
      */
     var type: String? = null
 
     /**
-     * 字段长度(Text限制字段长度,Number限制字段范围大小(-100~300),字典存储关联的字典,其他不限)
+     * 字段长度(TEXT限制字段长度范围,NUMBER限制字段长度且范围大小10,2(0.15~255.25),CHECK/RADIO/SELECT存储关联的字典,DATA自定义格式化时间yyyy-MM-dd HH:mm:ss)
      */
     /**
-     * 获取字段长度(Text限制字段长度,Number限制字段范围大小(-100~300),字典存储关联的字典,其他不限)
+     * 获取字段长度(TEXT限制字段长度范围,NUMBER限制字段长度且范围大小10,2(0.15~255.25),CHECK/RADIO/SELECT存储关联的字典,DATA自定义格式化时间yyyy-MM-dd HH:mm:ss)
      *
-     * @return extra - 字段长度(Text限制字段长度,Number限制字段范围大小(-100~300),字典存储关联的字典,其他不限)
+     * @return extra - 字段长度(TEXT限制字段长度范围,NUMBER限制字段长度且范围大小10,2(0.15~255.25),CHECK/RADIO/SELECT存储关联的字典,DATA自定义格式化时间yyyy-MM-dd HH:mm:ss)
      */
     /**
-     * 设置字段长度(Text限制字段长度,Number限制字段范围大小(-100~300),字典存储关联的字典,其他不限)
+     * 设置字段长度(TEXT限制字段长度范围,NUMBER限制字段长度且范围大小10,2(0.15~255.25),CHECK/RADIO/SELECT存储关联的字典,DATA自定义格式化时间yyyy-MM-dd HH:mm:ss)
      *
-     * @param extra 字段长度(Text限制字段长度,Number限制字段范围大小(-100~300),字典存储关联的字典,其他不限)
+     * @param extra 字段长度(TEXT限制字段长度范围,NUMBER限制字段长度且范围大小10,2(0.15~255.25),CHECK/RADIO/SELECT存储关联的字典,DATA自定义格式化时间yyyy-MM-dd HH:mm:ss)
      */
     var extra: String? = null
+
+    /**
+     * 字段默认值
+     */
+    /**
+     * 获取字段默认值
+     *
+     * @return default_value - 字段默认值
+     */
+    /**
+     * 设置字段默认值
+     *
+     * @param defaultValue 字段默认值
+     */
+    @Column(name = "default_value")
     var defaultValue: String? = null
-    var required:Boolean?=null
+
+    /**
+     * 是否必填
+     */
+    /**
+     * 获取是否必填
+     *
+     * @return required - 是否必填
+     */
+    /**
+     * 设置是否必填
+     *
+     * @param required 是否必填
+     */
+    var required: Byte? = null
+
+    /**
+     * 字段顺序
+     */
+    /**
+     * 获取字段顺序
+     *
+     * @return sort - 字段顺序
+     */
+    /**
+     * 设置字段顺序
+     *
+     * @param sort 字段顺序
+     */
     var sort: Int? = null
 
     /**
