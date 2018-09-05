@@ -10,7 +10,7 @@ import tk.mybatis.spring.annotation.MapperScan
 
 @MapperScan(basePackages = ["com.basicfu.sip.dict.mapper"])
 @EnableFeignClients
-@EnableSipClient(disable = [Function.Dict])
+@EnableSipClient(disable = [Function.Dict,Function.Logs])
 @EnableSipCore
 @SpringCloudApplication
 class SipDictApplication
