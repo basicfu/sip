@@ -66,11 +66,8 @@ class SqlInterceptor : Interceptor {
         @Suppress("UNCHECKED_CAST")
         val metaObject = SystemMetaObject.forObject(statementHandler)
         //name like null 上次过滤NULL问题，
-        val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
-                ?: //log
-                throw RuntimeException("not found app code")
         //TODO 应添加当系统设置某个参数或线程时跳过过滤sql
-        metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField, appId))
+        metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField))
         return invocation.proceed()
     }
 
@@ -81,18 +78,18 @@ class SqlInterceptor : Interceptor {
     override fun setProperties(properties: Properties) {
     }
 
-    fun addCondition(databaseName: String, sql: String, field: String, value: String): String {
+    fun addCondition(databaseName: String, sql: String, field: String): String {
         val statementList = SQLUtils.parseStatements(sql, dialect)
         if (statementList == null || statementList.size == 0) return sql
         val sqlStatement = statementList[0]
         when (sqlStatement) {
             is SQLSelectStatement -> {
                 val queryObject = sqlStatement.select.query as SQLSelectQueryBlock
-                addSelectStatementCondition(databaseName, queryObject, queryObject.from, field, value)
+                addSelectStatementCondition(databaseName, queryObject, queryObject.from, field)
             }
-            is SQLUpdateStatement -> addUpdateStatementCondition(databaseName, sqlStatement, field, value)
-            is SQLDeleteStatement -> addDeleteStatementCondition(databaseName, sqlStatement, field, value)
-            is SQLInsertStatement -> addInsertStatementCondition(databaseName, sqlStatement, field, value)
+            is SQLUpdateStatement -> addUpdateStatementCondition(databaseName, sqlStatement, field)
+            is SQLDeleteStatement -> addDeleteStatementCondition(databaseName, sqlStatement, field)
+            is SQLInsertStatement -> addInsertStatementCondition(databaseName, sqlStatement, field)
         }
         return SQLUtils.toSQLString(statementList, dialect)
     }
@@ -101,8 +98,7 @@ class SqlInterceptor : Interceptor {
         databaseName: String,
         queryObject: SQLSelectQueryBlock?,
         from: SQLTableSource?,
-        fieldName: String,
-        fieldValue: String
+        fieldName: String
     ) {
         if (StringUtils.isBlank(fieldName) || from == null || queryObject == null) return
         val originCondition = queryObject.where
@@ -120,7 +116,7 @@ class SqlInterceptor : Interceptor {
                 }
                 val alias = from.alias
                 val newCondition =
-                    newEqualityCondition(dbName, tableName, alias, fieldName, fieldValue, originCondition)
+                    newEqualityCondition(dbName, tableName, alias, fieldName, originCondition)
                 queryObject.where = newCondition
             }
             is SQLJoinTableSource -> {
@@ -128,14 +124,14 @@ class SqlInterceptor : Interceptor {
                 val left = joinObject!!.left
                 val right = joinObject.right
 
-                addSelectStatementCondition(dbName, queryObject, left, fieldName, fieldValue)
-                addSelectStatementCondition(dbName, queryObject, right, fieldName, fieldValue)
+                addSelectStatementCondition(dbName, queryObject, left, fieldName)
+                addSelectStatementCondition(dbName, queryObject, right, fieldName)
 
             }
             is SQLSubqueryTableSource -> {
                 val subSelectObject = from.select
                 val subQueryObject = subSelectObject.query as SQLSelectQueryBlock
-                addSelectStatementCondition(dbName, subQueryObject, subQueryObject.from, fieldName, fieldValue)
+                addSelectStatementCondition(dbName, subQueryObject, subQueryObject.from, fieldName)
             }
             else -> throw NotImplementedException("未处理的异常")
         }
@@ -144,8 +140,7 @@ class SqlInterceptor : Interceptor {
     private fun addInsertStatementCondition(
         databaseName: String,
         insertStatement: SQLInsertStatement?,
-        fieldName: String,
-        fieldValue: String
+        fieldName: String
     ) {
         if (insertStatement != null) {
             val sqlSelect = insertStatement.query
@@ -155,8 +150,7 @@ class SqlInterceptor : Interceptor {
                     databaseName,
                     selectQueryBlock,
                     selectQueryBlock.from,
-                    fieldName,
-                    fieldValue
+                    fieldName
                 )
             }
         }
@@ -165,15 +159,14 @@ class SqlInterceptor : Interceptor {
     private fun addUpdateStatementCondition(
         databaseName: String,
         updateStatement: SQLUpdateStatement,
-        fieldName: String,
-        fieldValue: String
+        fieldName: String
     ) {
         val where = updateStatement.where
         //添加子查询中的where条件
-        addSQLExprCondition(databaseName, where, fieldName, fieldValue)
+        addSQLExprCondition(databaseName, where, fieldName)
         val newCondition = newEqualityCondition(
             databaseName, updateStatement.tableName.simpleName,
-            updateStatement.tableSource.alias, fieldName, fieldValue, where
+            updateStatement.tableSource.alias, fieldName, where
         )
         updateStatement.where = newCondition
     }
@@ -181,14 +174,13 @@ class SqlInterceptor : Interceptor {
     private fun addDeleteStatementCondition(
         databaseName: String,
         deleteStatement: SQLDeleteStatement,
-        fieldName: String,
-        fieldValue: String
+        fieldName: String
     ) {
         val where = deleteStatement.where
-        addSQLExprCondition(databaseName, where, fieldName, fieldValue)
+        addSQLExprCondition(databaseName, where, fieldName)
         val newCondition = newEqualityCondition(
             databaseName, deleteStatement.tableName.simpleName,
-            deleteStatement.tableSource.alias, fieldName, fieldValue, where
+            deleteStatement.tableSource.alias, fieldName, where
         )
         deleteStatement.where = newCondition
 
@@ -203,32 +195,34 @@ class SqlInterceptor : Interceptor {
         tableName: String,
         tableAlias: String?,
         fieldName: String,
-        fieldValue: String?,
         originCondition: SQLExpr?
     ): SQLExpr? {
         val executeTable = config.appExecuteTable[databaseName]
         return if (executeTable != null && executeTable.contains(tableName)) {
             originCondition
         } else {
+            val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
+                    ?: //log
+                    throw RuntimeException("not found app code")
             val filedName = if (StringUtils.isBlank(tableAlias)) fieldName else "$tableAlias.$fieldName"
             val condition =
-                SQLBinaryOpExpr(SQLIdentifierExpr(filedName), SQLCharExpr(fieldValue), SQLBinaryOperator.Equality)
+                SQLBinaryOpExpr(SQLIdentifierExpr(filedName), SQLCharExpr(appId), SQLBinaryOperator.Equality)
             return SQLUtils.buildCondition(SQLBinaryOperator.BooleanAnd, condition, false, originCondition)
         }
     }
 
-    private fun addSQLExprCondition(databaseName: String, where: SQLExpr, fieldName: String, fieldValue: String) {
+    private fun addSQLExprCondition(databaseName: String, where: SQLExpr, fieldName: String) {
         when (where) {
             is SQLInSubQueryExpr -> {
                 val subSelectObject = where.getSubQuery()
                 val subQueryObject = subSelectObject.query as SQLSelectQueryBlock
-                addSelectStatementCondition(databaseName, subQueryObject, subQueryObject.from, fieldName, fieldValue)
+                addSelectStatementCondition(databaseName, subQueryObject, subQueryObject.from, fieldName)
             }
             is SQLBinaryOpExpr -> {
                 val left = where.left
                 val right = where.right
-                addSQLExprCondition(databaseName, left, fieldName, fieldValue)
-                addSQLExprCondition(databaseName, right, fieldName, fieldValue)
+                addSQLExprCondition(databaseName, left, fieldName)
+                addSQLExprCondition(databaseName, right, fieldName)
             }
             is SQLQueryExpr -> {
                 val selectQueryBlock = where.getSubQuery().query as SQLSelectQueryBlock
@@ -236,8 +230,7 @@ class SqlInterceptor : Interceptor {
                     databaseName,
                     selectQueryBlock,
                     selectQueryBlock.from,
-                    fieldName,
-                    fieldValue
+                    fieldName
                 )
             }
         }
