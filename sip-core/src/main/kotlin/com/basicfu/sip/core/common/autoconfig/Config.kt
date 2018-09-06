@@ -1,25 +1,27 @@
 package com.basicfu.sip.core.common.autoconfig
 
+import org.springframework.core.io.support.PropertiesLoaderUtils
 import org.springframework.stereotype.Component
-import org.yaml.snakeyaml.Yaml
-import java.io.FileInputStream
 import javax.annotation.PostConstruct
 
 @Component
 class Config {
     /**需要排除app_id的表*/
-    var appField="app_id"
-    var appExecuteTable=HashMap<String,ArrayList<String>>()
+    var appField = "app_id"
+    var appExecuteTable = HashMap<String, List<String>>()
 
     @Suppress("UNCHECKED_CAST")
     @PostConstruct
     fun init() {
-        val yaml = Yaml().load(FileInputStream(ClassLoader.getSystemResource("application.yaml").file)) as LinkedHashMap<String, Any>
-        yaml["sip"]?.let {
-            val app=(it as LinkedHashMap<String, Any>)
-            appField=app["app-field"].toString()
-            app["app-exclude-table"]?.let {
-                appExecuteTable=it as LinkedHashMap<String,ArrayList<String>>
+        val properties = PropertiesLoaderUtils.loadAllProperties("application.properties")
+        appField = properties.getProperty("sip.app-field")
+        properties.forEach { k, v ->
+            val key = k.toString()
+            if (key.startsWith("sip.app-exclude-table")) {
+                val array = key.split(".")
+                if (array.size == 3) {
+                    appExecuteTable[array[2]] = v.toString().split(",")
+                }
             }
         }
     }
