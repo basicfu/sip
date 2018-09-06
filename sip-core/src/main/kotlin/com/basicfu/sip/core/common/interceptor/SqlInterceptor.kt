@@ -66,7 +66,7 @@ class SqlInterceptor : Interceptor {
         @Suppress("UNCHECKED_CAST")
         val metaObject = SystemMetaObject.forObject(statementHandler)
         //name like null 上次过滤NULL问题，
-        val appId: String = RequestUtil.getParameter(Constant.System.APP_ID)
+        val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
                 ?: //log
                 throw RuntimeException("not found app code")
         //TODO 应添加当系统设置某个参数或线程时跳过过滤sql

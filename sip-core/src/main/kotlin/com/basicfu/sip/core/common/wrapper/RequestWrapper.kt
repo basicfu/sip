@@ -1,6 +1,5 @@
 package com.basicfu.sip.core.common.wrapper
 
-import com.basicfu.sip.core.common.Constant
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
@@ -20,19 +19,17 @@ class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(re
     }
 
     /**
-     * 如果有appId在后面追加appId
      * 由于zuul转发时使用getQueryString获取参数的方式转发，因此需要重写此方法而不是getParameter
      */
     override fun getQueryString(): String? {
-        var queryString = super.getQueryString()
-        if (queryString.isNullOrBlank()) {
-            params[Constant.System.APP_ID]?.let { queryString = "${Constant.System.APP_ID}=${it[0]}" }
-        } else {
-            params[Constant.System.APP_ID]?.let { queryString += "&${Constant.System.APP_ID}=${it[0]}" }
+        val sb=StringBuilder()
+        params.forEach { k, v ->
+            v.forEach {
+                sb.append("$k=$it&")
+            }
         }
-        return queryString
+        return sb.toString().substringBeforeLast("&")
     }
-
     override fun getParameterNames(): Enumeration<String> {
         return Vector(params.keys).elements()
     }

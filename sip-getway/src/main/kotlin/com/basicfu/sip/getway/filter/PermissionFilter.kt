@@ -111,8 +111,8 @@ class PermissionFilter : Filter {
         if (appSecret == null) {
             appSecret = request.getParameter(Constant.System.APP_SECRET)
         }
-        //set current thread app code
-        request.addParameter(Constant.System.APP_ID,app.id)
+        //set current thread app id,overwrite app parameter
+        request.addParameter(Constant.System.APP_CODE,app.id)
         //每个应用只能调用sip中的服务和自身应用的服务并配置权限
         val services = arrayListOf<AppServiceDto>()
         services.addAll(apps[Constant.System.APP_SYSTEM_CODE]?.services ?: arrayListOf())
