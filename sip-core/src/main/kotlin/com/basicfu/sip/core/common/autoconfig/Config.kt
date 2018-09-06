@@ -14,7 +14,7 @@ class Config {
     @Suppress("UNCHECKED_CAST")
     @PostConstruct
     fun init() {
-        val yaml = Yaml().load(FileInputStream(ClassLoader.getSystemResource("application-app.yaml").file)) as LinkedHashMap<String, Any>
+        val yaml = Yaml().load(FileInputStream(ClassLoader.getSystemResource("application.yaml").file)) as LinkedHashMap<String, Any>
         yaml["sip"]?.let {
             val app=(it as LinkedHashMap<String, Any>)
             appField=app["app-field"].toString()

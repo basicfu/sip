@@ -1,0 +1,47 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+feign:
+  httpclient:
+    enabled: true
+  ribbon:
+    ReadTimeout: 15000
+    ConnectTimeout: 500
+    ServerListRefreshInterval: 3000
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+sip:
+  app-field: app_id
+  app-exclude-table:
+    sip-base:
+      - app
+    sip-tools:
+      - kube_charts
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+mapper:
+  mappers: com.basicfu.sip.core.common.mapper.CustomMapper
+  not-empty: false
+  identity: MYSQL
+  safe-update: true
+  safe-delete: true
+logging:
+  pattern:
+    console: '%clr(%d{"yyyy-MM-dd HH:mm:ss.SSS"}){faint} %clr([${LOG_LEVEL_PATTERN}) %clr(%-30.30logger{29}]){cyan} %clr(:){faint} %m%n%wEx'
+  level:
+    com:
+      netflix:
+        discovery: info
