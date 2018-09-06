@@ -5,6 +5,7 @@ USE `sip-dict`;
 drop table if exists dict;
 create table dict (
   id bigint auto_increment comment '主键' primary key,
+  app_id bigint not null default 0 comment '应用ID',
   name varchar(64) NOT NULL DEFAULT '' COMMENT '字典名',
   value varchar(64) NOT NULL DEFAULT '' COMMENT '字典值',
   description varchar(255) COMMENT '字典描述',
@@ -19,6 +20,5 @@ create table dict (
   KEY key_rgt (rgt),
   KEY key_isdel (isdel)
 )comment '字典表' engine=InnoDB;
-
 
 INSERT INTO dict (id,name, value, description, lft, rgt, lvl, fixed, isdel) VALUES (1,'根', 'root', '根', 1, 2, 0, 0, 0);

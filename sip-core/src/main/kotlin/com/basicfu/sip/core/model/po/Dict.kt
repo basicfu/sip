@@ -21,6 +21,22 @@ class Dict {
     var id: Long? = null
 
     /**
+     * 应用ID
+     */
+    /**
+     * 获取应用ID
+     *
+     * @return app_id - 应用ID
+     */
+    /**
+     * 设置应用ID
+     *
+     * @param appId 应用ID
+     */
+    @Column(name = "app_id")
+    var appId: Long? = null
+
+    /**
      * 字典名
      */
     /**
@@ -50,6 +66,19 @@ class Dict {
      */
     var value: String? = null
 
+    /**
+     * 字典描述
+     */
+    /**
+     * 获取字典描述
+     *
+     * @return description - 字典描述
+     */
+    /**
+     * 设置字典描述
+     *
+     * @param description 字典描述
+     */
     var description: String? = null
 
     /**
@@ -96,6 +125,20 @@ class Dict {
      * @param lvl 节点层级
      */
     var lvl: Int? = null
+
+    /**
+     * 排序
+     */
+    /**
+     * 获取排序
+     *
+     * @return sort - 排序
+     */
+    /**
+     * 设置排序
+     *
+     * @param sort 排序
+     */
     var sort: Int? = null
 
     /**
