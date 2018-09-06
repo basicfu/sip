@@ -4,13 +4,5 @@ sip:
   app-exclude-table:
     sip-base:
       - app
-    sip-permission:
-      - user_role
-      - menu_resource
-      - permission_resource
-      - role_menu
-      - role_permission
-      - user_role
-      - resource
     sip-tools:
       - kube_charts

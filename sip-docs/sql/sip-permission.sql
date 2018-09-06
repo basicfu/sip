@@ -15,6 +15,7 @@ comment '角色表' engine=InnoDB;
 drop table if exists user_role;
 create table user_role(
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
   user_id bigint not null default 0 comment '用户Id',
   role_id bigint not null default 0 comment '角色Id'
 )
@@ -37,6 +38,7 @@ comment '菜单表' engine=InnoDB;
 drop table if exists role_menu;
 CREATE TABLE role_menu (
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
   role_id bigint not null default 0 comment '角色ID',
   menu_id bigint not null default 0 comment '菜单ID'
 )comment '角色菜单表' engine=InnoDB;
@@ -44,6 +46,7 @@ CREATE TABLE role_menu (
 drop table if exists resource;
 CREATE TABLE resource (
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
   service_id bigint not null default 0 comment '服务Id',
   url varchar(255) not null default '' comment '资源URL',
   method varchar(10) not null default '' comment '请求方法(一个接口有多种请求方式强制拆成多个接口)',
@@ -54,6 +57,7 @@ CREATE TABLE resource (
 drop table if exists menu_resource;
 CREATE TABLE menu_resource (
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
   menu_id bigint not null default 0 comment '菜单Id',
   resource_id bigint not null default 0 comment '资源Id'
 )comment '菜单资源表' engine=InnoDB;
@@ -61,6 +65,7 @@ CREATE TABLE menu_resource (
 drop table if exists role_permission;
 CREATE TABLE role_permission (
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
   role_id bigint not null default 0 comment '角色Id',
   permission_id bigint not null default 0 comment '权限Id'
 )comment '角色权限表' engine=InnoDB;
@@ -74,6 +79,7 @@ create table permission(
 drop table if exists permission_resource;
 CREATE TABLE permission_resource (
   id bigint auto_increment primary key,
+  app_id bigint not null default 0 comment '应用Id',
   permission_id bigint not null default 0 comment '权限Id',
   resource_id bigint not null default 0 comment '资源Id'
 )comment '权限资源表' engine=InnoDB;
