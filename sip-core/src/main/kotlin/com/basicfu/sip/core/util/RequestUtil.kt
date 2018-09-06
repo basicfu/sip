@@ -14,9 +14,4 @@ object RequestUtil {
         val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
         return request.getParameter(key)
     }
-
-    fun setParameter(key: String,value:String){
-        val request = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
-        request.setAttribute(key,value)
-    }
 }

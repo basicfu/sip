@@ -2,17 +2,22 @@ package com.basicfu.sip.getway.filter
 
 import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.wrapper.RequestWrapper
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.model.dto.AppServiceDto
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.util.RedisUtil
+import com.netflix.zuul.context.RequestContext
+import org.apache.commons.lang3.StringUtils
 import org.springframework.http.HttpStatus
 import org.springframework.util.AntPathMatcher
 import java.net.URI
+import java.util.*
 import javax.servlet.*
 import javax.servlet.annotation.WebFilter
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletRequestWrapper
 import javax.servlet.http.HttpServletResponse
 
 
@@ -48,7 +53,7 @@ class PermissionFilter : Filter {
      * 2.1.请求头Authorization
      */
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
-        val request = servletRequest as HttpServletRequest
+        val request = RequestWrapper(servletRequest as HttpServletRequest)
         val response = servletResponse as HttpServletResponse
         var uri = request.requestURI
         val pathArray = uri.split("/")
@@ -73,6 +78,7 @@ class PermissionFilter : Filter {
         //4.get path code
         if (appCode == null && pathArray.size >= 3) {
             appCode = pathArray[1]
+            uri=uri.substringAfter(appCode)
             pathFull = true
         }
         if (appCode == null) {
@@ -106,7 +112,7 @@ class PermissionFilter : Filter {
             appSecret = request.getParameter(Constant.System.APP_SECRET)
         }
         //set current thread app code
-        request.setAttribute(Constant.System.APP_CODE,app.id)
+        request.addParameter(Constant.System.APP_ID,app.id)
         //每个应用只能调用sip中的服务和自身应用的服务并配置权限
         val services = arrayListOf<AppServiceDto>()
         services.addAll(apps[Constant.System.APP_SYSTEM_CODE]?.services ?: arrayListOf())

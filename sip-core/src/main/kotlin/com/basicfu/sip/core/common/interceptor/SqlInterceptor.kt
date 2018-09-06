@@ -66,11 +66,9 @@ class SqlInterceptor : Interceptor {
         @Suppress("UNCHECKED_CAST")
         val metaObject = SystemMetaObject.forObject(statementHandler)
         //name like null 上次过滤NULL问题，
-        var appId=RequestUtil.getParameter(Constant.System.APP_CODE)
-        if(appId==null){
-            //log
-            appId=Constant.System.APP_SYSTEM_CODE
-        }
+        val appId: String = RequestUtil.getParameter(Constant.System.APP_ID)
+                ?: //log
+                throw RuntimeException("not found app code")
         //TODO 应添加当系统设置某个参数或线程时跳过过滤sql
         metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField, appId))
         return invocation.proceed()
