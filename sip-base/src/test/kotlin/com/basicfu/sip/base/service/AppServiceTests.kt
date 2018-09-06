@@ -2,10 +2,10 @@ package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.BaseTests
 import com.basicfu.sip.base.mapper.AppMapper
+import com.basicfu.sip.base.model.po.App
 import com.basicfu.sip.base.model.vo.AppVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.po.App
 import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test

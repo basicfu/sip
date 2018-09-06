@@ -1,8 +1,7 @@
 package com.basicfu.sip.getway.config
 
 import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.model.dto.ApplicationDto
-import com.basicfu.sip.core.model.po.Service
+import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.util.RedisUtil
 import org.springframework.cloud.netflix.zuul.filters.RefreshableRouteLocator
 import org.springframework.cloud.netflix.zuul.filters.SimpleRouteLocator
@@ -19,13 +18,13 @@ class CustomRouteLocator(servletPath: String, private val properties: ZuulProper
     override fun locateRoutes(): Map<String, ZuulProperties.ZuulRoute> {
         val routesMap = LinkedHashMap<String, ZuulProperties.ZuulRoute>()
         routesMap.putAll(super.locateRoutes())
-        val appServices = RedisUtil.hGetAll<List<Service>>(Constant.Redis.APP)
+        val appServices = RedisUtil.hGetAll<AppDto>(Constant.Redis.APP)
         //初始化路由时加入app domain，所有url由domain+prefix+url组成
-        appServices.forEach { app ->
-            app.value?.forEach { v ->
+        appServices.forEach { _, app ->
+            app?.services?.forEach { v ->
                 val zuulRoute = ZuulProperties.ZuulRoute()
                 zuulRoute.id = v.id.toString()
-                zuulRoute.path = v.path
+                zuulRoute.path = "/" + app.code + v.path
                 zuulRoute.serviceId = v.serverId
                 zuulRoute.url = v.url
                 zuulRoute.isStripPrefix = v.stripPrefix!!

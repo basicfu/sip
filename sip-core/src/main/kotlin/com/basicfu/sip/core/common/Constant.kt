@@ -8,13 +8,16 @@ package com.basicfu.sip.core.common
  */
 object Constant {
     object System {
-        const val NAME = "sip"
         const val GUEST = "GUEST"
         const val AUTHORIZATION = "Authorization"
         const val SESSION_TIMEOUT: Long = 24 * 60 * 60 * 1000
         const val LOGOUT="注销成功"
         const val PAGE_SIZE=20
         const val PAGE_SIZE_STR= PAGE_SIZE.toString()
+        const val APP_SYSTEM_CODE = "sip"
+        const val APP_CODE="app"
+        const val APP_CALL="call"
+        const val APP_SECRET="secret"
     }
 
     object Redis {

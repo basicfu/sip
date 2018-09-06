@@ -1,0 +1,8 @@
+#指定数据库下不需要使用app_id的表
+sip:
+  app-field: app_id
+  app-exclude-table:
+    sip-base:
+      - app
+    sip-permission:
+      - user_role

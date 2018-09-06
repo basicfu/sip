@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.mapper.AppSecretMapper
-import com.basicfu.sip.base.model.dto.AppSecretDto
+import com.basicfu.sip.core.model.dto.AppSecretDto
 import com.basicfu.sip.base.model.po.AppSecret
 import com.basicfu.sip.base.model.vo.AppSecretVo
 import com.basicfu.sip.core.common.mapper.generate

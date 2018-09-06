@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.model.po.Resource
-import com.basicfu.sip.core.model.po.Service
 import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.getway.common.datasource.DataSourceContextHolder
@@ -35,16 +34,14 @@ class InitConfig : CommandLineRunner {
         DataSourceContextHolder.base()
         val apps = mapper.selectApp()
         val services = mapper.selectService()
+        val secrets = mapper.selectSecret()
         val serviceMap = services.groupBy({ it.appId!! }, { it })
-        val appServiceMap = HashMap<String, List<Service>>()
-        apps.forEach {app->
-            val list = serviceMap[app.id] ?: arrayListOf()
-            list.forEach {service->
-                service.path="/"+app.code+service.path
-            }
-            appServiceMap[app.code!!] = list
+        val secretMap = secrets.groupBy({ it.appId!! }, { it })
+        apps.forEach { app ->
+            app.services = serviceMap[app.id] ?: arrayListOf()
+            app.secrets = secretMap[app.id] ?: arrayListOf()
         }
-        RedisUtil.hMSet(Constant.Redis.APP, appServiceMap)
+        RedisUtil.hMSet(Constant.Redis.APP, apps.associateBy({ it.code!! }, { it }))
     }
 
     /**

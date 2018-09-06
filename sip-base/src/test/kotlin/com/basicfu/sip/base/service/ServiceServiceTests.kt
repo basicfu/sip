@@ -2,10 +2,10 @@ package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.BaseTests
 import com.basicfu.sip.base.mapper.AppServiceMapper
+import com.basicfu.sip.base.model.po.AppService
 import com.basicfu.sip.base.model.vo.ServiceVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.po.AppService
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,11 +22,11 @@ class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
         val vo = generate<ServiceVo> {
             name = "基础服务"
             path = "/base/**"
-            serverId="sip-base"
-            url=""
-            stripPrefix=true
-            retryable=true
-            sensitiveHeaders=""
+            serverId = "sip-base"
+            url = ""
+            stripPrefix = true
+            retryable = true
+            sensitiveHeaders = ""
         }
         Assert.assertEquals(1, appServiceService.insert(vo))
         return mapper.selectLastInsertId()
@@ -45,11 +45,11 @@ class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
         val vo = generate<ServiceVo> {
             name = "基础服务"
             path = "/base/**"
-            serverId="sip-base"
-            url="https://www.baidu.com"
-            stripPrefix=true
-            retryable=true
-            sensitiveHeaders=""
+            serverId = "sip-base"
+            url = "https://www.baidu.com"
+            stripPrefix = true
+            retryable = true
+            sensitiveHeaders = ""
         }
         Assert.assertEquals(1, appServiceService.insert(vo))
         try {
@@ -82,14 +82,14 @@ class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
     fun update() {
         val id = preInsert()
         val vo = generate<ServiceVo> {
-            this.id=id
+            this.id = id
             name = "基础服务"
             path = "/base/**"
-            serverId="sip-base"
-            url="https://www.baidu.com"
-            stripPrefix=true
-            retryable=true
-            sensitiveHeaders=""
+            serverId = "sip-base"
+            url = "https://www.baidu.com"
+            stripPrefix = true
+            retryable = true
+            sensitiveHeaders = ""
         }
         Assert.assertEquals(1, appServiceService.update(vo))
         appServiceService.delete(listOf(id))

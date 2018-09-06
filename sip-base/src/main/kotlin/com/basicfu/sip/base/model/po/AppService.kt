@@ -1,11 +1,9 @@
-package com.basicfu.sip.core.model.po
+package com.basicfu.sip.base.model.po
 
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
-class Service {
+@Table(name = "app_service")
+class AppService {
     /**
      * @return id
      */
@@ -22,10 +20,10 @@ class Service {
     /**
      * 获取应用ID
      *
-     * @return tenant_id - 应用ID
+     * @return app_id - 应用ID
      */
     /**
-     * 设置租户ID
+     * 设置应用ID
      *
      * @param appId 应用ID
      */
@@ -140,6 +138,33 @@ class Service {
     @Column(name = "sensitive_headers")
     var sensitiveHeaders: String? = null
 
+    /**
+     * 创建时间
+     */
+    /**
+     * 获取创建时间
+     *
+     * @return cdate - 创建时间
+     */
+    /**
+     * 设置创建时间
+     *
+     * @param cdate 创建时间
+     */
     var cdate: Int? = null
+
+    /**
+     * 更新时间
+     */
+    /**
+     * 获取更新时间
+     *
+     * @return udate - 更新时间
+     */
+    /**
+     * 设置更新时间
+     *
+     * @param udate 更新时间
+     */
     var udate: Int? = null
 }

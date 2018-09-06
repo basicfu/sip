@@ -1,6 +1,7 @@
 package com.basicfu.sip.core.common
 
 import com.basicfu.sip.core.annotation.EnableSipCore
+import com.basicfu.sip.core.common.autoconfig.Config
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
@@ -15,8 +16,9 @@ class BeanRegistrar : ImportBeanDefinitionRegistrar {
 
     override fun registerBeanDefinitions(metadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
         //register close project eureka throw exception
-        val fc = BeanDefinitionBuilder.genericBeanDefinition(FeignBeanFactoryPostProcessor::class.java)
-        registry.registerBeanDefinition(FeignBeanFactoryPostProcessor::class.java.simpleName, fc.beanDefinition)
+        registry.registerBeanDefinition(FeignBeanFactoryPostProcessor::class.java.simpleName, BeanDefinitionBuilder.genericBeanDefinition(FeignBeanFactoryPostProcessor::class.java).beanDefinition)
+        //register config
+        registry.registerBeanDefinition(Config::class.java.simpleName, BeanDefinitionBuilder.genericBeanDefinition(Config::class.java).beanDefinition)
 
         val attrs = metadata.getAnnotationAttributes(EnableSipCore::class.java.name, true)
         if (attrs != null) {

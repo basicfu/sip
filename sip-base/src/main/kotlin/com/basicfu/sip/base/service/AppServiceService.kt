@@ -2,13 +2,13 @@ package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.mapper.AppServiceMapper
+import com.basicfu.sip.base.model.po.AppService
 import com.basicfu.sip.base.model.vo.ServiceVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.ApplicationDto
 import com.basicfu.sip.core.service.BaseService
 import org.springframework.stereotype.Service
-import com.basicfu.sip.core.model.po.AppService
 
 /**
  * @author basicfu

@@ -1,6 +1,6 @@
-package com.basicfu.sip.base.model.dto
+package com.basicfu.sip.core.model.dto
 
-class ServiceDto {
+class AppServiceDto {
     var id: Long? = null
     var appId: Long? = null
     var name: String? = null
