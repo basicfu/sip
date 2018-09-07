@@ -8,4 +8,5 @@ package com.basicfu.sip.client.common
  */
 object Constant {
     const val AUTHORIZATION = "Authorization"
+    const val APP_CODE = "app"
 }

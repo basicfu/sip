@@ -2,7 +2,7 @@ package com.basicfu.sip.client.model
 
 class UserDto {
     var id: Long? = null
-    var tenantId: Long? = null
+    var appId: Long? = null
     var username: String? = null
     var mobile:String?=null
     var email:String?=null

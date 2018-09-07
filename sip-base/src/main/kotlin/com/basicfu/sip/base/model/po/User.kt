@@ -102,7 +102,7 @@ class User {
      *
      * @param type 用户类型0系统用户,1租户,2普通用户
      */
-    var type: Byte? = null
+    var type: Int? = null
 
     /**
      * 0正常,1删除,2黑名单
@@ -117,5 +117,5 @@ class User {
      *
      * @param status 0正常,1删除,2黑名单
      */
-    var status: Byte? = null
+    var status: Int? = null
 }
