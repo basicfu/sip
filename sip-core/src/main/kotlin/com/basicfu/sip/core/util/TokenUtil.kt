@@ -23,7 +23,8 @@ object TokenUtil {
      * 获取访客对象
      */
     fun getGuestUser(): UserDto? {
-        return RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
+        val appId = RequestUtil.getParameter(Constant.System.APP_CODE)
+        return RedisUtil.get<UserDto>("${Constant.Redis.TOKEN_GUEST}$appId")
     }
 
     /**

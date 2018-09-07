@@ -111,12 +111,15 @@ class PermissionFilter : Filter {
         if (appSecret == null) {
             appSecret = request.getParameter(Constant.System.APP_SECRET)
         }
+        val appId=app.id!!
         //set current thread app id,overwrite app parameter
-        request.addParameter(Constant.System.APP_CODE,app.id)
+        request.addParameter(Constant.System.APP_CODE,appId)
         //每个应用只能调用sip中的服务和自身应用的服务并配置权限
         val services = arrayListOf<AppServiceDto>()
         services.addAll(apps[Constant.System.APP_SYSTEM_CODE]?.services ?: arrayListOf())
-        services.addAll(apps[appCode]?.services ?: arrayListOf())
+        if(Constant.System.APP_SYSTEM_CODE!=appCode){
+            services.addAll(apps[appCode]?.services ?: arrayListOf())
+        }
         var allow = false
         for (service in services) {
             //多个service的path一致也不影响匹配
@@ -133,37 +136,27 @@ class PermissionFilter : Filter {
                     }
                 }
                 //token
-                val serviceUrl = "/" + antPathMatcher.extractPathWithinPattern(service.path, uri)
+                val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
                 val authorization = request.getHeader(Constant.System.AUTHORIZATION)
                 if (authorization == null || authorization.length != 32) {
                     //未登录用户
-                    val noLoginUser = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
-                    if (noLoginUser != null) {
-                        val resources = noLoginUser.resources?.get(service.id.toString())
-                        if (resources?.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) } == true) {
-                            allow = true
-                            break
-                        }
+                    if(allowGuest(appId,service.id!!,serviceUrl)){
+                        allow = true
+                        break
                     }
                 } else {
                     val user = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + authorization)
                     if (user == null) {
                         //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
-                        val noLoginUser = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_GUEST)
-                        if (noLoginUser != null) {
-                            val resources = noLoginUser.resources?.get(service.id.toString())
-                            if (resources?.any {
-                                    antPathMatcher.match(it, "/" + request.method + serviceUrl)
-                                } == true) {
-                                allow = true
-                                break
-                            }
+                        if(allowGuest(appId,service.id!!,serviceUrl)){
+                            allow = true
+                            break
                         }
                         returnMsg(response, "login timeout")
                     } else {
                         //auth存在并且redis存在无过期
                         val resources = user.resources?.get(service.id.toString())
-                        if (resources?.any { antPathMatcher.match(it, "/" + request.method + serviceUrl) } == true) {
+                        if (resources?.any { antPathMatcher.match(it, serviceUrl) } == true) {
                             RedisUtil.expire(
                                 Constant.Redis.TOKEN_PREFIX + authorization,
                                 Constant.System.SESSION_TIMEOUT
@@ -200,6 +193,16 @@ class PermissionFilter : Filter {
 
     override fun destroy() {}
 
+    private fun allowGuest(appId:Long,serviceId:Long,permissionUrl:String):Boolean{
+        val noLoginUser = RedisUtil.get<UserDto>("${Constant.Redis.TOKEN_GUEST}$appId")
+        if (noLoginUser != null) {
+            val resources = noLoginUser.resources?.get(serviceId.toString())
+            if (resources?.any { antPathMatcher.match(it, permissionUrl) } == true) {
+                return true
+            }
+        }
+        return false
+    }
     private fun returnMsg(response: HttpServletResponse, msg: String) {
         val result = Result.error<String>(msg)
         response.status = HttpStatus.OK.value()

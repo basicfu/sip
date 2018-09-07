@@ -11,7 +11,7 @@ import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.dto.PermissionDto
 import com.basicfu.sip.permission.model.po.Permission
 import com.basicfu.sip.permission.model.po.PermissionResource
-import com.basicfu.sip.core.model.po.Resource
+import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.PermissionVo
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang.StringUtils
@@ -45,6 +45,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         val po = dealInsert(to<Permission>(vo))
         return mapper.insertSelective(po)
     }
+
     fun insertResource(vo: PermissionVo): Int {
         val ids = vo.resourceIds!!
         if (resourceMapper.selectCountByExample(example<Resource> {
@@ -59,6 +60,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         }
         return prMapper.insertList(permissionResources)
     }
+
     fun update(vo: PermissionVo): Int {
         val checkPermission = mapper.selectOne(generate {
             name = vo.name

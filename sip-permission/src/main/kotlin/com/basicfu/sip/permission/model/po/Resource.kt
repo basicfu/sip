@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.model.po
+package com.basicfu.sip.permission.model.po
 
 import javax.persistence.Column
 import javax.persistence.GeneratedValue
@@ -16,6 +16,8 @@ class Resource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
+    @Column(name = "app_id")
+    var appId: Long? = null
     /**
      * 服务Id
      */

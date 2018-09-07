@@ -15,8 +15,8 @@ import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.model.dto.UserDto
-import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.SqlUtil
@@ -43,15 +43,15 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var userTemplateService: UserTemplateService
 
     fun get(id: Long): JSONObject? {
-        val result=to<UserDto>(mapper.selectByPrimaryKey(id))
+        val result = to<UserDto>(mapper.selectByPrimaryKey(id))
         result?.let {
             val userAuths = userAuthMapper.select(generate {
-                uid=id
+                uid = id
             })
-            val userAuthMap=userAuths.associateBy({ it.type }, { it })
-            it.mobile=userAuthMap[1]?.username
-            it.email=userAuthMap[2]?.username
-            it.ldate=userAuths.map { it.ldate!! }.max()
+            val userAuthMap = userAuths.associateBy({ it.type }, { it })
+            it.mobile = userAuthMap[1]?.username
+            it.email = userAuthMap[2]?.username
+            it.ldate = userAuths.map { it.ldate!! }.max()
         }
         return UserUtil.toJson(result)
     }
@@ -70,10 +70,10 @@ class UserService : BaseService<UserMapper, User>() {
                 username = vo.username
             }
         })
-        val users=pageList.list
-        if(users.isNotEmpty()){
+        val users = pageList.list
+        if (users.isNotEmpty()) {
             val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
-                andIn(UserAuth::uid,users.map { it.id })
+                andIn(UserAuth::uid, users.map { it.id })
             }).groupBy({ it.uid }, { it })
             users.forEach {
                 val userAuth = userAuths[it.id]
@@ -81,7 +81,7 @@ class UserService : BaseService<UserMapper, User>() {
                     val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
                     it.mobile = userAuthMap[1]?.username
                     it.email = userAuthMap[2]?.username
-                    it.ldate=userAuth.map { it.ldate!! }.max()
+                    it.ldate = userAuth.map { it.ldate!! }.max()
                 }
             }
         }
@@ -95,9 +95,9 @@ class UserService : BaseService<UserMapper, User>() {
         val users = to<UserDto>(mapper.selectByExample(example<User> {
             andIn(User::id, ids)
         }))
-        if(users.isNotEmpty()){
+        if (users.isNotEmpty()) {
             val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
-                andIn(UserAuth::uid,users.map { it.id })
+                andIn(UserAuth::uid, users.map { it.id })
             }).groupBy({ it.uid }, { it })
             users.forEach {
                 val userAuth = userAuths[it.id]
@@ -105,7 +105,7 @@ class UserService : BaseService<UserMapper, User>() {
                     val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
                     it.mobile = userAuthMap[1]?.username
                     it.email = userAuthMap[2]?.username
-                    it.ldate=userAuth.map { it.ldate!! }.max()
+                    it.ldate = userAuth.map { it.ldate!! }.max()
                 }
             }
         }
@@ -128,11 +128,11 @@ class UserService : BaseService<UserMapper, User>() {
      * MOBILE:只按照手机号
      * EMAIL:只按照邮箱
      */
-    fun suggest(q: String,roleCode:String?, size: Int): List<JSONObject>? {
+    fun suggest(q: String, roleCode: String?, size: Int): List<JSONObject>? {
         //可测试性能
 //        mapper.selectBySql("SELECT u.id,u.tenant_id,u.content,u.cdate,u.udate,status,ua.username,ua.type from user u LEFT JOIN user_auth ua on u.id=ua.uid INNER JOIN (select DISTINCT(uid) from user_auth WHERE username like '%1%' limit 10) as sub on u.id=sub.uid;")
         val userIds: List<Long>
-        if(roleCode.isNullOrBlank()) {
+        if (roleCode.isNullOrBlank()) {
             userIds = userAuthMapper.selectByExampleAndRowBounds(example<UserAuth> {
                 select(UserAuth::uid)
                 distinct()
@@ -140,14 +140,14 @@ class UserService : BaseService<UserMapper, User>() {
                     username = q
                 }
             }, RowBounds(0, size)).mapNotNull { it.uid }
-        }else{
+        } else {
             val users = mapper.selectBySql(
                 "SELECT DISTINCT uid as id FROM `sip-base`.user_auth ua " +
                         "RIGHT JOIN `sip-permission`.user_role ur on ua.uid=ur.user_id " +
                         "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
                         "WHERE ua.username LIKE ${SqlUtil.dealLikeValue(q)} AND r.code='$roleCode' LIMIT 0,$size"
             )
-            userIds=users.map { it.id!! }
+            userIds = users.map { it.id!! }
         }
         val users = to<UserDto>(selectByIds(userIds))
         if (users.isNotEmpty()) {
@@ -161,7 +161,7 @@ class UserService : BaseService<UserMapper, User>() {
                     val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
                     it.mobile = userAuthMap[1]?.username
                     it.email = userAuthMap[2]?.username
-                    it.ldate=userAuth.map { it.ldate!! }.max()
+                    it.ldate = userAuth.map { it.ldate!! }.max()
                 }
             }
         }
@@ -203,7 +203,7 @@ class UserService : BaseService<UserMapper, User>() {
         user.roles = permission.getJSONArray("roles")
         user.menus = permission.getJSONArray("menus")
         user.permissions = permission.getJSONArray("permissions")
-        user.resources = permission.getJSONArray("resources").toJavaList(Resource::class.java)
+        user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
             .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
         val token = TokenUtil.generateToken()
         //TODO 系统设置登录过期时间

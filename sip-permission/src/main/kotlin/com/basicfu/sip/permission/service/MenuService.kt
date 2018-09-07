@@ -4,7 +4,6 @@ import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.MenuDto
-import com.basicfu.sip.core.model.po.Resource
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.permission.common.Enum
@@ -13,6 +12,7 @@ import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.po.Menu
 import com.basicfu.sip.permission.model.po.MenuResource
+import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.MenuVo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -30,7 +30,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
 
     fun all(): List<Any> {
         val menus = to<MenuDto>(mapper.selectAll())
-        return MenuUtil.recursive(null,menus)
+        return MenuUtil.recursive(null, menus)
     }
 
     fun insert(vo: MenuVo): Int {
