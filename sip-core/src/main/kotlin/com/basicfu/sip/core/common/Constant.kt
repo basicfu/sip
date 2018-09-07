@@ -18,6 +18,7 @@ object Constant {
         const val APP_CODE = "app"
         const val APP_CALL = "call"
         const val APP_SECRET = "secret"
+        const val APP_SKIP = "skip"
     }
 
     object Redis {

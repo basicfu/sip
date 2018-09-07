@@ -6,7 +6,9 @@ import com.alibaba.druid.sql.ast.expr.*
 import com.alibaba.druid.sql.ast.statement.*
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.autoconfig.Config
+import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.RequestUtil
+import com.basicfu.sip.core.util.ThreadLocalUtil
 import com.mysql.jdbc.DatabaseMetaData
 import org.apache.commons.lang3.NotImplementedException
 import org.apache.commons.lang3.StringUtils
@@ -57,18 +59,28 @@ class SqlInterceptor : Interceptor {
     lateinit var config: Config
 
     override fun intercept(invocation: Invocation): Any {
-        val metaData = (invocation.args[0] as Connection).metaData
-        val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
-        field.isAccessible = true
-        val databaseName = field.get(metaData).toString()
-        val statementHandler = invocation.target as StatementHandler
-        val boundSql = statementHandler.boundSql
-        @Suppress("UNCHECKED_CAST")
-        val metaObject = SystemMetaObject.forObject(statementHandler)
-        //name like null 上次过滤NULL问题，
-        //TODO 应添加当系统设置某个参数或线程时跳过过滤sql
-        metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField))
-        return invocation.proceed()
+        val proceed:Any
+        try {
+            if (ThreadLocalUtil.get<Boolean>(Constant.System.APP_SKIP) != null) {
+                return invocation.proceed()
+            }
+            val metaData = (invocation.args[0] as Connection).metaData
+            val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
+            field.isAccessible = true
+            val databaseName = field.get(metaData).toString()
+            val statementHandler = invocation.target as StatementHandler
+            val boundSql = statementHandler.boundSql
+            @Suppress("UNCHECKED_CAST")
+            val metaObject = SystemMetaObject.forObject(statementHandler)
+            //name like null 上次过滤NULL问题，
+            //TODO 应添加当系统设置某个参数或线程时跳过过滤sql
+            metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField))
+            proceed = invocation.proceed()
+        } finally {
+            //只针对一次sql有效，执行完不论是否抛错一定释放
+            AppUtil.releaseAppNotCheck()
+        }
+        return proceed
     }
 
     override fun plugin(target: Any): Any {
@@ -102,7 +114,7 @@ class SqlInterceptor : Interceptor {
     ) {
         if (StringUtils.isBlank(fieldName) || from == null || queryObject == null) return
         val originCondition = queryObject.where
-        var dbName=databaseName
+        var dbName = databaseName
         when (from) {
             is SQLExprTableSource -> {
                 var tableName = ""
@@ -110,8 +122,8 @@ class SqlInterceptor : Interceptor {
                     tableName = (from.expr as SQLIdentifierExpr).name
                 } else if (from.expr is SQLPropertyExpr) {
                     //此种情况目前只发现在`数据库名.表明`的情况，取owner中的库名
-                    val sqlPropertyExpr=from.expr as SQLPropertyExpr
-                    dbName=sqlPropertyExpr.ownernName.replace("`","")
+                    val sqlPropertyExpr = from.expr as SQLPropertyExpr
+                    dbName = sqlPropertyExpr.ownernName.replace("`", "")
                     tableName = sqlPropertyExpr.name
                 }
                 val alias = from.alias

@@ -7,6 +7,7 @@ import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.permission.common.Enum
 import com.basicfu.sip.permission.mapper.*
@@ -111,6 +112,8 @@ class RoleService : BaseService<RoleMapper, Role>() {
         val resourceIds = arrayListOf<Long>()
         resourceIds.addAll(menuResourceIds)
         resourceIds.addAll(permissionResourceIds)
+        //其他应用可以有系统的应用resource，所以此处不使用appId
+        AppUtil.appNotCheck()
         val resources = resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ","))
         val result = JSONObject()
         result["roles"] = roles

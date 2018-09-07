@@ -8,13 +8,16 @@ object ThreadLocalUtil {
         }
     }
 
-    operator fun <T> get(key: String): T {
-        println(Thread.currentThread().name)
-        return threadLocal.get()[key] as T
+    operator fun <T> get(key: String): T? {
+        val any = threadLocal.get()[key]
+        return if(any==null){
+            null
+        }else{
+            any as T
+        }
     }
 
     operator fun set(key: String, value: Any) {
-        println(Thread.currentThread().name)
         threadLocal.get()[key] = value
     }
 
