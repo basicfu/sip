@@ -235,11 +235,11 @@ open class Sqls<T> {
 
     //自定义条件添加标识，以免为NULL的被忽略
     fun andCondition(k: String, condition: String) {
-        this.criteria.criterions.add(Criterion(k, condition, "and",true))
+        this.criteria.criterions.add(Criterion(k, condition, "and", true))
     }
 
     fun orCondition(k: String, condition: String) {
-        this.criteria.criterions.add(Criterion(k, condition, "or",true))
+        this.criteria.criterions.add(Criterion(k, condition, "or", true))
     }
 
     fun Sqls<T>.orIsNull(vararg k: KMutableProperty1<T, String?>) {
@@ -401,8 +401,14 @@ open class Sqls<T> {
         this.criteria.criterions.add(Criterion(k, v1, v2, "not between", "or"))
     }
 
-    fun Sqls<T>.orLike(k: KMutableProperty1<T, *>, v: String) {
+    fun Sqls<T>.orLike(k: KMutableProperty1<T, *>, v: String?) {
         this.orLike(k.name, dealLikeValue(v))
+    }
+
+    inline fun <reified T> Sqls<T>.orLike(op: T.() -> Unit = {}) {
+        for ((k, v) in this.getValues(op)) {
+            this.orLike(k, dealLikeValue(v.toString()))
+        }
     }
 
     @PublishedApi
