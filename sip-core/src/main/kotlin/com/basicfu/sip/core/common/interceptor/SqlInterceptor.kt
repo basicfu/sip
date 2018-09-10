@@ -64,11 +64,10 @@ class SqlInterceptor : Interceptor {
     override fun intercept(invocation: Invocation): Any {
         val proceed: Any
         try {
-            val start=System.currentTimeMillis()
             if (ThreadLocalUtil.get<Boolean>(Constant.System.APP_SKIP) != null) {
                 return invocation.proceed()
             }
-            if(invocation.method.name=="prepare"){
+            if (invocation.method.name == "prepare") {
                 val metaData = (invocation.args[0] as Connection).metaData
                 val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
                 field.isAccessible = true
@@ -78,20 +77,20 @@ class SqlInterceptor : Interceptor {
                 @Suppress("UNCHECKED_CAST")
                 val metaObject = SystemMetaObject.forObject(statementHandler)
                 metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField))
-            }else if(invocation.method.name=="update"){
+            } else if (invocation.method.name == "update") {
                 //当为insert时设置bean的appId
                 //当为手动sql时目前不支持自动添加appId
-                if((invocation.args[0] as MappedStatement).sqlCommandType==SqlCommandType.INSERT){
+                if ((invocation.args[0] as MappedStatement).sqlCommandType == SqlCommandType.INSERT) {
                     val bean = invocation.args[1]
-                    val field=bean::class.java.getDeclaredField(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,config.appField))
-                    field.isAccessible=true
+                    val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
+                    val field = bean::class.java.getDeclaredField(appField)
+                    field.isAccessible = true
                     val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
                             ?: //log
                             throw RuntimeException("not found app code")
-                    field.set(invocation.args[1],appId.toLong())
+                    field.set(bean, appId.toLong())
                 }
             }
-            println(System.currentTimeMillis()-start)
             proceed = invocation.proceed()
         } finally {
             //只针对一次sql有效，执行完不论是否抛错一定释放
