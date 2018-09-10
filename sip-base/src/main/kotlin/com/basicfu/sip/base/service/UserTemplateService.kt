@@ -22,7 +22,10 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
 
     fun list(vo: UserTemplateVo): PageInfo<UserTemplateDto> {
         val pageInfo = selectPage<UserTemplateDto>(example<UserTemplate> {
-            andLike(UserTemplate::name, vo.name)
+            orLike {
+                name = vo.q
+                enName = vo.q
+            }
         })
         pageInfo.list.sortBy { it.sort }
         return pageInfo
@@ -34,7 +37,7 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
     }
 
     fun insert(vo: UserTemplateVo): Int {
-        if(UserDto::class.java.declaredFields.map { it.name }.contains(vo.enName))throw CustomException(Enum.UserTemplate.SYSTEM_FIELD)
+        if (UserDto::class.java.declaredFields.map { it.name }.contains(vo.enName)) throw CustomException(Enum.UserTemplate.SYSTEM_FIELD)
         if (mapper.selectCount(generate {
                 name = vo.name
             }) != 0) throw CustomException(Enum.UserTemplate.FIELD_NAME_EXISTS)
@@ -46,7 +49,7 @@ class UserTemplateService : BaseService<UserTemplateMapper, UserTemplate>() {
     }
 
     fun update(vo: UserTemplateVo): Int {
-        if(UserDto::class.java.declaredFields.map { it.name }.contains(vo.enName))throw CustomException(Enum.UserTemplate.SYSTEM_FIELD)
+        if (UserDto::class.java.declaredFields.map { it.name }.contains(vo.enName)) throw CustomException(Enum.UserTemplate.SYSTEM_FIELD)
         val po = dealUpdate(to<UserTemplate>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }

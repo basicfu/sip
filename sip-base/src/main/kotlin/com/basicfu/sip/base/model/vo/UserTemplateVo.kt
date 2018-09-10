@@ -2,7 +2,7 @@ package com.basicfu.sip.base.model.vo
 
 class UserTemplateVo {
     var id: Long? = null
-    var tenantId: Long? = null
+    var appId: Long? = null
     var name: String? = null
     var enName: String? = null
     var type: String? = null
@@ -12,4 +12,6 @@ class UserTemplateVo {
     var sort: Int? = null
     var cdate: Int? = null
     var udate: Int? = null
+
+    var q: String? = null
 }
