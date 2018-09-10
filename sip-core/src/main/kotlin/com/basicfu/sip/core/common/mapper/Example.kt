@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate", "unused")
+
 package com.basicfu.sip.core.common.mapper
 
 import com.basicfu.sip.core.util.SqlUtil.dealLikeValue
@@ -165,7 +167,7 @@ open class Sqls<T> {
     @PublishedApi
     internal fun andIn(k: String, values: Iterable<*>) {
         val notNullValues = values.filterNotNull()
-        if(notNullValues.isEmpty()){
+        if (notNullValues.isEmpty()) {
             throw RuntimeException("list中没有非null元素")
         }
         this.criteria.criterions.add(Criterion(k, notNullValues, "in", "and"))
@@ -219,7 +221,7 @@ open class Sqls<T> {
     //此处的v是condition可以sql注入
     @PublishedApi
     internal fun andLike(k: String, v: Any?) {
-        this.andCondition(k,"like $v")
+        v?.let { this.andCondition(k, "like $v") }
     }
 
     fun Sqls<T>.andNotLike(k: KMutableProperty1<T, *>, v: String) {
@@ -228,15 +230,18 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun andNotLike(k: String, v: Any?) {
-        this.criteria.criterions.add(Criterion(k, v, "not like", "and"))
+        v?.let { this.andCondition(k, "not like $v") }
     }
 
-    fun andCondition(k:String,condition: String){
-        this.criteria.criterions.add(Criterion(k, condition, "and"))
+    //自定义条件添加标识，以免为NULL的被忽略
+    fun andCondition(k: String, condition: String) {
+        this.criteria.criterions.add(Criterion(k, condition, "and",true))
     }
-    fun orCondition(k:String,condition: String){
-        this.criteria.criterions.add(Criterion(k, condition, "or"))
+
+    fun orCondition(k: String, condition: String) {
+        this.criteria.criterions.add(Criterion(k, condition, "or",true))
     }
+
     fun Sqls<T>.orIsNull(vararg k: KMutableProperty1<T, String?>) {
         k.forEach {
             this.orIsNull(it.name)
@@ -402,7 +407,7 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orLike(k: String, v: Any?) {
-        this.orCondition(k,"like $v")
+        v?.let { this.orCondition(k, "like $v") }
     }
 
     fun Sqls<T>.orNotLike(k: KMutableProperty1<T, *>, v: String) {
@@ -411,7 +416,7 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orNotLike(k: String, v: Any?) {
-        this.criteria.criterions.add(Criterion(k, v, "not like", "or"))
+        v?.let { this.orCondition(k, "not like $v") }
     }
 
     class Criteria {
@@ -424,6 +429,7 @@ open class Sqls<T> {
         var value: Any? = null
         var secondValue: Any? = null
         var condition: String? = null
+        var customCondition = false
         var andOr: String? = null
         val values: Array<Any>
             get() = if (value != null) {
@@ -436,10 +442,11 @@ open class Sqls<T> {
                 arrayOf()
             }
 
-        constructor(property: String, condition: String, andOr: String) {
+        constructor(property: String, condition: String, andOr: String, customCondition: Boolean = false) {
             this.property = property
             this.condition = condition
             this.andOr = andOr
+            this.customCondition = customCondition
         }
 
 
@@ -464,12 +471,12 @@ open class Sqls<T> {
 class Example<T> @JvmOverloads constructor(
     private var entityClass: Class<*>,
     //过滤为Null的值
-    private var filterNull:Boolean=true,
+    private var filterNull: Boolean = true,
     //值是否允许为Null
     private var notNull: Boolean = false,
     //判断属性是否必须存在
     private var exists: Boolean = true
-    ) : Sqls<T>() {
+) : Sqls<T>() {
     private var table = EntityHelper.getEntityTable(entityClass)
     private var propertyMap = table.propertyMap
     private var orderByClause = StringBuilder()
@@ -581,9 +588,9 @@ class Example<T> @JvmOverloads constructor(
                 val property = criterion.property
                 val values = criterion.values
                 //过滤value为NULL的
-//                if(criterion.value!=null){
+                if (criterion.customCondition || criterion.value != null) {
                     transformCriterion(exampleCriteria, condition, property, values, andOr)
-//                }
+                }
             }
             oredCriteria!!.add(exampleCriteria)
         }
@@ -594,7 +601,7 @@ class Example<T> @JvmOverloads constructor(
         val clazz = this::class.java
         for (field in clazz.declaredFields) {
             field.isAccessible = true
-            if (field.name == "sqlsCriteria"||field.name == "filterNull") {
+            if (field.name == "sqlsCriteria" || field.name == "filterNull") {
                 continue
             }
             var value = field.get(this)
