@@ -9,10 +9,14 @@ import com.basicfu.sip.core.common.autoconfig.Config
 import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.RequestUtil
 import com.basicfu.sip.core.util.ThreadLocalUtil
+import com.google.common.base.CaseFormat
 import com.mysql.jdbc.DatabaseMetaData
 import org.apache.commons.lang3.NotImplementedException
 import org.apache.commons.lang3.StringUtils
+import org.apache.ibatis.executor.Executor
 import org.apache.ibatis.executor.statement.StatementHandler
+import org.apache.ibatis.mapping.MappedStatement
+import org.apache.ibatis.mapping.SqlCommandType
 import org.apache.ibatis.plugin.*
 import org.apache.ibatis.reflection.SystemMetaObject
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,8 +25,6 @@ import org.springframework.util.ReflectionUtils
 import java.sql.Connection
 import java.util.*
 
-
-//
 //@Intercepts(
 //    Signature(type = Executor::class, method = "update", args = arrayOf(MappedStatement::class, Any::class)),
 //    Signature(
@@ -50,7 +52,8 @@ import java.util.*
  */
 @Component
 @Intercepts(
-    Signature(type = StatementHandler::class, method = "prepare", args = arrayOf(Connection::class, Integer::class))
+    Signature(type = StatementHandler::class, method = "prepare", args = arrayOf(Connection::class, Integer::class)),
+    Signature(type = Executor::class, method = "update", args = arrayOf(MappedStatement::class, Any::class))
 //    Signature(type = StatementHandler::class, method = "query", args = arrayOf(Statement::class, ResultHandler::class))
 )
 class SqlInterceptor : Interceptor {
@@ -59,22 +62,36 @@ class SqlInterceptor : Interceptor {
     lateinit var config: Config
 
     override fun intercept(invocation: Invocation): Any {
-        val proceed:Any
+        val proceed: Any
         try {
+            val start=System.currentTimeMillis()
             if (ThreadLocalUtil.get<Boolean>(Constant.System.APP_SKIP) != null) {
                 return invocation.proceed()
             }
-            val metaData = (invocation.args[0] as Connection).metaData
-            val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
-            field.isAccessible = true
-            val databaseName = field.get(metaData).toString()
-            val statementHandler = invocation.target as StatementHandler
-            val boundSql = statementHandler.boundSql
-            @Suppress("UNCHECKED_CAST")
-            val metaObject = SystemMetaObject.forObject(statementHandler)
-            //name like null 上次过滤NULL问题，
-            //TODO 应添加当系统设置某个参数或线程时跳过过滤sql
-            metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField))
+            if(invocation.method.name=="prepare"){
+                val metaData = (invocation.args[0] as Connection).metaData
+                val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
+                field.isAccessible = true
+                val databaseName = field.get(metaData).toString()
+                val statementHandler = invocation.target as StatementHandler
+                val boundSql = statementHandler.boundSql
+                @Suppress("UNCHECKED_CAST")
+                val metaObject = SystemMetaObject.forObject(statementHandler)
+                metaObject.setValue("delegate.boundSql.sql", addCondition(databaseName, boundSql.sql, config.appField))
+            }else if(invocation.method.name=="update"){
+                //当为insert时设置bean的appId
+                //当为手动sql时目前不支持自动添加appId
+                if((invocation.args[0] as MappedStatement).sqlCommandType==SqlCommandType.INSERT){
+                    val bean = invocation.args[1]
+                    val field=bean::class.java.getDeclaredField(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,config.appField))
+                    field.isAccessible=true
+                    val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
+                            ?: //log
+                            throw RuntimeException("not found app code")
+                    field.set(invocation.args[1],appId.toLong())
+                }
+            }
+            println(System.currentTimeMillis()-start)
             proceed = invocation.proceed()
         } finally {
             //只针对一次sql有效，执行完不论是否抛错一定释放
