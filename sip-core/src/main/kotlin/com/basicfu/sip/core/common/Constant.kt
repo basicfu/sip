@@ -25,5 +25,10 @@ object Constant {
         const val TOKEN_PREFIX = "TOKEN_"
         const val TOKEN_GUEST = TOKEN_PREFIX + System.GUEST + "_"
         const val APP = "APP"
+        const val DICT = "DICT_"
+    }
+
+    object Dict {
+        const val USER_TEMPLATE_FIELD_TYPE = "USER_TEMPLATE_FIELD_TYPE"
     }
 }

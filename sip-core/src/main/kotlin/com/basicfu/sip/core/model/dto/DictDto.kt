@@ -2,6 +2,7 @@ package com.basicfu.sip.core.model.dto
 
 class DictDto {
     var id: Long? = null
+    var appId: Long? = null
     var name: String? = null
     var value: String? = null
     var description: String? = null
