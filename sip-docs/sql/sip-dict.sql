@@ -8,7 +8,7 @@ create table dict (
   app_id bigint not null default 0 comment '应用ID',
   name varchar(64) NOT NULL DEFAULT '' COMMENT '字典名',
   value varchar(64) NOT NULL DEFAULT '' COMMENT '字典值',
-  description varchar(255) COMMENT '字典描述',
+  description varchar(255) default '' COMMENT '字典描述',
   lft bigint NOT NULL DEFAULT 0 COMMENT '左节点',
   rgt bigint NOT NULL DEFAULT 0 COMMENT '右节点',
   lvl int NOT NULL DEFAULT 0 COMMENT '节点层级',
