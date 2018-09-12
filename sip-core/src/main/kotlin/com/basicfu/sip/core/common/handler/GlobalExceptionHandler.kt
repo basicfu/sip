@@ -1,11 +1,15 @@
 package com.basicfu.sip.core.common.handler
 
+import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.model.Result
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.validation.FieldError
+import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -15,6 +19,7 @@ import org.springframework.web.servlet.NoHandlerFoundException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+@Suppress("unused")
 @ControllerAdvice
 class GlobalExceptionHandler {
     private val log = LoggerFactory.getLogger(this.javaClass)
@@ -41,7 +46,7 @@ class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(HttpMessageNotReadableException::class)
     private fun httpMessageNotReadableException(e: HttpMessageNotReadableException): Result<Any> {
-        log.error("\${Enum.INVALID_PARAMETER.msg}-【msg】--" + e.message)
+        log.error("${Enum.INVALID_PARAMETER.msg}-【msg】--" + e.message)
         return Result.error(
             Enum.INVALID_PARAMETER.msg,
             Enum.INVALID_PARAMETER.value
@@ -61,11 +66,36 @@ class GlobalExceptionHandler {
 
     /**
      * 前台传递参数限制异常
+     * 参数验证异常
      */
     @ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    private fun notValidException(e: Exception): Result<Any> {
-        log.error(e.message)
+    private fun methodArgumentNotValidException(e: MethodArgumentNotValidException): Result<Any> {
+        val fieldErrorsMap = e.bindingResult.fieldErrors?.associateBy({ it.field }, { it })
+        if (fieldErrorsMap != null) {
+            val linkedHashList = linkedSetOf<FieldError>()
+            val bean = e.bindingResult.target
+            val declaredFields = bean::class.java.declaredFields
+            declaredFields.forEach {
+                val error = fieldErrorsMap[it.name]
+                if (error != null) {
+                    linkedHashList.add(error)
+                }
+            }
+            val first = linkedHashList.first()
+            val array = JSONArray()
+            linkedHashList.forEach {
+                val data = JSONObject()
+                data["field"] = it.field
+                data["msg"] = it.defaultMessage
+                array.add(data)
+            }
+            return Result.error(
+                first.defaultMessage,
+                Enum.INVALID_PARAMETER.value,
+                array
+            )
+        }
         return Result.error(
             Enum.INVALID_PARAMETER.msg,
             Enum.INVALID_PARAMETER.value
@@ -92,8 +122,22 @@ class GlobalExceptionHandler {
         response: HttpServletResponse,
         e: HttpRequestMethodNotSupportedException
     ): Result<Any> {
-        response.status = 405
+        response.status = 200
         log.error(e.message)
         return Result.error(e.message.toString(), 405)
+    }
+
+    /**
+     * Content type not supported
+     */
+    @ResponseBody
+    @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+    private fun httpMediaTypeNotSupportedException(
+        response: HttpServletResponse,
+        e: HttpMediaTypeNotSupportedException
+    ): Result<Any> {
+        response.status = 200
+        log.error(e.message)
+        return Result.error(e.message.toString(), 500)
     }
 }
