@@ -29,4 +29,8 @@ interface Mapper {
 
     @Select("SELECT r.app_id as appId,resource.app_id as appId,resource.service_id as serviceId,resource.url as url,resource.method as method FROM role r INNER JOIN role_menu rm on r.id=rm.role_id INNER JOIN menu_resource mr ON rm.menu_id=mr.menu_id INNER JOIN resource on resource.id=mr.resource_id where r.code=#{code}")
     fun selectPermissionResourceIdByRoleCode(@Param("code") code: String): List<ResourceDto>
+
+    @Select("SELECT id,app_id as appId,name,value,description,lft,rgt,lvl,sort,fixed,isdel from dict where isdel=0")
+    fun selectDict(): List<DictDto>
+
 }

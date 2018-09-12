@@ -29,20 +29,29 @@ class DataSourceConfig {
     }
 
     @Bean
-    fun dataSource(@Qualifier("baseDataSource") baseDataSource: DataSource, @Qualifier("permissionDataSource") permissionDataSource: DataSource): DataSource {
+    @ConfigurationProperties("spring.datasource.druid.dict")
+    fun dictDataSource(): DataSource {
+        return DruidDataSourceBuilder.create().build()
+    }
+
+    @Bean
+    fun dataSource(baseDataSource: DataSource,permissionDataSource: DataSource,dictDataSource: DataSource): DataSource {
         val targetDataSources = HashMap<Any, Any>()
         targetDataSources[DataSourceContextHolder.DataSourceType.BASE.name] = baseDataSource
         targetDataSources[DataSourceContextHolder.DataSourceType.PERMISSION.name] = permissionDataSource
+        targetDataSources[DataSourceContextHolder.DataSourceType.DICT.name] = dictDataSource
         val dataSource = DynamicDataSource()
         dataSource.setTargetDataSources(targetDataSources)
-        dataSource.setDefaultTargetDataSource(permissionDataSource)
+        dataSource.setDefaultTargetDataSource(baseDataSource)
         return dataSource
     }
 
     @Bean
-    fun sqlSessionFactory(@Qualifier("baseDataSource") baseDataSource: DataSource, @Qualifier("permissionDataSource") permissionDataSource: DataSource): SqlSessionFactoryBean {
+    fun sqlSessionFactory(@Qualifier("baseDataSource") baseDataSource: DataSource,
+                          @Qualifier("permissionDataSource") permissionDataSource: DataSource,
+                          @Qualifier("dictDataSource") dictDataSource: DataSource): SqlSessionFactoryBean {
         val sqlSessionFactoryBean = SqlSessionFactoryBean()
-        sqlSessionFactoryBean.setDataSource(this.dataSource(baseDataSource, permissionDataSource))
+        sqlSessionFactoryBean.setDataSource(this.dataSource(baseDataSource, permissionDataSource,dictDataSource))
         sqlSessionFactoryBean.setMapperLocations(PathMatchingResourcePatternResolver().getResources("classpath*:/mapper/*.xml"))
         return sqlSessionFactoryBean
     }

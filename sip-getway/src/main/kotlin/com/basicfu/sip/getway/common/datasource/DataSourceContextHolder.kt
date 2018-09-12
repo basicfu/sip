@@ -3,7 +3,8 @@ package com.basicfu.sip.getway.common.datasource
 class DataSourceContextHolder {
     enum class DataSourceType {
         BASE,
-        PERMISSION
+        PERMISSION,
+        DICT
     }
     companion object {
         private val contextHolder = ThreadLocal<DataSourceType>()
@@ -15,6 +16,9 @@ class DataSourceContextHolder {
         }
         fun permission() {
             contextHolder.set(DataSourceType.PERMISSION)
+        }
+        fun dict() {
+            contextHolder.set(DataSourceType.DICT)
         }
     }
 

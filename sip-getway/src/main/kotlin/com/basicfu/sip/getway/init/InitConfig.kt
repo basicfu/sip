@@ -3,6 +3,7 @@ package com.basicfu.sip.getway.init
 import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.dto.AppDto
+import com.basicfu.sip.core.model.dto.DictDto
 import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.util.MenuUtil
@@ -12,6 +13,7 @@ import com.basicfu.sip.getway.mapper.Mapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
+import java.util.*
 
 /**
  * @author basicfu
@@ -25,6 +27,7 @@ class InitConfig : CommandLineRunner {
     override fun run(vararg strings: String) {
         val apps = initAppService()
         initNoLoginToken(apps)
+        initDict(apps)
     }
 
     /**
@@ -69,5 +72,32 @@ class InitConfig : CommandLineRunner {
             user.menus = JSON.parseArray(JSON.toJSONString(appMenu))
             RedisUtil.set("${Constant.Redis.TOKEN_GUEST}${app.id}", user)
         }
+    }
+
+    /**
+     * init dict
+     */
+    fun initDict(apps: List<AppDto>) {
+        DataSourceContextHolder.dict()
+        val dicts = mapper.selectDict()
+        val dictMap = dicts.groupBy({ it.appId!! }, { it })
+        apps.forEach { app ->
+            val list = dictMap[app.id]
+            if (list != null) {
+                val root = list.filter { it.lvl == 0 }?.get(0)
+                chidren(root, list)
+                RedisUtil.set("${Constant.Redis.DICT}${app.id}", root)
+            }
+        }
+    }
+
+    private fun chidren(parent: DictDto, list: List<DictDto>) {
+        val children = ArrayList<DictDto>()
+        list.filter { it.lft in parent.lft!!..parent.rgt!! && it.lvl == parent.lvl!! + 1 }.forEach {
+            chidren(it, list)
+            children.add(it)
+        }
+        children.sortBy { it.sort }
+        parent.children = children
     }
 }
