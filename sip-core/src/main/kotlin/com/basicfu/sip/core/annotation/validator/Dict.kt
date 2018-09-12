@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 @Retention
 @Constraint(validatedBy = [(DictValidator::class)])
 annotation class Dict(
-    val message: String = "the value of the request is not in the dictionary",
+    val message: String = "dictionary can't be null",
     val dict: String,
     val groups: Array<KClass<*>> = [],
     val payload: Array<KClass<out Payload>> = []

@@ -18,13 +18,16 @@ class DictValidator : ConstraintValidator<Dict, String> {
         this.dict=dict.dict
     }
 
-    override fun isValid(value: String, context: ConstraintValidatorContext): Boolean {
+    override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
+        if(value==null){
+            return false
+        }
         val dict = this.dict ?: throw RuntimeException("dict is null")
         val dictMap = RedisUtil.get<DictDto>("${Constant.Redis.DICT}${RequestUtil.getParameter(Constant.System.APP_CODE)}")
             ?.children?.associateBy({ it.value!! }, { it })?.get(dict)?.children?.associateBy { it.value }
         if(dictMap?.containsKey(value) == false){
             context.disableDefaultConstraintViolation()
-            context.buildConstraintViolationWithTemplate("值【$value】不在字典中").addConstraintViolation()
+            context.buildConstraintViolationWithTemplate("值[$value]不在字典中").addConstraintViolation()
             return false
         }
         return true
