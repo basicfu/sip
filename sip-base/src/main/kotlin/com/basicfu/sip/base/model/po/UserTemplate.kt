@@ -120,7 +120,7 @@ class UserTemplate {
      *
      * @param required 是否必填
      */
-    var required: Byte? = null
+    var required: Boolean? = null
 
     /**
      * 字段顺序

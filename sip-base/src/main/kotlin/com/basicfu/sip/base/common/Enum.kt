@@ -27,8 +27,8 @@ enum class Enum constructor(val value: Int, val msg:String) {
         URL_EXISTS(1,"服务URL已存在")
     }
     enum class UserTemplate constructor(val value: Int,val msg: String){
-        FIELD_NAME_EXISTS(1,"字段名已存在"),
-        FIELD_EN_NAME_EXISTS(1,"字段英文名已存在"),
+        NAME_EXISTS(1,"字段名已存在"),
+        EN_NAME_EXISTS(1,"字段英文名已存在"),
         SYSTEM_FIELD(2,"系统字段无法添加")
     }
     enum class User constructor(val value: Int,val msg: String){

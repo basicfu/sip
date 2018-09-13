@@ -42,6 +42,7 @@ class GlobalExceptionHandler {
 
     /**
      * spring接收参数异常
+     * 会包括bean set时抛出的异常
      */
     @ResponseBody
     @ExceptionHandler(HttpMessageNotReadableException::class)

@@ -2,8 +2,11 @@ package com.basicfu.sip.base.controller
 
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.base.service.UserTemplateService
+import com.basicfu.sip.core.annotation.Insert
+import com.basicfu.sip.core.annotation.Update
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -27,12 +30,12 @@ class UserTemplateController {
     }
 
     @PostMapping("/insert")
-    fun insert(@RequestBody vo: UserTemplateVo): Result<Any> {
+    fun insert(@Validated(Insert::class) @RequestBody vo: UserTemplateVo): Result<Any> {
         return Result.success(userTemplateService.insert(vo))
     }
 
     @PostMapping("/update")
-    fun update(@RequestBody vo: UserTemplateVo): Result<Any> {
+    fun update(@Validated(Update::class) @RequestBody vo: UserTemplateVo): Result<Any> {
         return Result.success(userTemplateService.update(vo))
     }
 
