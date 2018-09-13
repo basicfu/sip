@@ -41,7 +41,7 @@ object UserTemplateUtil {
                 if (startLength > endLength) {
                     throw CustomException("${prefix}结束值不能大于开始值")
                 }
-                if (value!=null&&value.length !in startLength..endLength) {
+                if (!value.isNullOrBlank()&&value!!.length !in startLength..endLength) {
                     throw CustomException("${default}长度需要[$startLength~$endLength]个字符")
                 }
             }
@@ -61,7 +61,7 @@ object UserTemplateUtil {
                 if ((lengthRange.size != 2||lengthRange[1].isEmpty()) || (valueRange.size != 2||valueRange[1].isEmpty())) {
                     throw CustomException("${prefix}约束格式不正确,如:3,0&0~100")
                 }
-                if(value!=null){
+                if(!value.isNullOrBlank()){
                     val startLength = lengthRange[0].toInt()
                     val endLength = lengthRange[1].toInt()
                     val startValue = valueRange[0].toFloat()
@@ -72,7 +72,7 @@ object UserTemplateUtil {
                     if(endLength>10){
                         throw CustomException("${prefix}小数位最大10位")
                     }
-                    val splitValue = value.split(".")
+                    val splitValue = value!!.split(".")
                     if(splitValue.contains(".")&&(splitValue.size!=2||splitValue[1].isEmpty())){
                         throw CustomException("${default}不能只有点没有小数")
                     }
@@ -106,7 +106,7 @@ object UserTemplateUtil {
                 if (dict==null||dict.isEmpty()) {
                     throw CustomException("${prefix}字典${extra}不存在")
                 }
-                if(value!=null){
+                if(!value.isNullOrBlank()){
                     if(!dict.associateBy{it.value}.containsKey(value)){
                         throw CustomException("${default}不在字典${extra}中")
                     }
@@ -119,7 +119,7 @@ object UserTemplateUtil {
                 } catch (e: Exception) {
                     throw CustomException("${prefix}日期格式不正确,需要输入支持Java SimpleDateFormat的格式")
                 }
-                if(value!=null){
+                if(!value.isNullOrBlank()){
                     try {
                         sdf.parse(value)
                     }catch (e:Exception){
