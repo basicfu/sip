@@ -85,10 +85,10 @@ class SqlInterceptor : Interceptor {
                     val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
                     val field = bean::class.java.getDeclaredField(appField)
                     field.isAccessible = true
-                    val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
+                    val appId: Long = AppUtil.getAppId()
                             ?: //log
                             throw RuntimeException("not found app code")
-                    field.set(bean, appId.toLong())
+                    field.set(bean, appId)
                 }
             }
             proceed = invocation.proceed()
@@ -229,12 +229,12 @@ class SqlInterceptor : Interceptor {
         return if (executeTable != null && executeTable.contains(tableName)) {
             originCondition
         } else {
-            val appId: String = RequestUtil.getParameter(Constant.System.APP_CODE)
+            val appId: Long = AppUtil.getAppId()
                     ?: //log
                     throw RuntimeException("not found app code")
             val filedName = if (StringUtils.isBlank(tableAlias)) fieldName else "$tableAlias.$fieldName"
             val condition =
-                SQLBinaryOpExpr(SQLIdentifierExpr(filedName), SQLCharExpr(appId), SQLBinaryOperator.Equality)
+                SQLBinaryOpExpr(SQLIdentifierExpr(filedName), SQLCharExpr(appId.toString()), SQLBinaryOperator.Equality)
             return SQLUtils.buildCondition(SQLBinaryOperator.BooleanAnd, condition, false, originCondition)
         }
     }

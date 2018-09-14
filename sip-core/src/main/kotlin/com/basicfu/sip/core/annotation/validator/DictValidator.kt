@@ -1,9 +1,9 @@
 package com.basicfu.sip.core.annotation.validator
 
 import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core .model.dto.DictDto
+import com.basicfu.sip.core.model.dto.DictDto
+import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.RedisUtil
-import com.basicfu.sip.core.util.RequestUtil
 import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 
@@ -23,7 +23,7 @@ class DictValidator : ConstraintValidator<Dict, String> {
             return false
         }
         val dict = this.dict ?: throw RuntimeException("dict is null")
-        val dictMap = RedisUtil.get<DictDto>("${Constant.Redis.DICT}${RequestUtil.getParameter(Constant.System.APP_CODE)}")
+        val dictMap = RedisUtil.get<DictDto>("${Constant.Redis.DICT}${AppUtil.getAppId()}")
             ?.children?.associateBy({ it.value!! }, { it })?.get(dict)?.children?.associateBy { it.value }
         if(dictMap?.containsKey(value) == false){
             context.disableDefaultConstraintViolation()
