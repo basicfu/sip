@@ -84,7 +84,7 @@ class InitConfig : CommandLineRunner {
         apps.forEach { app ->
             val list = dictMap[app.id]
             if (list != null) {
-                val root = list.filter { it.lvl == 0 }?.get(0)
+                val root = list.filter { it.lvl == 0 }[0]
                 chidren(root, list)
                 RedisUtil.set("${Constant.Redis.DICT}${app.id}", root)
             }

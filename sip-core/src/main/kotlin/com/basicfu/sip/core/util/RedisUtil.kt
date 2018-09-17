@@ -12,7 +12,7 @@ import javax.annotation.Resource
 class RedisUtil {
     @Autowired
     @Resource(name = "redisTemplate")
-    private lateinit var redisTemplateTmp: RedisTemplate<Any, Any>
+    private lateinit var redisTemplateTmp: RedisTemplate<String, Any>
 
     @PostConstruct
     fun init() {
@@ -21,14 +21,14 @@ class RedisUtil {
 
     companion object {
         private val timeUnit = TimeUnit.MILLISECONDS
-        lateinit var redisTemplate: RedisTemplate<Any, Any>
+        lateinit var redisTemplate: RedisTemplate<String, Any>
 
-        fun set(k: Any, v: Any?) {
+        fun set(k: String, v: Any?) {
             val serialize = SerializationUtil.serialize(v)
             redisTemplate.opsForValue().set(k, serialize)
         }
 
-        fun set(k: Any, v: Any?, expireMilliseconds: Long) {
+        fun set(k: String, v: Any?, expireMilliseconds: Long) {
             val serialize = SerializationUtil.serialize(v)
             redisTemplate.opsForValue().set(k, serialize)
             expire(k, expireMilliseconds)
@@ -39,23 +39,30 @@ class RedisUtil {
             return SerializationUtil.deserialize(data)
         }
 
-        fun expire(key: Any, expireMilliseconds: Long) {
+        fun keys(pattern: String):Set<String> {
+            return redisTemplate.keys(pattern)
+        }
+
+        fun expire(key: String, expireMilliseconds: Long) {
             redisTemplate.expire(key, expireMilliseconds, timeUnit)
         }
 
-        fun del(key: Any) {
+        fun del(key: String) {
             redisTemplate.delete(key)
         }
 
-        fun hSet(key: Any, hk: Any, hv: Any?) {
+        fun del(keys:List<String>){
+            redisTemplate.delete(keys)
+        }
+
+        fun hSet(key: String, hk: Any, hv: Any?) {
             val serialize = SerializationUtil.serialize(hv)
             redisTemplate.opsForHash<Any, Any>().put(key, hk, serialize)
         }
 
-        inline fun <reified T> hGet(key: Any, hk: Any): T? {
-            val data = redisTemplate.opsForHash<Any, Any>().get(key.toString(), hk.toString())
+        inline fun <reified T> hGet(key: String, hk: Any): T? {
+            val data = redisTemplate.opsForHash<Any, Any>().get(key, hk)
             return SerializationUtil.deserialize(data)
-
         }
 
         inline fun <reified T : Any> hMSet(key: String, map: Map<String, T?>) {
@@ -66,7 +73,7 @@ class RedisUtil {
             redisTemplate.opsForHash<Any, Any>().putAll(key, result)
         }
 
-        inline fun <reified T> hGetAll(key: Any): HashMap<String, T?> {
+        inline fun <reified T> hGetAll(key: String): HashMap<String, T?> {
             val entries = redisTemplate.opsForHash<String, T>().entries(key)
             val result = hashMapOf<String, T?>()
             entries.forEach { k, v ->
@@ -75,11 +82,11 @@ class RedisUtil {
             return result
         }
 
-        fun hDel(key: Any, hk: Any) {
+        fun hDel(key: String, hk: Any) {
             redisTemplate.opsForHash<Any, Any>().delete(key, hk)
         }
 
-        fun exists(key: Any): Boolean {
+        fun exists(key: String): Boolean {
             return redisTemplate.hasKey(key)
         }
 
@@ -91,19 +98,19 @@ class RedisUtil {
             redisTemplate.exec()
         }
 
-        fun increment(key: Any, l: Long): Long {
+        fun increment(key: String, l: Long): Long {
             return redisTemplate.opsForValue().increment(key, l)
         }
 
-        fun sadd(key: Any, vararg objs: Any): Long {
+        fun sadd(key: String, vararg objs: Any): Long {
             return redisTemplate.opsForSet().add(key, *objs)
         }
 
-        fun scard(key: Any): Long {
+        fun scard(key: String): Long {
             return redisTemplate.boundSetOps(key).size()
         }
 
-        fun rpush(k: Any, v: Any?) {
+        fun rpush(k: String, v: Any?) {
             val serialize = SerializationUtil.serialize(v)
             redisTemplate.opsForList().rightPush(k, serialize)
         }

@@ -34,6 +34,7 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class User constructor(val value: Int,val msg: String){
         EXIST_USER(1,"用户名已存在"),
         USERNAME_OR_PASSWORD_ERROR(1,"用户名或密码错误"),
+        THEN_USER_MAX_ONLINE(1,"超过用户同时登录最大数"),
         LOGIN_ERROR(2,"登录失败，请稍后重试")
     }
     enum class FieldType{

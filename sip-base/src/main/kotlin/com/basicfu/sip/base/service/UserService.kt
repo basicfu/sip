@@ -173,6 +173,9 @@ class UserService : BaseService<UserMapper, User>() {
      * 用户名登录
      * 后期密码使用加密后的值
      * TODO 登录后清除该用户其他token
+     * TODO 界面配置登录模式
+     * 模式一：系统配置允许用户同时在线用户数,如1，再次登录只能修改密码
+     * 模式二：每次登录后上次用户自动过期，登录后清除该用户其他token
      * TODO 校验手机和邮箱拥有者后可开启手机或邮箱登录
      * TODO 登录查询表过多，可优化连为连表查询
      */
@@ -184,6 +187,17 @@ class UserService : BaseService<UserMapper, User>() {
         if (!PasswordUtil.matches(vo.username + vo.password!!, userAuth.password!!)) throw CustomException(
             Enum.User.USERNAME_OR_PASSWORD_ERROR
         )
+        //TODO 界面配置登录模式
+        val loginModal = 2
+        val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(vo.username!!)+"*")
+        @Suppress("ConstantConditionIf")
+        if (loginModal == 1) {
+            if (keys.size >= 2) {
+                throw CustomException(Enum.User.THEN_USER_MAX_ONLINE)
+            }
+        } else {
+            RedisUtil.del(keys.map { it })
+        }
         val user = to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
         val currentTime = (System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
@@ -205,14 +219,13 @@ class UserService : BaseService<UserMapper, User>() {
         user.permissions = permission.getJSONArray("permissions")
         user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
             .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
-        val token = TokenUtil.generateToken()
         //TODO 系统设置登录过期时间
-        RedisUtil.set(
-            Constant.Redis.TOKEN_PREFIX + token, user,
-            Constant.System.SESSION_TIMEOUT
-        )
+        val userToken=TokenUtil.generateUserToken(vo.username!!)
+        val redisToken=TokenUtil.getRedisToken(userToken)
+        RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
+        val frontToken= TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
         val result = JSONObject()
-        result["token"] = token
+        result["token"] = frontToken
         result["time"] = System.currentTimeMillis() / 1000
         result["username"] = user.username
         result["roles"] = user.roles
@@ -221,6 +234,7 @@ class UserService : BaseService<UserMapper, User>() {
 
     /**
      * 登出
+     * TODO 如果是模式2需要移除所有token
      */
     fun logout() {
         TokenUtil.getCurrentToken()?.let {

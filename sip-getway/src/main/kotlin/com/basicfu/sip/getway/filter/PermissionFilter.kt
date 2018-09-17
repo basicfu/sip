@@ -6,18 +6,14 @@ import com.basicfu.sip.core.common.wrapper.RequestWrapper
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.model.dto.AppServiceDto
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.util.RedisUtil
-import com.netflix.zuul.context.RequestContext
-import org.apache.commons.lang3.StringUtils
+import com.basicfu.sip.core.util.TokenUtil
 import org.springframework.http.HttpStatus
 import org.springframework.util.AntPathMatcher
 import java.net.URI
-import java.util.*
 import javax.servlet.*
 import javax.servlet.annotation.WebFilter
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletRequestWrapper
 import javax.servlet.http.HttpServletResponse
 
 
@@ -137,15 +133,15 @@ class PermissionFilter : Filter {
                 }
                 //token
                 val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
-                val authorization = request.getHeader(Constant.System.AUTHORIZATION)
-                if (authorization == null || authorization.length != 32) {
+                val frontToken = request.getHeader(Constant.System.AUTHORIZATION)
+                if (frontToken == null || frontToken.length != 32) {
                     //未登录用户
                     if(allowGuest(appId,service.id!!,serviceUrl)){
                         allow = true
                         break
                     }
                 } else {
-                    val user = RedisUtil.get<UserDto>(Constant.Redis.TOKEN_PREFIX + authorization)
+                    val user = TokenUtil.getCurrentUserByFrontToken(frontToken)
                     if (user == null) {
                         //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
                         if(allowGuest(appId,service.id!!,serviceUrl)){
@@ -158,7 +154,7 @@ class PermissionFilter : Filter {
                         val resources = user.resources?.get(service.id.toString())
                         if (resources?.any { antPathMatcher.match(it, serviceUrl) } == true) {
                             RedisUtil.expire(
-                                Constant.Redis.TOKEN_PREFIX + authorization,
+                                TokenUtil.getCurrentToken(frontToken)!!,
                                 Constant.System.SESSION_TIMEOUT
                             )
                             allow = true
@@ -194,7 +190,7 @@ class PermissionFilter : Filter {
     override fun destroy() {}
 
     private fun allowGuest(appId:Long,serviceId:Long,permissionUrl:String):Boolean{
-        val noLoginUser = RedisUtil.get<UserDto>("${Constant.Redis.TOKEN_GUEST}$appId")
+        val noLoginUser = TokenUtil.getGuestUser(appId)
         if (noLoginUser != null) {
             val resources = noLoginUser.resources?.get(serviceId.toString())
             if (resources?.any { antPathMatcher.match(it, permissionUrl) } == true) {

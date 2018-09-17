@@ -19,6 +19,7 @@ object Constant {
         const val APP_CALL = "call"
         const val APP_SECRET = "secret"
         const val APP_SKIP = "skip"
+        const val AES_TOKEN_KEY = "AES_TOKEN_KEY_AA"
     }
 
     object Redis {
