@@ -21,9 +21,9 @@ class AppService : BaseService<AppMapper, App>() {
 
     fun list(vo: AppVo): PageInfo<AppDto> {
         return selectPage(example<App> {
-            andLike {
-                name = vo.name
-                code = vo.code
+            orLike {
+                name = vo.q
+                code = vo.q
             }
         })
     }
@@ -36,6 +36,7 @@ class AppService : BaseService<AppMapper, App>() {
                 code = vo.code
             }) != 0) throw CustomException(Enum.App.CODE_EXISTS)
         val po = dealInsert(to<App>(vo))
+        //TODO 初始化应用信息
         return mapper.insertSelective(po)
     }
 
