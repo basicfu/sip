@@ -67,6 +67,7 @@ class SqlInterceptor : Interceptor {
             if (ThreadLocalUtil.get<Boolean>(Constant.System.APP_SKIP) != null) {
                 return invocation.proceed()
             }
+            //过滤应用在实际修改的地方判断，在连库查询时数据库可能不一样
             if (invocation.method.name == "prepare") {
                 val metaData = (invocation.args[0] as Connection).metaData
                 val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
@@ -80,15 +81,28 @@ class SqlInterceptor : Interceptor {
             } else if (invocation.method.name == "update") {
                 //当为insert时设置bean的appId
                 //当为手动sql时目前不支持自动添加appId
-                if ((invocation.args[0] as MappedStatement).sqlCommandType == SqlCommandType.INSERT) {
-                    val bean = invocation.args[1]
-                    val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
-                    val field = bean::class.java.getDeclaredField(appField)
-                    field.isAccessible = true
-                    val appId: Long = AppUtil.getAppId()
-                            ?: //log
-                            throw RuntimeException("not found app code")
-                    field.set(bean, appId)
+                //过滤应用
+                /**
+                 * 这里无法获取到数据库名,因此只判断了表明
+                 */
+                val mappedStatement=(invocation.args[0] as MappedStatement)
+                if(mappedStatement.sqlCommandType == SqlCommandType.INSERT){
+                    val statementList = SQLUtils.parseStatements(mappedStatement.getBoundSql(invocation.args[1]).sql, dialect)
+                    val tableName=(statementList[0] as SQLInsertStatement).tableName.simpleName
+                    val allTable= arrayListOf<String>()
+                    config.appExecuteTable.values.forEach {
+                        allTable.addAll(it)
+                    }
+                    if (!allTable.contains(tableName)) {
+                        val bean = invocation.args[1]
+                        val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
+                        val field = bean::class.java.getDeclaredField(appField)
+                        field.isAccessible = true
+                        val appId: Long = AppUtil.getAppId()
+                                ?: //log
+                                throw RuntimeException("not found app code")
+                        field.set(bean, appId)
+                    }
                 }
             }
             proceed = invocation.proceed()
