@@ -24,8 +24,6 @@ class UserTemplateVo {
     @NotNull(message = "是否必填不能为空", groups = [Insert::class, Update::class])
     var required: Boolean? = null
     var sort: Int? = null
-    var cdate: Int? = null
-    var udate: Int? = null
 
     var q: String? = null
 }
