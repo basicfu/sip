@@ -1,10 +1,11 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.mapper.AppSecretMapper
-import com.basicfu.sip.core.model.dto.AppSecretDto
 import com.basicfu.sip.base.model.po.AppSecret
 import com.basicfu.sip.base.model.vo.AppSecretVo
+import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.AppSecretDto
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service
@@ -18,11 +19,17 @@ import java.util.*
 class AppSecretService : BaseService<AppSecretMapper, AppSecret>() {
 
     fun list(vo: AppSecretVo): PageInfo<AppSecretDto> {
-        return selectPage()
+        return selectPage(example<AppSecret> {
+            orLike {
+                secret = vo.q
+                description = vo.q
+            }
+            orderByDesc(AppSecret::cdate)
+        })
     }
 
     fun all(): List<AppSecretDto> {
-        return to(mapper.selectAll())
+        return to(mapper.selectAll().sortedBy { it.cdate })
     }
 
     fun insert(vo: AppSecretVo): Int {

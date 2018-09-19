@@ -38,7 +38,7 @@ create table app_secret(
 	id bigint auto_increment primary key,
 	app_id bigint not null default 0 comment '应用ID',
 	secret varchar(32) not null default '' comment 'secret',
-	description varchar(64) not null default '' comment '描述',
+	description varchar(32) not null default '' comment '描述',
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
 	unique key (app_id,secret)

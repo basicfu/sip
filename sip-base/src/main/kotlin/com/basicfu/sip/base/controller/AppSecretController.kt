@@ -2,8 +2,11 @@ package com.basicfu.sip.base.controller
 
 import com.basicfu.sip.base.model.vo.AppSecretVo
 import com.basicfu.sip.base.service.AppSecretService
+import com.basicfu.sip.core.annotation.Insert
+import com.basicfu.sip.core.annotation.Update
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -27,12 +30,12 @@ class AppSecretController {
     }
 
     @PostMapping("/insert")
-    fun insert(@RequestBody vo: AppSecretVo): Result<Any> {
+    fun insert(@Validated(Insert::class) @RequestBody vo: AppSecretVo): Result<Any> {
         return Result.success(appSecretService.insert(vo))
     }
 
     @PostMapping("/update")
-    fun update(@RequestBody vo: AppSecretVo): Result<Any> {
+    fun update(@Validated(Update::class) @RequestBody vo: AppSecretVo): Result<Any> {
         return Result.success(appSecretService.update(vo))
     }
 

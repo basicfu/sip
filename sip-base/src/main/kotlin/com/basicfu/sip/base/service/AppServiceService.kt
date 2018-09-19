@@ -34,7 +34,7 @@ class AppServiceService : BaseService<AppServiceMapper, AppService>() {
     }
 
     fun insert(vo: AppServiceVo): Int {
-        if(vo.serverId.isNullOrBlank()&&vo.url.isNullOrBlank()){
+        if (vo.serverId.isNullOrBlank() && vo.url.isNullOrBlank()) {
             throw CustomException(Enum.Service.SERVER_ID_OR_URL)
         }
         if (mapper.selectCount(generate {
@@ -51,7 +51,7 @@ class AppServiceService : BaseService<AppServiceMapper, AppService>() {
     }
 
     fun update(vo: AppServiceVo): Int {
-        if(vo.serverId.isNullOrBlank()&&vo.url.isNullOrBlank()){
+        if (vo.serverId.isNullOrBlank() && vo.url.isNullOrBlank()) {
             throw CustomException(Enum.Service.SERVER_ID_OR_URL)
         }
         val checkPath = mapper.selectOne(generate {

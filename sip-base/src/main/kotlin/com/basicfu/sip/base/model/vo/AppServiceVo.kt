@@ -15,7 +15,9 @@ class AppServiceVo {
     var name: String? = null
     @Length(min = 2, max = 32, message = "PATH需要2~32位", groups = [Insert::class, Update::class])
     var path: String? = null
+    @Length(max=32,message = "注册名最大32个字符",groups = [Insert::class, Update::class])
     var serverId: String? = null
+    @Length(max=32,message = "URL最大255个字符",groups = [Insert::class, Update::class])
     var url: String? = null
     @NotNull(message = "过滤前缀不能为空", groups = [Insert::class, Update::class])
     var stripPrefix: Boolean? = null
