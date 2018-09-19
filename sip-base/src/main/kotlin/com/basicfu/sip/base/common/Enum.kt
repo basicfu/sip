@@ -24,7 +24,8 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class Service constructor(val value: Int,val msg: String){
         PATH_EXISTS(1,"服务路径已存在"),
         SERVER_ID_EXISTS(1,"服务ID已存在"),
-        URL_EXISTS(1,"服务URL已存在")
+        URL_EXISTS(1,"服务URL已存在"),
+        SERVER_ID_OR_URL(1,"注册名或URL必填一个"),
     }
     enum class UserTemplate constructor(val value: Int,val msg: String){
         NAME_EXISTS(1,"字段名已存在"),

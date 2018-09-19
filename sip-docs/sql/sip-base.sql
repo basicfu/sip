@@ -14,6 +14,25 @@ create table app(
 )
 comment '应用表' engine=InnoDB;
 
+drop table if exists app_service;
+create table app_service(
+	id bigint auto_increment primary key,
+	app_id bigint not null default 0 comment '应用ID',
+	name varchar(32) not null default '' comment '应用名',
+	path varchar(32) not null default '' comment '应用path',
+	server_id varchar(32) not null default '' comment '应用注册名',
+	url varchar(255) not null default '' comment '应用URL',
+	strip_prefix tinyint not null default 0 comment '过滤前缀',
+	retryable tinyint not null default 0 comment '重试',
+	sensitive_headers varchar(512) null comment '敏感头信息',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
+  unique key (app_id,path),
+  unique key (app_id,server_id),
+  unique key (app_id,url)
+)
+comment '服务表' engine=InnoDB;
+
 drop table if exists app_secret;
 create table app_secret(
 	id bigint auto_increment primary key,
@@ -25,23 +44,6 @@ create table app_secret(
 	unique key (app_id,secret)
 )
 comment '应用secret表' engine=InnoDB;
-
-drop table if exists app_service;
-create table app_service(
-	id bigint auto_increment primary key,
-	app_id bigint not null default 0 comment '应用ID',
-	name varchar(64) not null default '' comment '应用名',
-	path varchar(64) not null default '' comment '应用path',
-	server_id varchar(64) not null default '' comment '应用注册名',
-	url varchar(255) not null default '' comment '应用URL',
-	strip_prefix tinyint not null default 0 comment '过滤前缀',
-	retryable tinyint not null default 0 comment '重试',
-	sensitive_headers varchar(500) null comment '敏感头信息',
-	cdate int not null default 0 comment '创建时间',
-  udate int not null default 0 comment '更新时间',
-  unique key (app_id,path)
-)
-comment '服务表' engine=InnoDB;
 
 drop table if exists user;
 create table user(

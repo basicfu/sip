@@ -3,7 +3,7 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.BaseTests
 import com.basicfu.sip.base.mapper.AppServiceMapper
 import com.basicfu.sip.base.model.po.AppService
-import com.basicfu.sip.base.model.vo.ServiceVo
+import com.basicfu.sip.base.model.vo.AppServiceVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
 import org.junit.Assert
@@ -19,7 +19,7 @@ class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
     lateinit var appServiceService: AppServiceService
 
     fun preInsert(): Long {
-        val vo = generate<ServiceVo> {
+        val vo = generate<AppServiceVo> {
             name = "基础服务"
             path = "/base/**"
             serverId = "sip-base"
@@ -42,7 +42,7 @@ class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
 
     @Test
     fun insert() {
-        val vo = generate<ServiceVo> {
+        val vo = generate<AppServiceVo> {
             name = "基础服务"
             path = "/base/**"
             serverId = "sip-base"
@@ -81,7 +81,7 @@ class ServiceServiceTests : BaseTests<AppServiceMapper, AppService>() {
     @Test
     fun update() {
         val id = preInsert()
-        val vo = generate<ServiceVo> {
+        val vo = generate<AppServiceVo> {
             this.id = id
             name = "基础服务"
             path = "/base/**"

@@ -1,9 +1,12 @@
 package com.basicfu.sip.base.controller
 
-import com.basicfu.sip.base.model.vo.ServiceVo
+import com.basicfu.sip.base.model.vo.AppServiceVo
 import com.basicfu.sip.base.service.AppServiceService
+import com.basicfu.sip.core.annotation.Insert
+import com.basicfu.sip.core.annotation.Update
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -11,10 +14,15 @@ import org.springframework.web.bind.annotation.*
  * @date 2018/6/22
  */
 @RestController
-@RequestMapping("/service")
-class ServiceController {
+@RequestMapping("/app-service")
+class AppServiceController {
     @Autowired
     lateinit var appServiceService: AppServiceService
+
+    @GetMapping("/list")
+    fun list(vo: AppServiceVo): Result<Any> {
+        return Result.success(appServiceService.list(vo))
+    }
 
     @GetMapping("/all")
     fun all(): Result<Any> {
@@ -22,12 +30,12 @@ class ServiceController {
     }
 
     @PostMapping("/insert")
-    fun insert(@RequestBody vo: ServiceVo): Result<Any> {
+    fun insert(@Validated(Insert::class) @RequestBody vo: AppServiceVo): Result<Any> {
         return Result.success(appServiceService.insert(vo))
     }
 
     @PostMapping("/update")
-    fun update(@RequestBody vo: ServiceVo): Result<Any> {
+    fun update(@Validated(Update::class) @RequestBody vo: AppServiceVo): Result<Any> {
         return Result.success(appServiceService.update(vo))
     }
 
