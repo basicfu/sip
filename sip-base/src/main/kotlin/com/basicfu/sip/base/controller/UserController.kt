@@ -62,32 +62,22 @@ class UserController {
     }
 
     @PostMapping("/insert")
-    fun insert(@RequestBody vo: UserVo): Result<Any> {
-        return Result.success(userService.insert(vo))
+    fun insert(@RequestBody map:Map<String,Any>): Result<Any> {
+        return Result.success(userService.insert(map))
     }
 
     @PostMapping("/register")
-    fun register(@RequestBody vo: UserVo): Result<Any> {
-        return Result.success(userService.insert(vo))
+    fun register(@RequestBody map:Map<String,Any>): Result<Any> {
+        return Result.success(userService.insert(map))
     }
 
-    @GetMapping("/update")
-    fun update(@RequestBody vo: UserVo): Result<Any> {
-        return Result.success(userService.update(vo))
+    @PostMapping("/update")
+    fun update(@RequestBody map:Map<String,Any>): Result<Any> {
+        return Result.success(userService.update(map))
     }
-//
-//    @PostMapping("/insert")
-//    fun insert(vo: UserTemplateVo): Result<Any> {
-//        return Result(userTemplateService.insert(vo))
-//    }
-//
-//    @PostMapping("/update")
-//    fun update(vo: UserTemplateVo): Result<Any> {
-//        return Result(userTemplateService.update(vo))
-//    }
-//
-//    @DeleteMapping("/delete")
-//    fun delete(ids: List<Long>): Result<Any> {
-//        return Result(userTemplateService.delete(ids))
-//    }
+
+    @DeleteMapping("/delete")
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
+        return Result.success(userService.delete(ids))
+    }
 }

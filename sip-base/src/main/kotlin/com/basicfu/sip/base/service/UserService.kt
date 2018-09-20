@@ -189,7 +189,7 @@ class UserService : BaseService<UserMapper, User>() {
         )
         //TODO 界面配置登录模式
         val loginModal = 2
-        val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(vo.username!!)+"*")
+        val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(vo.username!!) + "*")
         @Suppress("ConstantConditionIf")
         if (loginModal == 1) {
             if (keys.size >= 2) {
@@ -220,10 +220,10 @@ class UserService : BaseService<UserMapper, User>() {
         user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
             .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
         //TODO 系统设置登录过期时间
-        val userToken=TokenUtil.generateUserToken(vo.username!!)
-        val redisToken=TokenUtil.getRedisToken(userToken)
+        val userToken = TokenUtil.generateUserToken(vo.username!!)
+        val redisToken = TokenUtil.getRedisToken(userToken)
         RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
-        val frontToken= TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
+        val frontToken = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
         val result = JSONObject()
         result["token"] = frontToken
         result["time"] = System.currentTimeMillis() / 1000
@@ -243,20 +243,130 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     /**
-     * 用户模板需要在添加时强制限制好格式
+     * 用户模板在添加时已做强制校验就检查过默认值
      */
-    fun insert(vo: UserVo): Int {
+    fun insert(map: Map<String, Any>): Int {
+        val vo = UserUtil.toUser<UserVo>(map)
         //检查用户名重复
         if (userAuthMapper.selectCount(generate {
                 username = vo.username
             }) > 0) throw CustomException(Enum.User.EXIST_USER)
-        val contentJson = vo.content
+        //添加用户
+        val user = dealInsert(generate<User> {
+            username = vo.username
+            content = dealUserTemplate(vo.content).toJSONString()
+            type = 2
+        })
+        mapper.insertSelective(user)
+        //添加用户授权
+        val userAuth = dealInsert(generate<UserAuth> {
+            uid = user.id
+            username = vo.username
+            password = BCryptPasswordEncoder().encode(vo.username + vo.password)
+            type = 0
+        })
+        userAuthMapper.insertSelective(userAuth)
+        //mobile、phone特殊处理
+        if (vo.mobile != null) {
+            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
+                uid = user.id
+                username = vo.mobile
+                password = BCryptPasswordEncoder().encode(vo.mobile + vo.password)
+                type = 1
+            }))
+        }
+        if (vo.email != null) {
+            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
+                uid = user.id
+                username = vo.email
+                password = BCryptPasswordEncoder().encode(vo.email + vo.password)
+                type = 2
+            }))
+        }
+        return 1
+    }
+
+    fun update(map: Map<String, Any>): Int {
+        val vo = UserUtil.toUser<UserVo>(map)
+        //检查用户名重复
+        val checkUsername = mapper.selectOne(generate {
+            username = vo.username
+        })
+        if (checkUsername != null && checkUsername.id != vo.id) throw CustomException(Enum.User.EXIST_USER)
+        //更新用户内容
+        mapper.updateByPrimaryKeySelective(dealUpdate(generate<User> {
+            id = vo.id
+            content = dealUserTemplate(vo.content).toJSONString()
+        }))
+        //更新用户授权
+        //判断用户密码和上次是否一致，不一致进行更新
+        val userAuths = userAuthMapper.select(generate {
+            uid = vo.id
+        }).associateBy({ it.type }, { it })
+        val usernameAuth = userAuths[0]!!
+        val mobileAuth = userAuths[1]
+        val emailAuth = userAuths[2]
+        if (!vo.password.isNullOrBlank() && !PasswordUtil.matches(
+                vo.username + vo.password!!,
+                usernameAuth.password!!
+            )
+        ) {
+            userAuthMapper.updateByPrimaryKeySelective(dealUpdate(generate<UserAuth> {
+                id = usernameAuth.id
+                password = BCryptPasswordEncoder().encode(vo.username + vo.password)
+            }))
+        }
+        //mobile、phone特殊处理
+        if (vo.mobile != null) {
+            if (mobileAuth == null) {
+                userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
+                    uid = vo.id
+                    username = vo.mobile
+                    password = BCryptPasswordEncoder().encode(vo.mobile + vo.password)
+                    type = 1
+                }))
+            } else if (vo.mobile != mobileAuth.username) {
+                userAuthMapper.updateByPrimaryKeySelective(dealUpdate(generate<UserAuth> {
+                    id = mobileAuth.id
+                    username = vo.mobile
+                    password = BCryptPasswordEncoder().encode(vo.mobile + vo.password)
+                }))
+            }
+        } else if (mobileAuth != null) {
+            userAuthMapper.deleteByPrimaryKey(mobileAuth.id)
+        }
+        if (vo.email != null) {
+            if (emailAuth == null) {
+                userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
+                    uid = vo.id
+                    username = vo.email
+                    password = BCryptPasswordEncoder().encode(vo.email + vo.password)
+                    type = 2
+                }))
+            } else if (vo.email != emailAuth.username) {
+                userAuthMapper.updateByPrimaryKeySelective(dealUpdate(generate<UserAuth> {
+                    id = emailAuth.id
+                    username = vo.email
+                    password = BCryptPasswordEncoder().encode(vo.email + vo.password)
+                }))
+            }
+        } else if (emailAuth != null) {
+            userAuthMapper.deleteByPrimaryKey(emailAuth.id)
+        }
+        return 1
+    }
+
+    fun delete(ids: List<Long>?): Int {
+        return deleteByIds(ids)
+    }
+
+    /**
+     * 处理json串内容
+     */
+    fun dealUserTemplate(contentJson: JSONObject): JSONObject {
         //获取该租户下的用户模板信息,传过来空值也要根据模板处理默认值
         val userTemplateList = userTemplateService.all()
         val contentResult = JSONObject()
-        //mobile、phone特殊处理
-        val mobile = contentJson.getString(UserDto::mobile.name)
-        val email = contentJson.getString(UserDto::email.name)
         userTemplateList.forEach { it ->
             val extra = it.extra!!
             val enName = it.enName!!
@@ -291,34 +401,44 @@ class UserService : BaseService<UserMapper, User>() {
                         val extraArray = extra.split("&")
                         val lengthRange = extraArray[0].split(",")
                         val valueRange = extraArray[1].split("~")
-                        val startLength = lengthRange[0].toInt()
-                        val endLength = lengthRange[1].toInt()
-                        val startValue = valueRange[0].toFloat()
-                        val endValue = valueRange[1].toFloat()
-                        val splitValue = value.split(".")
-                        if (splitValue.size == 1) {
-                            //移除符号判断长度
-                            if (Math.abs(splitValue[0].toLong()).toString().length !in 1..startLength) {
-                                throw CustomException("字段名[$name]整数位需要[1~$startLength]位")
+                        if (!value.isNullOrBlank()) {
+                            val startLength = lengthRange[0].toInt()
+                            val endLength = lengthRange[1].toInt()
+                            val startValue = valueRange[0].toFloat()
+                            val endValue = valueRange[1].toFloat()
+                            val splitValue = value.split(".")
+                            if (splitValue.size == 1) {
+                                //移除符号判断长度
+                                if (Math.abs(splitValue[0].toLong()).toString().length !in 1..startLength) {
+                                    throw CustomException("字段名[$name]整数位需要[1~$startLength]位")
+                                }
+                                if (splitValue[0].toLong() !in startValue..endValue) {
+                                    throw CustomException(
+                                        "字段名[$name]值范围需要[${BigDecimal(startValue.toString()).setScale(
+                                            endLength
+                                        )}~${BigDecimal(endValue.toString()).setScale(endLength)}]之间"
+                                    )
+                                }
+                                contentResult[enName] = splitValue[0]
                             }
-                            if (splitValue[0].toLong() !in startValue..endValue) {
-                                throw CustomException("字段名[$name]值范围需要[$startValue~$endValue]之间")
+                            if (splitValue.size == 2) {
+                                if (Math.abs(splitValue[0].toLong()).toString().length !in 1..startLength) {
+                                    throw CustomException("字段名[$name]整数位需要[1~$startLength]位")
+                                }
+                                if (splitValue[1].length > endLength) {
+                                    throw CustomException("字段名[$name]小数位不能大于$endLength]位")
+                                }
+                                //小数为不够自动补0
+                                val floatValue = BigDecimal(value).setScale(endLength).toFloat()
+                                if (floatValue !in startValue..endValue) {
+                                    throw CustomException(
+                                        "字段名[$name]值范围需要[${BigDecimal(startValue.toString()).setScale(
+                                            endLength
+                                        )}~${BigDecimal(endValue.toString()).setScale(endLength)}]之间"
+                                    )
+                                }
+                                contentResult[enName] = floatValue
                             }
-                            contentResult[enName] = splitValue[0]
-                        }
-                        if (splitValue.size == 2) {
-                            if (Math.abs(splitValue[0].toLong()).toString().length !in 1..startLength) {
-                                throw CustomException("字段名[$name]整数位需要[1~$startLength]位")
-                            }
-                            if (splitValue[1].length > endLength) {
-                                throw CustomException("字段名[$name]小数位不能大于$endLength]位")
-                            }
-                            //小数为不够自动补0
-                            val floatValue = BigDecimal(value).setScale(endLength).toFloat()
-                            if (floatValue !in startValue..endValue) {
-                                throw CustomException("字段名[$name]值范围需要[$startValue~$endValue]之间")
-                            }
-                            contentResult[enName] = floatValue
                         }
                     }
                 }
@@ -376,43 +496,6 @@ class UserService : BaseService<UserMapper, User>() {
                 }
             }
         }
-        val user = dealInsert(generate<User> {
-            username = vo.username
-            content = contentResult.toJSONString()
-            type = 2
-        })
-        mapper.insertSelective(user)
-        val userAuth = dealInsert(generate<UserAuth> {
-            uid = user.id
-            username = vo.username
-            password = BCryptPasswordEncoder().encode(vo.username + vo.password)
-            type = 0
-        })
-        userAuthMapper.insertSelective(userAuth)
-        if (mobile != null) {
-            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
-                uid = user.id
-                username = mobile
-                password = BCryptPasswordEncoder().encode(vo.username + vo.password)
-                type = 1
-            }))
-        }
-        if (email != null) {
-            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
-                uid = user.id
-                username = email
-                password = BCryptPasswordEncoder().encode(vo.username + vo.password)
-                type = 2
-            }))
-        }
-        return 1
-    }
-
-    fun update(vo: UserVo): Int {
-        return 0
-    }
-
-    fun delete(ids: List<Long>?): Int {
-        return deleteByIds(ids)
+        return contentResult
     }
 }
