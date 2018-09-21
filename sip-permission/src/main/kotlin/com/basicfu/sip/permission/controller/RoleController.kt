@@ -17,8 +17,13 @@ class RoleController {
     lateinit var roleService: RoleService
 
     @GetMapping("/get/permission/{uid}")
-    fun list(@PathVariable uid: Long): Result<Any> {
+    fun getPermissionByUid(@PathVariable uid: Long): Result<Any> {
         return Result.success(roleService.getPermissionByUid(uid))
+    }
+
+    @GetMapping("/list")
+    fun list(vo: RoleVo): Result<Any> {
+        return Result.success(roleService.list(vo))
     }
 
     @GetMapping("/all")
@@ -54,6 +59,11 @@ class RoleController {
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
         return Result.success(roleService.delete(ids))
+    }
+
+    @DeleteMapping("/delete/user")
+    fun deleteUser(vo: RoleVo): Result<Any> {
+        return Result.success(roleService.deleteUser(vo))
     }
 
     @DeleteMapping("/delete/menu")

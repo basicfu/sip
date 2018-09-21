@@ -2,9 +2,7 @@ package com.basicfu.sip.permission.controller
 
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.permission.model.vo.PermissionVo
-import com.basicfu.sip.permission.model.vo.RoleVo
 import com.basicfu.sip.permission.service.PermissionService
-import com.basicfu.sip.permission.service.ResourceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -32,6 +30,7 @@ class PermissionController {
     fun insert(@RequestBody vo: PermissionVo): Result<Any> {
         return Result.success(permissionService.insert(vo))
     }
+
     @PostMapping("/insert/resource")
     fun insertPermission(@RequestBody vo: PermissionVo): Result<Any> {
         return Result.success(permissionService.insertResource(vo))
@@ -45,5 +44,10 @@ class PermissionController {
     @DeleteMapping("/delete")
     fun delete(ids: List<Long>): Result<Any> {
         return Result.success(permissionService.delete(ids))
+    }
+
+    @DeleteMapping("/delete/resource")
+    fun deleteResource(@RequestBody vo: PermissionVo): Result<Any> {
+        return Result.success(permissionService.deleteResource(vo))
     }
 }

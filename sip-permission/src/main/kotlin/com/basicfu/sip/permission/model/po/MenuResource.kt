@@ -18,6 +18,8 @@ class MenuResource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
+    @Column(name = "app_id")
+    var appId: Long? = null
     /**
      * 菜单Id
      */

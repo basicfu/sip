@@ -78,4 +78,11 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         }
         return deleteByIds(ids)
     }
+
+    fun deleteResource(vo: PermissionVo): Int {
+        return prMapper.deleteByExample(example<PermissionResource> {
+            andEqualTo(PermissionResource::permissionId, vo.id)
+            andIn(PermissionResource::resourceId, vo.resourceIds!!)
+        })
+    }
 }

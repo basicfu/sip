@@ -14,6 +14,7 @@ import com.basicfu.sip.permission.mapper.*
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
 import com.basicfu.sip.permission.model.vo.RoleVo
+import com.github.pagehelper.PageInfo
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -123,11 +124,11 @@ class RoleService : BaseService<RoleMapper, Role>() {
         return result
     }
 
-//    fun list(vo: RoleVo): PageInfo<RoleDto> {
-//        return selectPage(example<Role> {
-//            andLike(Role::name, vo.name)
-//        })
-//    }
+    fun list(vo: RoleVo): PageInfo<RoleDto> {
+        return selectPage(example<Role> {
+            andLike(Role::name, vo.name)
+        })
+    }
 
     fun all(): List<RoleDto> = to(mapper.selectAll())
 

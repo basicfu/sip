@@ -18,6 +18,8 @@ class UserRole {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
+    @Column(name = "app_id")
+    var appId: Long? = null
     /**
      * 用户Id
      */
