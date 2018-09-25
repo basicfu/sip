@@ -62,17 +62,17 @@ class UserController {
     }
 
     @PostMapping("/insert")
-    fun insert(@RequestBody map:Map<String,Any>): Result<Any> {
+    fun insert(@RequestBody map: Map<String, Any>): Result<Any> {
         return Result.success(userService.insert(map))
     }
 
     @PostMapping("/register")
-    fun register(@RequestBody map:Map<String,Any>): Result<Any> {
+    fun register(@RequestBody map: Map<String, Any>): Result<Any> {
         return Result.success(userService.insert(map))
     }
 
     @PostMapping("/update")
-    fun update(@RequestBody map:Map<String,Any>): Result<Any> {
+    fun update(@RequestBody map: Map<String, Any>): Result<Any> {
         return Result.success(userService.update(map))
     }
 

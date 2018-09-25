@@ -42,6 +42,14 @@ class UserService : BaseService<UserMapper, User>() {
     @Autowired
     lateinit var userTemplateService: UserTemplateService
 
+    fun getCurrentUser(): JSONObject? {
+        var user = TokenUtil.getCurrentUser()
+        if (user == null) {
+            user = TokenUtil.getGuestUser()
+        }
+        return UserUtil.toJson(user)
+    }
+
     fun get(id: Long): JSONObject? {
         val result = to<UserDto>(mapper.selectByPrimaryKey(id))
         result?.let {
@@ -56,19 +64,12 @@ class UserService : BaseService<UserMapper, User>() {
         return UserUtil.toJson(result)
     }
 
-    fun getCurrentUser(): JSONObject? {
-        var user = TokenUtil.getCurrentUser()
-        if (user == null) {
-            user = TokenUtil.getGuestUser()
-        }
-        return UserUtil.toJson(user)
-    }
-
     fun list(vo: UserVo): PageInfo<JSONObject> {
         val pageList = selectPage<UserDto>(example<User> {
             andLike {
                 username = vo.username
             }
+            orderByDesc(User::cdate)
         })
         val users = pageList.list
         if (users.isNotEmpty()) {
@@ -258,6 +259,10 @@ class UserService : BaseService<UserMapper, User>() {
             type = 2
         })
         mapper.insertSelective(user)
+        //处理用户角色
+        if (vo.roleIds!=null) {
+            com.basicfu.sip.client.util.UserUtil.updateRole(user.id!!, vo.roleIds!!)
+        }
         //添加用户授权
         val userAuth = dealInsert(generate<UserAuth> {
             uid = user.id
@@ -298,6 +303,10 @@ class UserService : BaseService<UserMapper, User>() {
             id = vo.id
             content = dealUserTemplate(vo.content).toJSONString()
         }))
+        //处理用户角色
+        if (vo.roleIds!=null) {
+            com.basicfu.sip.client.util.UserUtil.updateRole(vo.id!!, vo.roleIds!!)
+        }
         //更新用户授权
         //判断用户密码和上次是否一致，不一致进行更新
         val userAuths = userAuthMapper.select(generate {

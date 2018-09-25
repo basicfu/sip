@@ -17,6 +17,11 @@ enum class Enum constructor(val value: Int, val msg:String) {
     enum class Dict{
         TEXT
     }
+
+    enum class User constructor(val value: Int,val msg: String){
+        USER_NOT_FOUND(1,"未找到用户ID"),
+    }
+
     enum class Menu constructor(val value: Int,val msg: String){
         EXIST_NAME(1,"菜单名已存在"),
         RESOURCE_NOT_FOUND(1,"部分要添加资源没有找到,请刷新数据后重试")

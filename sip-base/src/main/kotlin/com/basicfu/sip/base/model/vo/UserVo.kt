@@ -16,4 +16,7 @@ class UserVo {
     var udate: Int? = null
     var type: Int? = null
     var status: Int? = null
+
+    var ids:List<Long>?=null
+    var roleIds:List<Long>?=null
 }

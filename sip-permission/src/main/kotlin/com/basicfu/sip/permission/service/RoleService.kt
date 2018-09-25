@@ -1,6 +1,7 @@
 package com.basicfu.sip.permission.service
 
 import com.alibaba.fastjson.JSONObject
+import com.basicfu.sip.client.util.UserUtil
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
@@ -141,18 +142,17 @@ class RoleService : BaseService<RoleMapper, Role>() {
     }
 
     fun insertUser(vo: RoleVo): Int {
-        var ids = vo.userIds!!
-        //暂时不验证用户ID是否存在
-//        if(menuService.mapper.selectCountByExample(example<Menu> {
-//                andIn(Menu::id, ids)
-//            })!=ids.size)throw CustomException(Enum.Role.MENU_NOT_FOUND)
+        var userIds = vo.userIds!!
+        if (UserUtil.listUsernameByIds(userIds).isEmpty()) {
+            throw CustomException(Enum.User.USER_NOT_FOUND)
+        }
         val existsUserIds = urMapper.selectByExample(example<UserRole> {
             andEqualTo(UserRole::roleId, vo.id)
-            andIn(UserRole::userId, ids)
+            andIn(UserRole::userId, userIds)
         }).map { it.userId }
-        ids = ids.filter { !existsUserIds.contains(it) }
+        userIds = userIds.filter { !existsUserIds.contains(it) }
         val userRoles = arrayListOf<UserRole>()
-        ids.forEach { it ->
+        userIds.forEach { it ->
             val ur = UserRole()
             ur.roleId = vo.id
             ur.userId = it

@@ -94,6 +94,13 @@ class UserUtil {
         }
 
         /**
+         * 用户批量更新角色,如果没有会添加,如果有将删除
+         */
+        fun updateRole(userId: Long, roleIds: List<Long>) {
+            roleFeign.updateRole(userId, roleIds.toTypedArray())
+        }
+
+        /**
          * 服务器端用户对象转换为用户提供对象
          */
         @PublishedApi
