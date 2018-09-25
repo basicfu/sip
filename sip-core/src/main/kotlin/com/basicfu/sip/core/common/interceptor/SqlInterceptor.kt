@@ -7,7 +7,6 @@ import com.alibaba.druid.sql.ast.statement.*
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.autoconfig.Config
 import com.basicfu.sip.core.util.AppUtil
-import com.basicfu.sip.core.util.RequestUtil
 import com.basicfu.sip.core.util.ThreadLocalUtil
 import com.google.common.base.CaseFormat
 import com.mysql.jdbc.DatabaseMetaData
@@ -96,12 +95,21 @@ class SqlInterceptor : Interceptor {
                     if (!allTable.contains(tableName)) {
                         val bean = invocation.args[1]
                         val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
-                        val field = bean::class.java.getDeclaredField(appField)
-                        field.isAccessible = true
                         val appId: Long = AppUtil.getAppId()
                                 ?: //log
                                 throw RuntimeException("not found app code")
-                        field.set(bean, appId)
+                        if(bean is HashMap<*, *>){
+                            val list=bean["list"] as ArrayList<*>
+                            list.forEach {
+                                val field = it::class.java.getDeclaredField(appField)
+                                field.isAccessible = true
+                                field.set(it, appId)
+                            }
+                        }else{
+                            val field = bean::class.java.getDeclaredField(appField)
+                            field.isAccessible = true
+                            field.set(bean, appId)
+                        }
                     }
                 }
             }
