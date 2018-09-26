@@ -1,6 +1,7 @@
 package com.basicfu.sip.client.util
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.client.feign.RoleFeign
 import com.basicfu.sip.client.feign.UserFeign
@@ -91,6 +92,16 @@ class UserUtil {
          */
         fun getPermissionByUidJson(uid: Long): JSONObject? {
             return roleFeign.getPermissionByUid(uid).data
+        }
+
+        /**
+         * 根据用户ID查询用户角色
+         */
+        fun listRoleByIds(userIds: List<Long>): Map<Long, JSONArray> {
+            val listRoleByIds = roleFeign.listRoleByIds(userIds.toTypedArray()).data
+            return listRoleByIds?.associateBy(
+                { it.id!! },
+                { it.roles!! }) ?: HashMap()
         }
 
         /**

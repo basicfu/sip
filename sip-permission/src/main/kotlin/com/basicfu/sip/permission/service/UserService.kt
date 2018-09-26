@@ -1,10 +1,14 @@
 package com.basicfu.sip.permission.service
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.mapper.RoleMapper
 import com.basicfu.sip.permission.mapper.UserRoleMapper
+import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.Role
 import com.basicfu.sip.permission.model.po.UserRole
 import org.apache.commons.lang.StringUtils
@@ -20,6 +24,28 @@ class UserService : BaseService<RoleMapper, Role>() {
 
     @Autowired
     lateinit var urMapper: UserRoleMapper
+    @Autowired
+    lateinit var roleMapper: RoleMapper
+
+    fun listRoleByIds(ids: List<Long>): List<UserDto> {
+        val userRoles = urMapper.selectByExample(example<UserRole> {
+            andIn(UserRole::userId,ids)
+        })
+        val userRoleMap = userRoles.groupBy({ it.userId }, { it.roleId })
+        val roleIds = userRoles.map { it.roleId }
+        val result = arrayListOf<UserDto>()
+        if (roleIds.isNotEmpty()) {
+            val roles = roleMapper.selectByIds(StringUtils.join(roleIds, ","))
+            val roleMap = roles.associateBy { it.id }
+            userRoleMap.forEach { k, v ->
+                result.add(generate {
+                    id = k
+                    this.roles = com.alibaba.fastjson.JSON.toJSON(v.map { roleMap[it] }) as JSONArray
+                })
+            }
+        }
+        return result
+    }
 
     fun updateRole(id: Long, roleIds: List<Long>): Int {
         /**
@@ -30,11 +56,12 @@ class UserService : BaseService<RoleMapper, Role>() {
 //        if (UserUtil.listUsernameByIds(listOf(id)).isEmpty()) {
 //            throw CustomException(Enum.User.USER_NOT_FOUND)
 //        }
-        val existsRoleIds = urMapper.selectByExample(example<UserRole> {
+        val userRoles = urMapper.selectByExample(example<UserRole> {
             andEqualTo(UserRole::userId, id)
-        }).map { it.roleId }
+        })
+        val existsRoleIds = userRoles.map { it.roleId }
         val insertIds = roleIds.filter { !existsRoleIds.contains(it) }
-        val deleteIds = existsRoleIds.filter { !roleIds.contains(it) }
+        val deleteIds = userRoles.filter { !roleIds.contains(it.roleId) }.map { it.id }
         if (insertIds.isNotEmpty()) {
             urMapper.insertList(insertIds.map {
                 generate<UserRole> {

@@ -15,6 +15,11 @@ class UserController {
     @Autowired
     lateinit var userService: UserService
 
+    @GetMapping("/list/role/{ids}")
+    fun listRoleByIds(@PathVariable ids: List<Long>): Result<Any> {
+        return Result.success(userService.listRoleByIds(ids))
+    }
+
     @PostMapping("/update/role")
     fun updateRole(@RequestParam("id") id: Long,@RequestParam("roleIds") roleIds: Array<Long>): Result<Any> {
         return Result.success(userService.updateRole(id, roleIds.toList()))

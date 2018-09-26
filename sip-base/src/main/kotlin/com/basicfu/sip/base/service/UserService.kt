@@ -73,8 +73,13 @@ class UserService : BaseService<UserMapper, User>() {
         })
         val users = pageList.list
         if (users.isNotEmpty()) {
+            val userIds = users.map { it.id!! }
+            val listRoleByIds = com.basicfu.sip.client.util.UserUtil.listRoleByIds(userIds)
+            users.forEach {
+                it.roles=listRoleByIds[it.id]
+            }
             val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
-                andIn(UserAuth::uid, users.map { it.id })
+                andIn(UserAuth::uid, userIds)
             }).groupBy({ it.uid }, { it })
             users.forEach {
                 val userAuth = userAuths[it.id]
@@ -260,7 +265,7 @@ class UserService : BaseService<UserMapper, User>() {
         })
         mapper.insertSelective(user)
         //处理用户角色
-        if (vo.roleIds!=null) {
+        if (vo.roleIds != null) {
             com.basicfu.sip.client.util.UserUtil.updateRole(user.id!!, vo.roleIds!!)
         }
         //添加用户授权
@@ -304,7 +309,7 @@ class UserService : BaseService<UserMapper, User>() {
             content = dealUserTemplate(vo.content).toJSONString()
         }))
         //处理用户角色
-        if (vo.roleIds!=null) {
+        if (vo.roleIds != null) {
             com.basicfu.sip.client.util.UserUtil.updateRole(vo.id!!, vo.roleIds!!)
         }
         //更新用户授权
