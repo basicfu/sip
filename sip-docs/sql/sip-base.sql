@@ -60,7 +60,7 @@ create table user(
 drop table if exists user_auth;
 CREATE TABLE user_auth (
   id bigint auto_increment primary key,
-  app_id bigint not null default 0 comment '租户ID(虽有关联但有部分需求只查此表)',
+  app_id bigint not null default 0 comment '租户ID',
   uid bigint not null comment '用户ID',
   type tinyint not null default 0 comment 'auth类型0用户名,1手机号,2字典(读取字典)',
   username varchar(100) not null default '' comment '登录标识',
@@ -69,6 +69,7 @@ CREATE TABLE user_auth (
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   ldate int not null default 0 comment '最后一次登录时间',
+  status tinyint not null default 0 comment '0正常,1删除,2黑名单',
   unique key (uid,type)
 )comment '用户授权表' engine=InnoDB;
 
@@ -90,3 +91,5 @@ CREATE TABLE user_template (
 
 
 INSERT INTO app (id,name, code, cdate, udate) VALUES (1,'SIP', 'sip', 1531389485, 1531389485);
+INSERT INTO user (id,app_id, username, content, cdate, udate, type, status) VALUES (1,1, 'test', '{}', 1533019466, 1539054488, 0, 0);
+INSERT INTO user_auth (id,app_id,uid, type, username, password, salt, cdate, udate, ldate,status) VALUES (1,1,1, 0, 'test', '$2a$10$3d7ykD7OxOTglE6DcLdhWerSpViDhIAyz6CylkBg.QkRlTgtduQCa', '', 1533019466, 1539002195, 1538995227,0);

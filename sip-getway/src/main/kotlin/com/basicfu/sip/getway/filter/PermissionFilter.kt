@@ -2,6 +2,7 @@ package com.basicfu.sip.getway.filter
 
 import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.wrapper.RequestWrapper
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.AppDto
@@ -78,13 +79,13 @@ class PermissionFilter : Filter {
             pathFull = true
         }
         if (appCode == null) {
-            returnMsg(response, "not found app code")
+            returnMsg(response, Enum.NOT_FOUND_APP_CODE)
             return
         }
         val apps = RedisUtil.hGetAll<AppDto>(Constant.Redis.APP)
         val app = apps[appCode]
         if (app == null) {
-            returnMsg(response, "not found app code")
+            returnMsg(response, Enum.NOT_FOUND_APP_CODE)
             return
         }
         //1.get request header app call
@@ -96,7 +97,7 @@ class PermissionFilter : Filter {
             appCall = request.getParameter(Constant.System.APP_CALL)
         }
         if(appCall!=null&&apps[appCall]==null){
-            returnMsg(response, "not found call code")
+            returnMsg(response, Enum.NOT_FOUND_CALL_CODE)
             return
         }
         //1.get request header app secret
@@ -127,19 +128,20 @@ class PermissionFilter : Filter {
                         allow = true
                         break
                     } else {
-                        returnMsg(response, "secret invalid")
+                        returnMsg(response, Enum.SECRET_INVALID)
                         return
                     }
                 }
                 //token
                 val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
                 val frontToken = request.getHeader(Constant.System.AUTHORIZATION)
-                if (frontToken == null || frontToken.length != 32) {
-                    //未登录用户
+                if (frontToken == null) {
+                    //未登录用户（排除访客接口）
                     if(allowGuest(appId,service.id!!,serviceUrl)){
                         allow = true
                         break
                     }
+                    returnMsg(response, Enum.NOT_LOGIN)
                 } else {
                     val user = TokenUtil.getCurrentUserByFrontToken(frontToken)
                     if (user == null) {
@@ -148,7 +150,7 @@ class PermissionFilter : Filter {
                             allow = true
                             break
                         }
-                        returnMsg(response, "login timeout")
+                        returnMsg(response, Enum.NOT_LOGIN)
                     } else {
                         //auth存在并且redis存在无过期
                         val resources = user.resources?.get(service.id.toString())
@@ -183,7 +185,7 @@ class PermissionFilter : Filter {
                 }
             }
         } else {
-            returnMsg(response, "no auth")
+            returnMsg(response, Enum.UNAUTHORIZED)
         }
     }
 
@@ -199,8 +201,8 @@ class PermissionFilter : Filter {
         }
         return false
     }
-    private fun returnMsg(response: HttpServletResponse, msg: String) {
-        val result = Result.error<String>(msg)
+    private fun returnMsg(response: HttpServletResponse, msg: Enum) {
+        val result = Result.error<String>(msg.msg,msg.value)
         response.status = HttpStatus.OK.value()
         response.characterEncoding = "UTF-8"
         response.contentType = "application/json"
