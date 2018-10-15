@@ -24,6 +24,11 @@ class AppController {
         return Result.success(appService.list(vo))
     }
 
+    @GetMapping("/all")
+    fun all(): Result<Any> {
+        return Result.success(appService.all())
+    }
+
     @PostMapping("/insert")
     fun insert(@Validated(Insert::class) @RequestBody vo: AppVo): Result<Any> {
         return Result.success(appService.insert(vo))

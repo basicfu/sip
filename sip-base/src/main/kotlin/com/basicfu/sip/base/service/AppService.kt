@@ -28,6 +28,10 @@ class AppService : BaseService<AppMapper, App>() {
         })
     }
 
+    fun all(): List<AppDto> {
+        return to(mapper.selectAll())
+    }
+
     fun insert(vo: AppVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
