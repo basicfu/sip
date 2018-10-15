@@ -1,6 +1,11 @@
 package com.basicfu.sip.core.util
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.wrapper.RequestWrapper
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
  * @author basicfu
@@ -9,17 +14,35 @@ import com.basicfu.sip.core.common.Constant
 object AppUtil {
 
     /**
-     * 拦截器后app值是id
+     * 经过网关后才有值
      */
     fun getAppId(): Long? {
-        return RequestUtil.getParameter(Constant.System.APP_CODE)?.toLong()
+        val parameter = RequestUtil.getParameter(Constant.System.APP_CODE)
+        if (parameter != null) {
+            return try {
+                val json = JSON.parseObject(parameter)
+                json.getLong(Constant.System.APP_ID)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        return null
     }
 
     /**
-     * 在拦截器前app是code
+     * 经过网关后才有值
      */
     fun getAppCode(): String? {
-        return RequestUtil.getParameter(Constant.System.APP_CODE)
+        val parameter = RequestUtil.getParameter(Constant.System.APP_CODE)
+        if (parameter != null) {
+            return try {
+                val json = JSON.parseObject(parameter)
+                json.getString(Constant.System.APP_CODE)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        return null
     }
 
     /**
@@ -34,5 +57,14 @@ object AppUtil {
      */
     fun releaseAppNotCheck() {
         ThreadLocalUtil.remove(Constant.System.APP_SKIP)
+    }
+
+    /**
+     * 更新request中的app参数
+     */
+    fun updateApp(app:JSONObject) {
+        val requestWrapper = RequestWrapper(RequestUtil.getRequest())
+        requestWrapper.addParameter(Constant.System.APP_CODE, app.toJSONString())
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(requestWrapper))
     }
 }

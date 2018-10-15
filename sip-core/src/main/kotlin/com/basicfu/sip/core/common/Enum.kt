@@ -19,8 +19,29 @@ enum class Enum(val value: Int, val msg: String) {
     NOT_FOUND_CALL_CODE(5, "没有找到被调应用CODE"),
     NOT_FOUND_APP_CODE(6, "没有找到应用CODE"),
 
+    NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN(1000, "无权操作系统超级管理员"),
+    NOT_PERMISSION_ADD_SYSTEM_ADMIN(1001, "无权操作系统管理员"),
+    NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN(1002, "无权操作应用超级管理员"),
+    NOT_PERMISSION_ADD_APP_ADMIN(1003, "无权操作应用管理员"),
+    NOT_PERMISSION_ADD_APP_NORMAL(1004, "无权操作普通用户"),
+    SUPER_ADMIN_NOT_CHANGE_USER_TYPE(1005, "超级管理员无法变更用户类型"),
+    SYSTEM_USER_NOT_EXCHANGE_APP_USER(1006, "系统用户和应用用户不能变换"),
+
     REPEAT_REQUEST(101, "重复请求");
 
+    enum class UserType constructor(val system: Boolean){
+        SYSTEM_SUPER_ADMIN(true),
+        SYSTEM_ADMIN(true),
+        APP_SUPER_ADMIN(false),
+        APP_ADMIN(false),
+        NORMAL(false),
+    }
+
+    enum class LoginType constructor(val value: Int){
+        USERNAME(0),
+        MOBILE(1),
+        EMAIL(2),
+    }
 
     enum class Status private constructor(val value: String) {
         SUCCESS("SUCCESS"),

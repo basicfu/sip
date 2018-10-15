@@ -1,12 +1,14 @@
 package com.basicfu.sip.getway.filter
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.wrapper.RequestWrapper
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.model.dto.AppServiceDto
+import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.TokenUtil
 import org.springframework.http.HttpStatus
@@ -109,62 +111,74 @@ class PermissionFilter : Filter {
             appSecret = request.getParameter(Constant.System.APP_SECRET)
         }
         val appId=app.id!!
-        //set current thread app id,overwrite app parameter
-        request.addParameter(Constant.System.APP_CODE,appId)
-        //每个应用只能调用sip中的服务和自身应用的服务并配置权限
-        val services = arrayListOf<AppServiceDto>()
-        services.addAll(apps[Constant.System.APP_SYSTEM_CODE]?.services ?: arrayListOf())
-        if(Constant.System.APP_SYSTEM_CODE!=appCode){
-            services.addAll(apps[appCode]?.services ?: arrayListOf())
-        }
+        //set current thread app info,overwrite app parameter
+        val appInfo = JSONObject()
+        appInfo[Constant.System.APP_ID]=appId
+        appInfo[Constant.System.APP_CODE]=appCode
+        request.addParameter(Constant.System.APP_CODE,appInfo.toJSONString())
         var allow = false
-        for (service in services) {
-            //多个service的path一致也不影响匹配
-            if (antPathMatcher.match(service.path, uri)) {
-                //secret
-                if (appSecret != null) {
-                    if (app.secrets?.map { it.secret }?.contains(appSecret) == true) {
-                        //correct secret ignore permission filter
-                        allow = true
-                        break
-                    } else {
-                        returnMsg(response, Enum.SECRET_INVALID)
-                        return
+        //有限判断用户token信息
+        val frontToken = request.getHeader(Constant.System.AUTHORIZATION)
+        var user: UserDto? =null
+        if(frontToken!=null){
+            user = TokenUtil.getCurrentUserByFrontToken(frontToken)
+        }
+        //针对user中type为0的跳过权限，0为系统超级管理员
+        if(user!=null&&user.type==Enum.UserType.SYSTEM_SUPER_ADMIN.name){
+            allow=true
+        }else{
+            //每个应用只能调用sip中的服务和自身应用的服务并配置权限
+            val services = arrayListOf<AppServiceDto>()
+            services.addAll(apps[Constant.System.APP_SYSTEM_CODE]?.services ?: arrayListOf())
+            if(Constant.System.APP_SYSTEM_CODE!=appCode){
+                services.addAll(apps[appCode]?.services ?: arrayListOf())
+            }
+            for (service in services) {
+                //多个service的path一致也不影响匹配
+                if (antPathMatcher.match(service.path, uri)) {
+                    //secret
+                    if (appSecret != null) {
+                        if (app.secrets?.map { it.secret }?.contains(appSecret) == true) {
+                            //correct secret ignore permission filter
+                            allow = true
+                            break
+                        } else {
+                            returnMsg(response, Enum.SECRET_INVALID)
+                            return
+                        }
                     }
-                }
-                //token
-                val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
-                val frontToken = request.getHeader(Constant.System.AUTHORIZATION)
-                if (frontToken == null) {
-                    //未登录用户（排除访客接口）
-                    if(allowGuest(appId,service.id!!,serviceUrl)){
-                        allow = true
-                        break
-                    }
-                    returnMsg(response, Enum.NOT_LOGIN)
-                } else {
-                    val user = TokenUtil.getCurrentUserByFrontToken(frontToken)
-                    if (user == null) {
-                        //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
+                    //token
+                    val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
+                    if (frontToken == null) {
+                        //未登录用户（排除访客接口）
                         if(allowGuest(appId,service.id!!,serviceUrl)){
                             allow = true
                             break
                         }
                         returnMsg(response, Enum.NOT_LOGIN)
                     } else {
-                        //auth存在并且redis存在无过期
-                        val resources = user.resources?.get(service.id.toString())
-                        if (resources?.any { antPathMatcher.match(it, serviceUrl) } == true) {
-                            RedisUtil.expire(
-                                TokenUtil.getCurrentToken(frontToken)!!,
-                                Constant.System.SESSION_TIMEOUT
-                            )
-                            allow = true
-                            break
+                        if (user == null) {
+                            //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
+                            if(allowGuest(appId,service.id!!,serviceUrl)){
+                                allow = true
+                                break
+                            }
+                            returnMsg(response, Enum.NOT_LOGIN)
+                        } else {
+                            //auth存在并且redis存在无过期
+                            val resources = user.resources?.get(service.id.toString())
+                            if (resources?.any { antPathMatcher.match(it, serviceUrl) } == true) {
+                                RedisUtil.expire(
+                                    TokenUtil.getCurrentToken(frontToken)!!,
+                                    Constant.System.SESSION_TIMEOUT
+                                )
+                                allow = true
+                                break
+                            }
                         }
                     }
+                    break
                 }
-                break
             }
         }
         //must permission pass allow forward

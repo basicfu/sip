@@ -14,7 +14,7 @@ class UserVo {
     var content=JSONObject()
     var cdate: Int? = null
     var udate: Int? = null
-    var type: Int? = null
+    var type: String? = null
     var status: Int? = null
 
     var ids:List<Long>?=null

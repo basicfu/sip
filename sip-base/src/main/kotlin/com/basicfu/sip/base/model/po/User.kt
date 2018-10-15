@@ -102,7 +102,7 @@ class User {
      *
      * @param type 用户类型0系统用户,1租户,2普通用户
      */
-    var type: Int? = null
+    var type: String? = null
 
     /**
      * 0正常,1删除,2黑名单

@@ -12,16 +12,15 @@ import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.Enum.UserType
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.core.util.RedisUtil
-import com.basicfu.sip.core.util.SqlUtil
-import com.basicfu.sip.core.util.TokenUtil
-import com.basicfu.sip.core.util.UserUtil
+import com.basicfu.sip.core.util.*
 import com.github.pagehelper.PageInfo
 import org.apache.ibatis.session.RowBounds
 import org.springframework.beans.BeanUtils
@@ -76,7 +75,7 @@ class UserService : BaseService<UserMapper, User>() {
             val userIds = users.map { it.id!! }
             val listRoleByIds = com.basicfu.sip.client.util.UserUtil.listRoleByIds(userIds)
             users.forEach {
-                it.roles=listRoleByIds[it.id]
+                it.roles = listRoleByIds[it.id]
             }
             val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
                 andIn(UserAuth::uid, userIds)
@@ -178,24 +177,83 @@ class UserService : BaseService<UserMapper, User>() {
      * 登录
      * 用户名登录
      * 后期密码使用加密后的值
-     * TODO 登录后清除该用户其他token
      * TODO 界面配置登录模式
      * 模式一：系统配置允许用户同时在线用户数,如1，再次登录只能修改密码
      * 模式二：每次登录后上次用户自动过期，登录后清除该用户其他token
      * TODO 校验手机和邮箱拥有者后可开启手机或邮箱登录
      * TODO 登录查询表过多，可优化连为连表查询
+     *
      */
     fun login(vo: UserVo): JSONObject? {
-        val userAuth = userAuthMapper.selectOne(generate {
-            username = vo.username
-            type = 0
-        }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
-        if (!PasswordUtil.matches(vo.username + vo.password!!, userAuth.password!!)) throw CustomException(
+        val userAuth: UserAuth
+        var username = vo.username!!
+        //如果登录的应用是sip则不按照应用过滤查询用户,如果登录的是其他应用会切换为其他应用
+        var appId = AppUtil.getAppId()
+        var appCode = AppUtil.getAppCode()
+        if (appCode == Constant.System.APP_SYSTEM_CODE) {
+            if (username.contains("@")) {
+                //如果用户名有@则是应用普通管理员,只获取用户类型为APP_ADMIN
+                val app =
+                    RedisUtil.hGet<AppDto>(Constant.Redis.APP, username.substringBefore("@")) ?: throw CustomException(
+                        Enum.User.USERNAME_OR_PASSWORD_ERROR
+                    )
+                appId = app.id
+                appCode = app.code
+                username = username.substringAfter("@")
+                AppUtil.appNotCheck()
+                val userAuths = userAuthMapper.select(generate {
+                    this.appId = appId
+                    type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
+                    this.username = username
+                })
+                if (userAuths.isEmpty()) {
+                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                }
+                val userAuthMap = userAuths.associateBy { it.uid }
+                AppUtil.appNotCheck()
+                val selectByIds = selectByIds(userAuths.map { it.uid!! })
+                val filter = selectByIds.filter { it.type == com.basicfu.sip.core.common.Enum.UserType.APP_ADMIN.name }
+                if (filter.isEmpty()) {
+                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                }
+                userAuth = userAuthMap[filter[0].id]!!
+            } else {
+                //三种用户类型，可能属于多个应用，但用户名唯一
+                AppUtil.appNotCheck()
+                val userAuths = userAuthMapper.select(generate {
+                    this.username = username
+                    type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
+                })
+                if (userAuths.isEmpty()) {
+                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                }
+                val userAuthMap = userAuths.associateBy { it.uid }
+                AppUtil.appNotCheck()
+                val selectByIds = selectByIds(userAuths.map { it.uid!! })
+                val filter = selectByIds.filter {
+                    listOf(
+                        com.basicfu.sip.core.common.Enum.UserType.SYSTEM_SUPER_ADMIN.name,
+                        com.basicfu.sip.core.common.Enum.UserType.SYSTEM_ADMIN.name,
+                        com.basicfu.sip.core.common.Enum.UserType.APP_SUPER_ADMIN.name
+                    ).contains(it.type)
+                }
+                if (filter.isEmpty()) {
+                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                }
+                userAuth = userAuthMap[filter[0].id]!!
+            }
+        } else {
+            userAuth = userAuthMapper.selectOne(generate {
+                this.username = username
+                type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
+            }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+        }
+        if (!PasswordUtil.matches(username + vo.password!!, userAuth.password!!)) throw CustomException(
             Enum.User.USERNAME_OR_PASSWORD_ERROR
         )
         //TODO 界面配置登录模式
         val loginModal = 2
-        val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(vo.username!!) + "*")
+        val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
         @Suppress("ConstantConditionIf")
         if (loginModal == 1) {
             if (keys.size >= 2) {
@@ -204,12 +262,18 @@ class UserService : BaseService<UserMapper, User>() {
         } else {
             RedisUtil.del(keys.map { it })
         }
+        AppUtil.appNotCheck()
         val user = to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
         val currentTime = (System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
             id = userAuth.id
             ldate = currentTime
         })
+        // 后续需要更改当前应用ID
+        val appInfo = JSONObject()
+        appInfo[Constant.System.APP_ID] = appId
+        appInfo[Constant.System.APP_CODE] = appCode
+        AppUtil.updateApp(appInfo)
         val permission =
             com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user!!.id!!) ?: throw CustomException(
                 Enum.User.LOGIN_ERROR
@@ -217,6 +281,7 @@ class UserService : BaseService<UserMapper, User>() {
         val userAuths = userAuthMapper.select(generate {
             uid = userAuth.uid
         }).associateBy({ it.type }, { it })
+        user.appCode = appCode
         user.mobile = userAuths[1]?.username
         user.email = userAuths[2]?.username
         user.ldate = currentTime
@@ -226,7 +291,7 @@ class UserService : BaseService<UserMapper, User>() {
         user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
             .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
         //TODO 系统设置登录过期时间
-        val userToken = TokenUtil.generateUserToken(vo.username!!)
+        val userToken = TokenUtil.generateUserToken(username)
         val redisToken = TokenUtil.getRedisToken(userToken)
         RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
         val frontToken = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
@@ -253,6 +318,29 @@ class UserService : BaseService<UserMapper, User>() {
      */
     fun insert(map: Map<String, Any>): Int {
         val vo = UserUtil.toUser<UserVo>(map)
+        val currentUser = TokenUtil.getCurrentUser()
+        if (currentUser == null) {
+            //预留主动注册
+        } else {
+            when (vo.type) {
+                UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
+                UserType.SYSTEM_ADMIN.name ->
+                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name && throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_ADMIN)
+                UserType.APP_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN)
+                UserType.APP_ADMIN.name ->
+                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name &&
+                            currentUser.type != UserType.SYSTEM_ADMIN.name &&
+                            currentUser.type != UserType.APP_SUPER_ADMIN.name &&
+                            throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
+            //允许普通用户通过分配的角色添加普通用户
+//                UserType.NORMAL.name->
+//                    currentUser.type!=UserType.SYSTEM_SUPER_ADMIN.name&&
+//                    currentUser.type!=UserType.SYSTEM_ADMIN.name&&
+//                    currentUser.type!=UserType.APP_SUPER_ADMIN.name&&
+//                    currentUser.type!=UserType.APP_ADMIN.name&&
+//                            throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_NORMAL)
+            }
+        }
         //检查用户名重复
         if (userAuthMapper.selectCount(generate {
                 username = vo.username
@@ -261,7 +349,7 @@ class UserService : BaseService<UserMapper, User>() {
         val user = dealInsert(generate<User> {
             username = vo.username
             content = dealUserTemplate(vo.content).toJSONString()
-            type = 2
+            type = vo.type
         })
         mapper.insertSelective(user)
         //处理用户角色
@@ -298,6 +386,30 @@ class UserService : BaseService<UserMapper, User>() {
 
     fun update(map: Map<String, Any>): Int {
         val vo = UserUtil.toUser<UserVo>(map)
+        val currentUser = TokenUtil.getCurrentUser()!!
+        //检查用户类型是否能变动
+        val user = mapper.selectByPrimaryKey(vo.id) ?: return 0
+        if (user.type != vo.type) {
+            //超级管理员无法变更用户类型
+            if (user.type == UserType.SYSTEM_SUPER_ADMIN.name || user.type == UserType.APP_SUPER_ADMIN.name) {
+                throw CustomException(com.basicfu.sip.core.common.Enum.SUPER_ADMIN_NOT_CHANGE_USER_TYPE)
+            }
+            //如果发生系统/应用级别变化禁止
+            if (UserType.valueOf(user.type!!).system != UserType.valueOf(vo.type!!).system) {
+                throw CustomException(com.basicfu.sip.core.common.Enum.SYSTEM_USER_NOT_EXCHANGE_APP_USER)
+            }
+            when (vo.type) {
+                UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
+                UserType.SYSTEM_ADMIN.name ->
+                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name && throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_ADMIN)
+                UserType.APP_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN)
+                UserType.APP_ADMIN.name ->
+                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name &&
+                            currentUser.type != UserType.SYSTEM_ADMIN.name &&
+                            currentUser.type != UserType.APP_SUPER_ADMIN.name &&
+                            throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
+            }
+        }
         //检查用户名重复
         val checkUsername = mapper.selectOne(generate {
             username = vo.username
@@ -306,6 +418,7 @@ class UserService : BaseService<UserMapper, User>() {
         //更新用户内容
         mapper.updateByPrimaryKeySelective(dealUpdate(generate<User> {
             id = vo.id
+            type = vo.type
             content = dealUserTemplate(vo.content).toJSONString()
         }))
         //处理用户角色

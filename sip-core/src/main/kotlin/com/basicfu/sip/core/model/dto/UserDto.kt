@@ -12,8 +12,10 @@ class UserDto {
     var cdate: Int? = null
     var udate: Int? = null
     var ldate: Int? = null
-    var type: Int? = null
+    var type: String? = null
     var status: Int? = null
+
+    var appCode:String?=null
 
     var roles: JSONArray? = null
     var menus: JSONArray? = null

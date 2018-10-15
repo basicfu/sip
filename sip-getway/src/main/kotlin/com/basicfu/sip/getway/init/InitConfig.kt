@@ -70,6 +70,7 @@ class InitConfig : CommandLineRunner {
             user.username = Constant.System.GUEST
             user.resources = appResource?.groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
             user.menus = JSON.parseArray(JSON.toJSONString(appMenu))
+            user.appCode=app.code
             RedisUtil.set("${Constant.Redis.TOKEN_GUEST}${app.id}", user)
         }
     }

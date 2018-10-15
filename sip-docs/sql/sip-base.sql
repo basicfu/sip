@@ -53,7 +53,7 @@ create table user(
   content varchar(20000) null default '' comment '用户json信息(mysql8)',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
-  type tinyint not null default 0 comment '用户类型0系统用户,1租户,2普通用户',
+  type varchar(64) not null default '' comment '用户类型字典',
   status tinyint not null default 0 comment '0正常,1删除,2黑名单'
 )comment '用户表' engine=InnoDB;
 
@@ -62,7 +62,7 @@ CREATE TABLE user_auth (
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '租户ID',
   uid bigint not null comment '用户ID',
-  type tinyint not null default 0 comment 'auth类型0用户名,1手机号,2字典(读取字典)',
+  type varchar(64) not null default '' comment 'auth类型字典',
   username varchar(100) not null default '' comment '登录标识',
   password varchar(100) not null default '' comment '密码凭证',
   salt varchar(64) not null default '' comment '盐值',

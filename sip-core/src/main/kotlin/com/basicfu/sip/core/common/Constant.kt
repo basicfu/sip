@@ -15,10 +15,12 @@ object Constant {
         const val PAGE_SIZE = 20
         const val PAGE_SIZE_STR = PAGE_SIZE.toString()
         const val APP_SYSTEM_CODE = "sip"
+        const val APP_ID = "appId"
         const val APP_CODE = "app"
         const val APP_CALL = "call"
         const val APP_SECRET = "secret"
         const val APP_SKIP = "skip"
+        const val FEIGN_CODE = "feign"
         const val AES_TOKEN_KEY = "AES_TOKEN_KEY_AA"
     }
 
