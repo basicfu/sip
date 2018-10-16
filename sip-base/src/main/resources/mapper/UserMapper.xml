@@ -8,9 +8,11 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="app_id" jdbcType="BIGINT" property="appId" />
     <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
     <result column="content" jdbcType="VARCHAR" property="content" />
     <result column="cdate" jdbcType="INTEGER" property="cdate" />
     <result column="udate" jdbcType="INTEGER" property="udate" />
+    <result column="cuid" jdbcType="BIGINT" property="cuid" />
     <result column="type" jdbcType="TINYINT" property="type" />
     <result column="status" jdbcType="TINYINT" property="status" />
   </resultMap>

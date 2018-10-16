@@ -43,6 +43,7 @@ class User {
      * @param username 用户名
      */
     var username: String? = null
+    var nickname: String? = null
 
     /**
      * 用户json信息(mysql8)
@@ -88,6 +89,7 @@ class User {
      * @param udate 更新时间
      */
     var udate: Int? = null
+    var cuid: Long? = null
 
     /**
      * 用户类型0系统用户,1租户,2普通用户

@@ -73,9 +73,11 @@ class UserService : BaseService<UserMapper, User>() {
         val users = pageList.list
         if (users.isNotEmpty()) {
             val userIds = users.map { it.id!! }
+            val createUserMap = selectByIds(users.map { it.cuid!! }).associateBy { it.id }
             val listRoleByIds = com.basicfu.sip.client.util.UserUtil.listRoleByIds(userIds)
             users.forEach {
                 it.roles = listRoleByIds[it.id]
+                it.cuname=createUserMap[it.cuid]?.nickname?:"系统"
             }
             val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
                 andIn(UserAuth::uid, userIds)
@@ -319,9 +321,15 @@ class UserService : BaseService<UserMapper, User>() {
     fun insert(map: Map<String, Any>): Int {
         val vo = UserUtil.toUser<UserVo>(map)
         val currentUser = TokenUtil.getCurrentUser()
+        //后期改为如果是系统创建指定为超级管理员
+        var cuid=0L
         if (currentUser == null) {
             //预留主动注册
         } else {
+            //必须是同一个应用，否则创建人为应用超管
+            if(currentUser.appId==AppUtil.getAppId()){
+                cuid=currentUser.id!!
+            }
             when (vo.type) {
                 UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
                 UserType.SYSTEM_ADMIN.name ->
@@ -348,8 +356,10 @@ class UserService : BaseService<UserMapper, User>() {
         //添加用户
         val user = dealInsert(generate<User> {
             username = vo.username
+            nickname = vo.nickname
             content = dealUserTemplate(vo.content).toJSONString()
             type = vo.type
+            this.cuid=cuid
         })
         mapper.insertSelective(user)
         //处理用户角色
@@ -420,6 +430,7 @@ class UserService : BaseService<UserMapper, User>() {
             id = vo.id
             type = vo.type
             content = dealUserTemplate(vo.content).toJSONString()
+            nickname=vo.nickname
         }))
         //处理用户角色
         if (vo.roleIds != null) {

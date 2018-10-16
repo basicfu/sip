@@ -50,9 +50,11 @@ create table user(
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '租户ID',
   username varchar(32) not null default '' comment '用户名',
+  nickname varchar(32) not null default '' comment '昵称',
   content varchar(20000) null default '' comment '用户json信息(mysql8)',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
+  cuid bigint not null default 0 comment '创建人ID',
   type varchar(64) not null default '' comment '用户类型字典',
   status tinyint not null default 0 comment '0正常,1删除,2黑名单'
 )comment '用户表' engine=InnoDB;
@@ -91,5 +93,5 @@ CREATE TABLE user_template (
 
 
 INSERT INTO app (id,name, code, cdate, udate) VALUES (1,'SIP', 'sip', 1531389485, 1531389485);
-INSERT INTO user (id,app_id, username, content, cdate, udate, type, status) VALUES (1,1, 'test', '{}', 1533019466, 1539054488, 0, 0);
+INSERT INTO user (id,app_id, username, nickname, content, cdate, udate, cuid, type, status) VALUES (1,1, 'test', 'test', '{}', 1533019466, 1539054488, 0, 'SYSTEM_SUPER_ADMIN', 0);
 INSERT INTO user_auth (id,app_id,uid, type, username, password, salt, cdate, udate, ldate,status) VALUES (1,1,1, 0, 'test', '$2a$10$3d7ykD7OxOTglE6DcLdhWerSpViDhIAyz6CylkBg.QkRlTgtduQCa', '', 1533019466, 1539002195, 1538995227,0);
