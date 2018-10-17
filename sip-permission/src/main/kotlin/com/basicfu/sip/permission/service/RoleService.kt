@@ -104,7 +104,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         }else{
             arrayListOf()
         }
-        val permissions = if(permissionIds.isEmpty()){
+        val permissions = if(permissionIds.isNotEmpty()){
             to<MenuDto>(permissionMapper.selectByExample(example<Permission> {
                 andIn(Permission::id, permissionIds)
             }))
