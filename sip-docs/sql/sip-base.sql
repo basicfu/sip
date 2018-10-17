@@ -28,8 +28,7 @@ create table app_service(
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   unique key (app_id,path),
-  unique key (app_id,server_id),
-  unique key (app_id,url)
+  unique key (app_id,server_id,url)
 )
 comment '服务表' engine=InnoDB;
 
@@ -88,7 +87,7 @@ CREATE TABLE user_template (
   sort int not null default 0 comment '字段顺序',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
-  unique key (tenant_id,name)
+  unique key (app_id,name)
 )comment '用户模板' engine=InnoDB;
 
 
