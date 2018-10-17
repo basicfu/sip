@@ -114,9 +114,12 @@ class RoleService : BaseService<RoleMapper, Role>() {
         val resourceIds = arrayListOf<Long>()
         resourceIds.addAll(menuResourceIds)
         resourceIds.addAll(permissionResourceIds)
+        val resources=ArrayList<Resource>()
         //其他应用可以有系统的应用resource，所以此处不使用appId
-        AppUtil.appNotCheck()
-        val resources = resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ","))
+        if(resourceIds.isNotEmpty()){
+            AppUtil.appNotCheck()
+            resources.addAll(resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ",")))
+        }
         val result = JSONObject()
         result["roles"] = roles
         result["menus"] = menus
