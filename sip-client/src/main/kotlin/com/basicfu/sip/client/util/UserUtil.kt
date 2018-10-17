@@ -160,7 +160,10 @@ class UserUtil {
                         it.set(u, tmpUser.getJSONArray(it.name))
                     } else if (it.name == "resources") {
                         it.isAccessible = true
-                        it.set(u, tmpUser.getJSONObject(it.name) as Map<String, List<String>>)
+                        val obj = tmpUser.getJSONObject(it.name)
+                        if(obj!=null){
+                            it.set(u, tmpUser.getJSONObject(it.name) as Map<String, List<String>>)
+                        }
                     }
                 }
                 result.add(u)
