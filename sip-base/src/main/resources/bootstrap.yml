@@ -7,9 +7,3 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ipAddress}:${server.port}
-sip:
-  logs:
-    redis:
-      host: redis-dev.dmka.cn
-      port: 4379
-      password: root

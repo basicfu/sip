@@ -12,6 +12,7 @@ import org.springframework.core.type.AnnotationMetadata
  */
 @Suppress("UNCHECKED_CAST")
 class BeanRegistrar : ImportBeanDefinitionRegistrar {
+    private val beanNamePrefix="SIP_"
 
     override fun registerBeanDefinitions(metadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
         //register feign config set request heads
@@ -32,14 +33,14 @@ class BeanRegistrar : ImportBeanDefinitionRegistrar {
                 values.forEach {
                     it.value.forEach {
                         val builder = BeanDefinitionBuilder.genericBeanDefinition(it)
-                        registry.registerBeanDefinition(it.simpleName, builder.beanDefinition)
+                        registry.registerBeanDefinition(beanNamePrefix+it.simpleName, builder.beanDefinition)
                     }
                 }
             } else if (enable.isNotEmpty()) {
                 enable.forEach {
                     it.value.forEach {
                         val builder = BeanDefinitionBuilder.genericBeanDefinition(it)
-                        registry.registerBeanDefinition(it.simpleName, builder.beanDefinition)
+                        registry.registerBeanDefinition(beanNamePrefix+it.simpleName, builder.beanDefinition)
                     }
                 }
             } else if (disable.isNotEmpty()) {
@@ -50,7 +51,7 @@ class BeanRegistrar : ImportBeanDefinitionRegistrar {
                 values.forEach {
                     it.value.forEach {
                         val builder = BeanDefinitionBuilder.genericBeanDefinition(it)
-                        registry.registerBeanDefinition(it.simpleName, builder.beanDefinition)
+                        registry.registerBeanDefinition(beanNamePrefix+it.simpleName, builder.beanDefinition)
                     }
                 }
             }

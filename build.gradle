@@ -132,6 +132,7 @@ project(":sip-getway") {
         compile("org.springframework.cloud:spring-cloud-starter-openfeign")
         compile("mysql:mysql-connector-java:5.1.45")
         compile("org.springframework.retry:spring-retry")
+        compile("com.sun.mail:javax.mail:1.5.6")
     }
 }
 project(":sip-base") {
@@ -179,6 +180,8 @@ project(":sip-client") {
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("org.springframework.cloud:spring-cloud-starter-feign")
         compile("org.springframework.boot:spring-boot-starter-data-redis")
+        compile("io.protostuff:protostuff-core:1.5.9")
+        compile("io.protostuff:protostuff-runtime:1.5.9")
     }
 }
 project(":sip-api") {

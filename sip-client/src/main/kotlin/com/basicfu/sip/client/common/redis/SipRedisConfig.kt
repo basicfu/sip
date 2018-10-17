@@ -9,25 +9,22 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 import org.springframework.stereotype.Component
 import redis.clients.jedis.JedisPoolConfig
 
-
-
-
 /**
  * @author basicfu
  * @date 2018/8/24
  */
 @Component
-class SipLogsRedisConfig {
+class SipRedisConfig {
 
-    @Value("\${sip.logs.redis.host:}")
+    @Value("\${sip.redis.host:}")
     private val host: String? = null
-    @Value("\${sip.logs.redis.port:}")
+    @Value("\${sip.redis.port:}")
     private val port: Int = 0
-    @Value("\${sip.logs.redis.password:}")
+    @Value("\${sip.redis.password:}")
     private val password: String? = null
 
     @Bean
-    fun sipLogsRedisConnectionFactory(): RedisConnectionFactory {
+    fun sipRedisConnectionFactory(): RedisConnectionFactory {
         val poolConfig = JedisPoolConfig()
         val jedisConnectionFactory = JedisConnectionFactory(poolConfig)
         jedisConnectionFactory.database = 0
@@ -39,10 +36,10 @@ class SipLogsRedisConfig {
         return jedisConnectionFactory
     }
 
-    @Bean(name = ["sipLogsRedisTemplate"])
-    fun redisTemplate(sipLogsRedisConnectionFactory:RedisConnectionFactory): RedisTemplate<*, *> {
+    @Bean(name = ["sipClientRedisTemplate"])
+    fun redisTemplate(sipRedisConnectionFactory:RedisConnectionFactory): RedisTemplate<*, *> {
         val redisTemplate = RedisTemplate<Any, Any>()
-        redisTemplate.connectionFactory = sipLogsRedisConnectionFactory
+        redisTemplate.connectionFactory = sipRedisConnectionFactory
         val stringRedisSerializer = StringRedisSerializer()
         redisTemplate.keySerializer = stringRedisSerializer
         redisTemplate.hashKeySerializer = stringRedisSerializer
