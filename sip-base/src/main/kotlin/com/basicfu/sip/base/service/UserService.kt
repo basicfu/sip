@@ -180,8 +180,9 @@ class UserService : BaseService<UserMapper, User>() {
      * 用户名登录
      * 后期密码使用加密后的值
      * TODO 界面配置登录模式
-     * 模式一：系统配置允许用户同时在线用户数,如1，再次登录只能修改密码
+     * 模式一：系统配置允许用户同时在线用户数,如3，超过次数需等待其他用户过期或主动退出，否则只能修改密码强制退出所有用户
      * 模式二：每次登录后上次用户自动过期，登录后清除该用户其他token
+     * 模式三：无限制登录次数
      * TODO 校验手机和邮箱拥有者后可开启手机或邮箱登录
      * TODO 登录查询表过多，可优化连为连表查询
      *
@@ -254,14 +255,15 @@ class UserService : BaseService<UserMapper, User>() {
             Enum.User.USERNAME_OR_PASSWORD_ERROR
         )
         //TODO 界面配置登录模式
-        val loginModal = 2
-        val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
+        val loginModal = 3
         @Suppress("ConstantConditionIf")
         if (loginModal == 1) {
+            val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             if (keys.size >= 2) {
                 throw CustomException(Enum.User.THEN_USER_MAX_ONLINE)
             }
-        } else {
+        } else if(loginModal==2){
+            val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             RedisUtil.del(keys.map { it })
         }
         AppUtil.appNotCheck()
