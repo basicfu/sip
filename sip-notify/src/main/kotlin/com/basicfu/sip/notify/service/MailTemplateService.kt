@@ -75,7 +75,7 @@ class MailTemplateService : BaseService<MailTemplateMapper, MailTemplate>() {
             if (null == template.senderId) {
                 BeanUtils.copyProperties(senders[0], mailVo)
             } else {
-                val filter = senders.filter { it.appId == template.senderId }
+                val filter = senders.filter { it.id == template.senderId }
                 BeanUtils.copyProperties(filter[0], mailVo)
             }
             val properties = vo.properties
