@@ -51,16 +51,12 @@ class UserService : BaseService<UserMapper, User>() {
 
     fun get(id: Long): JSONObject? {
         val result = to<UserDto>(mapper.selectByPrimaryKey(id))
-        result?.let {
-            val userAuths = userAuthMapper.select(generate {
-                uid = id
-            })
-            val userAuthMap = userAuths.associateBy({ it.type }, { it })
-            it.mobile = userAuthMap[1]?.username
-            it.email = userAuthMap[2]?.username
-            it.ldate = userAuths.map { it.ldate!! }.max()
+        if (result != null) {
+            val list = arrayListOf(result)
+            dealReturnUser(list)
+            return UserUtil.toJson(list[0])
         }
-        return UserUtil.toJson(result)
+        return null
     }
 
     fun list(vo: UserVo): PageInfo<JSONObject> {
@@ -68,30 +64,11 @@ class UserService : BaseService<UserMapper, User>() {
             andLike {
                 username = vo.username
             }
+//            andCondition("user.content->'\$.customCompany'")
             orderByDesc(User::cdate)
         })
         val users = pageList.list
-        if (users.isNotEmpty()) {
-            val userIds = users.map { it.id!! }
-            val createUserMap = selectByIds(users.map { it.cuid!! }).associateBy { it.id }
-            val listRoleByIds = com.basicfu.sip.client.util.UserUtil.listRoleByIds(userIds)
-            users.forEach {
-                it.roles = listRoleByIds[it.id]
-                it.cuname = createUserMap[it.cuid]?.nickname ?: "系统"
-            }
-            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
-                andIn(UserAuth::uid, userIds)
-            }).groupBy({ it.uid }, { it })
-            users.forEach {
-                val userAuth = userAuths[it.id]
-                if (userAuth != null) {
-                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
-                    it.mobile = userAuthMap[1]?.username
-                    it.email = userAuthMap[2]?.username
-                    it.ldate = userAuth.map { it.ldate!! }.max()
-                }
-            }
-        }
+        dealReturnUser(users)
         val result = PageInfo<JSONObject>()
         BeanUtils.copyProperties(pageList, result)
         result.list = UserUtil.toJson(users)
@@ -102,20 +79,7 @@ class UserService : BaseService<UserMapper, User>() {
         val users = to<UserDto>(mapper.selectByExample(example<User> {
             andIn(User::id, ids)
         }))
-        if (users.isNotEmpty()) {
-            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
-                andIn(UserAuth::uid, users.map { it.id })
-            }).groupBy({ it.uid }, { it })
-            users.forEach {
-                val userAuth = userAuths[it.id]
-                if (userAuth != null) {
-                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
-                    it.mobile = userAuthMap[1]?.username
-                    it.email = userAuthMap[2]?.username
-                    it.ldate = userAuth.map { it.ldate!! }.max()
-                }
-            }
-        }
+        dealReturnUser(users)
         return UserUtil.toJson(users)
     }
 
@@ -262,7 +226,7 @@ class UserService : BaseService<UserMapper, User>() {
             if (keys.size >= 2) {
                 throw CustomException(Enum.User.THEN_USER_MAX_ONLINE)
             }
-        } else if(loginModal==2){
+        } else if (loginModal == 2) {
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             RedisUtil.del(keys.map { it })
         }
@@ -498,6 +462,33 @@ class UserService : BaseService<UserMapper, User>() {
 
     fun delete(ids: List<Long>?): Int {
         return deleteByIds(ids)
+    }
+
+    /**
+     * 处理返回的用户，创建人、邮箱、手机、最后登录时间、角色
+     */
+    fun dealReturnUser(users: List<UserDto>) {
+        if (users.isNotEmpty()) {
+            val userIds = users.map { it.id!! }
+            val createUserMap = selectByIds(users.map { it.cuid!! }).associateBy { it.id }
+            val listRoleByIds = com.basicfu.sip.client.util.UserUtil.listRoleByIds(userIds)
+            users.forEach {
+                it.roles = listRoleByIds[it.id]
+                it.cuname = createUserMap[it.cuid]?.nickname ?: "系统"
+            }
+            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
+                andIn(UserAuth::uid, userIds)
+            }).groupBy({ it.uid }, { it })
+            users.forEach {
+                val userAuth = userAuths[it.id]
+                if (userAuth != null) {
+                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
+                    it.mobile = userAuthMap[1]?.username
+                    it.email = userAuthMap[2]?.username
+                    it.ldate = userAuth.map { it.ldate!! }.max()
+                }
+            }
+        }
     }
 
     /**
