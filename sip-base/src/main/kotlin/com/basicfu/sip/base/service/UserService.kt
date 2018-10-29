@@ -3,6 +3,7 @@ package com.basicfu.sip.base.service
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.Enum
+import com.basicfu.sip.base.common.Enum.Condition
 import com.basicfu.sip.base.common.Enum.FieldType.*
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
@@ -19,8 +20,10 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.model.dto.UserDto
+import com.basicfu.sip.core.model.vo.BaseVo
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.*
+import com.github.pagehelper.PageHelper
 import com.github.pagehelper.PageInfo
 import org.apache.ibatis.session.RowBounds
 import org.springframework.beans.BeanUtils
@@ -59,14 +62,101 @@ class UserService : BaseService<UserMapper, User>() {
         return null
     }
 
+    /**
+     * 支持多个and条件，暂不支持or
+     * 更多查询条件待开发
+     */
     fun list(vo: UserVo): PageInfo<JSONObject> {
-        val pageList = selectPage<UserDto>(example<User> {
-            andLike {
-                username = vo.username
+        val pageList: PageInfo<UserDto>
+        val userTemplateMap = userTemplateService.all().associateBy { it.enName }
+        if (vo.roleCode.isNullOrBlank()) {
+            pageList = selectPage(example<User> {
+                exists(false)
+                vo.condition?.let {
+                    JSON.parseObject(it).forEach { k, v ->
+                        val key = if (userTemplateMap.containsKey(k)) {
+                            "content->'$.$k'"
+                        } else {
+                            k
+                        }
+                        //判断是否是系统字段
+                        val parameterObj = JSON.parseObject(v.toString())
+                        val condition = Enum.Condition.valueOf(parameterObj.getString("condition"))
+                        val value = parameterObj["value"]
+                        when (condition) {
+                            Condition.IS_NULL -> andCondition(key, "is null")
+                            Condition.IS_NOT_NULL -> andCondition(key, "is not null")
+                            Condition.EQUAL_TO -> andCondition(key, "= '$value'")
+                            Condition.NOT_EQUAL_TO -> andCondition(key, "<> '$value'")
+                            Condition.GREATER_THEN -> andCondition(key, "> '$value'")
+                            Condition.GREATER_THEN_OR_EQUAL_TO -> andCondition(key, ">= '$value'")
+                            Condition.LESS_THEN -> andCondition(key, "< '$value'")
+                            Condition.LESS_THEN_OR_EQUAL_TO -> andCondition(key, "<= '$value'")
+                            Condition.IN -> andCondition("", "JSON_CONTAINS(user.content,'$value','\$.$k')=1")
+                            Condition.NOT_IN -> andCondition("", "JSON_CONTAINS(user.content,'$value','\$.$k')=0")
+                            Condition.BETWEEN -> {
+                                val values = JSON.parseArray(value.toString())
+                                andCondition(key, "between ${values[0]} and ${values[1]}")
+                            }
+                            Condition.NOT_BETWEEN -> {
+                                val values = JSON.parseArray(value.toString())
+                                andCondition(key, "not between ${values[0]} and ${values[1]}")
+                            }
+                            Condition.LIKE -> andCondition(key, "like ${SqlUtil.dealLikeValue(value.toString())}")
+                            Condition.NOT_LIKE -> andCondition(
+                                key,
+                                "not like ${SqlUtil.dealLikeValue(value.toString())}"
+                            )
+                        }
+                    }
+                }
+                orderByDesc(User::cdate)
+            })
+        } else {
+            val page = BaseVo().setInfo()
+            PageHelper.startPage<Any>(page.pageNum, page.pageSize)
+            var sql = "SELECT DISTINCT u.* FROM `sip-base`.user u " +
+                    "LEFT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
+                    "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
+                    "WHERE r.code='${vo.roleCode}'"
+            vo.condition?.let {
+                JSON.parseObject(it).forEach { k, v ->
+                    val key = if (userTemplateMap.containsKey(k)) {
+                        "content->'$.$k'"
+                    } else {
+                        k
+                    }
+                    //判断是否是系统字段
+                    val parameterObj = JSON.parseObject(v.toString())
+                    val condition = Enum.Condition.valueOf(parameterObj.getString("condition"))
+                    val value = parameterObj["value"]
+                    when (condition) {
+                        Condition.IS_NULL -> sql += "and $key is null"
+                        Condition.IS_NOT_NULL -> sql += "and $key is not null"
+                        Condition.EQUAL_TO -> sql += "and $key = '$value'"
+                        Condition.NOT_EQUAL_TO -> sql += "and $key <> '$value'"
+                        Condition.GREATER_THEN -> sql += "and $key > '$value'"
+                        Condition.GREATER_THEN_OR_EQUAL_TO -> sql += "and $key >= '$value'"
+                        Condition.LESS_THEN -> sql += "and $key < '$value'"
+                        Condition.LESS_THEN_OR_EQUAL_TO -> sql += "and $key <= '$value'"
+                        Condition.IN -> sql += " JSON_CONTAINS(user.content,'$value','\$.$key')=1"
+                        Condition.NOT_IN -> sql += " JSON_CONTAINS(user.content,'$value','\$.$key')=0"
+                        Condition.BETWEEN -> {
+                            val values = JSON.parseArray(value.toString())
+                            sql += " between ${values[0]} and ${values[1]}"
+                        }
+                        Condition.NOT_BETWEEN -> {
+                            val values = JSON.parseArray(value.toString())
+                            sql += "not between ${values[0]} and ${values[1]}"
+                        }
+                        Condition.LIKE -> sql += "and $key like ${SqlUtil.dealLikeValue(value.toString())}"
+                        Condition.NOT_LIKE -> sql += "and $key not like ${SqlUtil.dealLikeValue(value.toString())}"
+                    }
+                }
             }
-//            andCondition("user.content->'\$.customCompany'")
-            orderByDesc(User::cdate)
-        })
+            val result = mapper.selectBySql(sql)
+            pageList = PageInfo(to<UserDto>(result))
+        }
         val users = pageList.list
         dealReturnUser(users)
         val result = PageInfo<JSONObject>()
@@ -121,21 +211,7 @@ class UserService : BaseService<UserMapper, User>() {
             userIds = users.map { it.id!! }
         }
         val users = to<UserDto>(selectByIds(userIds))
-        if (users.isNotEmpty()) {
-            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
-                select(UserAuth::uid, UserAuth::type, UserAuth::username, UserAuth::ldate)
-                andIn(UserAuth::uid, users.map { it.id })
-            }).groupBy({ it.uid }, { it })
-            users.forEach {
-                val userAuth = userAuths[it.id]
-                if (userAuth != null) {
-                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
-                    it.mobile = userAuthMap[1]?.username
-                    it.email = userAuthMap[2]?.username
-                    it.ldate = userAuth.map { it.ldate!! }.max()
-                }
-            }
-        }
+        dealReturnUser(users)
         return UserUtil.toJson(users)
     }
 
