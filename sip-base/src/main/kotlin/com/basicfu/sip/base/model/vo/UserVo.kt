@@ -22,5 +22,4 @@ class UserVo {
     var roleIds:List<Long>?=null
 
     var condition:String?=null
-    var roleCode:String?=null
 }

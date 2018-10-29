@@ -25,6 +25,7 @@ import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.*
 import com.github.pagehelper.PageHelper
 import com.github.pagehelper.PageInfo
+import org.apache.commons.lang3.StringUtils
 import org.apache.ibatis.session.RowBounds
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,59 +70,15 @@ class UserService : BaseService<UserMapper, User>() {
     fun list(vo: UserVo): PageInfo<JSONObject> {
         val pageList: PageInfo<UserDto>
         val userTemplateMap = userTemplateService.all().associateBy { it.enName }
-        if (vo.roleCode.isNullOrBlank()) {
+        val conditionJson = vo.condition?.let { JSON.parseObject(it) } ?: JSONObject()
+        val roleCode = conditionJson.getString("roleCode")
+        if (roleCode == null) {
             pageList = selectPage(example<User> {
                 exists(false)
-                vo.condition?.let {
-                    JSON.parseObject(it).forEach { k, v ->
-                        val key = if (userTemplateMap.containsKey(k)) {
-                            "content->'$.$k'"
-                        } else {
-                            k
-                        }
-                        //判断是否是系统字段
-                        val parameterObj = JSON.parseObject(v.toString())
-                        val condition = Enum.Condition.valueOf(parameterObj.getString("condition"))
-                        val value = parameterObj["value"]
-                        when (condition) {
-                            Condition.IS_NULL -> andCondition(key, "is null")
-                            Condition.IS_NOT_NULL -> andCondition(key, "is not null")
-                            Condition.EQUAL_TO -> andCondition(key, "= '$value'")
-                            Condition.NOT_EQUAL_TO -> andCondition(key, "<> '$value'")
-                            Condition.GREATER_THEN -> andCondition(key, "> '$value'")
-                            Condition.GREATER_THEN_OR_EQUAL_TO -> andCondition(key, ">= '$value'")
-                            Condition.LESS_THEN -> andCondition(key, "< '$value'")
-                            Condition.LESS_THEN_OR_EQUAL_TO -> andCondition(key, "<= '$value'")
-                            Condition.IN -> andCondition("", "JSON_CONTAINS(user.content,'$value','\$.$k')=1")
-                            Condition.NOT_IN -> andCondition("", "JSON_CONTAINS(user.content,'$value','\$.$k')=0")
-                            Condition.BETWEEN -> {
-                                val values = JSON.parseArray(value.toString())
-                                andCondition(key, "between ${values[0]} and ${values[1]}")
-                            }
-                            Condition.NOT_BETWEEN -> {
-                                val values = JSON.parseArray(value.toString())
-                                andCondition(key, "not between ${values[0]} and ${values[1]}")
-                            }
-                            Condition.LIKE -> andCondition(key, "like ${SqlUtil.dealLikeValue(value.toString())}")
-                            Condition.NOT_LIKE -> andCondition(
-                                key,
-                                "not like ${SqlUtil.dealLikeValue(value.toString())}"
-                            )
-                        }
-                    }
-                }
-                orderByDesc(User::cdate)
-            })
-        } else {
-            val page = BaseVo().setInfo()
-            PageHelper.startPage<Any>(page.pageNum, page.pageSize)
-            var sql = "SELECT DISTINCT u.* FROM `sip-base`.user u " +
-                    "LEFT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
-                    "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
-                    "WHERE r.code='${vo.roleCode}'"
-            vo.condition?.let {
-                JSON.parseObject(it).forEach { k, v ->
-                    val key = if (userTemplateMap.containsKey(k)) {
+                conditionJson.forEach { k, v ->
+                    //是系统字段不应该使用json in
+                    val systemField = !userTemplateMap.containsKey(k)
+                    val key = if (!systemField) {
                         "content->'$.$k'"
                     } else {
                         k
@@ -131,30 +88,106 @@ class UserService : BaseService<UserMapper, User>() {
                     val condition = Enum.Condition.valueOf(parameterObj.getString("condition"))
                     val value = parameterObj["value"]
                     when (condition) {
-                        Condition.IS_NULL -> sql += "and $key is null"
-                        Condition.IS_NOT_NULL -> sql += "and $key is not null"
-                        Condition.EQUAL_TO -> sql += "and $key = '$value'"
-                        Condition.NOT_EQUAL_TO -> sql += "and $key <> '$value'"
-                        Condition.GREATER_THEN -> sql += "and $key > '$value'"
-                        Condition.GREATER_THEN_OR_EQUAL_TO -> sql += "and $key >= '$value'"
-                        Condition.LESS_THEN -> sql += "and $key < '$value'"
-                        Condition.LESS_THEN_OR_EQUAL_TO -> sql += "and $key <= '$value'"
-                        Condition.IN -> sql += " JSON_CONTAINS(user.content,'$value','\$.$key')=1"
-                        Condition.NOT_IN -> sql += " JSON_CONTAINS(user.content,'$value','\$.$key')=0"
+                        Condition.IS_NULL -> andCondition(key, "is null")
+                        Condition.IS_NOT_NULL -> andCondition(key, "is not null")
+                        Condition.EQUAL_TO -> andCondition(key, "= '$value'")
+                        Condition.NOT_EQUAL_TO -> andCondition(key, "<> '$value'")
+                        Condition.GREATER_THEN -> andCondition(key, "> '$value'")
+                        Condition.GREATER_THEN_OR_EQUAL_TO -> andCondition(key, ">= '$value'")
+                        Condition.LESS_THEN -> andCondition(key, "< '$value'")
+                        Condition.LESS_THEN_OR_EQUAL_TO -> andCondition(key, "<= '$value'")
+                        Condition.IN -> {
+                            //目前系统字段没有需要in的
+                            if (!systemField) {
+                                andCondition("", "JSON_CONTAINS(user.content,'$value','\$.$k')=1")
+                            }
+                        }
+                        Condition.NOT_IN -> {
+                            if (!systemField) {
+                                andCondition("", "JSON_CONTAINS(user.content,'$value','\$.$k')=0")
+                            }
+                        }
                         Condition.BETWEEN -> {
                             val values = JSON.parseArray(value.toString())
-                            sql += " between ${values[0]} and ${values[1]}"
+                            andCondition(key, "between ${values[0]} and ${values[1]}")
                         }
                         Condition.NOT_BETWEEN -> {
                             val values = JSON.parseArray(value.toString())
-                            sql += "not between ${values[0]} and ${values[1]}"
+                            andCondition(key, "not between ${values[0]} and ${values[1]}")
                         }
-                        Condition.LIKE -> sql += "and $key like ${SqlUtil.dealLikeValue(value.toString())}"
-                        Condition.NOT_LIKE -> sql += "and $key not like ${SqlUtil.dealLikeValue(value.toString())}"
+                        Condition.LIKE -> andCondition(key, "like ${SqlUtil.dealLikeValue(value.toString())}")
+                        Condition.NOT_LIKE -> andCondition(
+                            key,
+                            "not like ${SqlUtil.dealLikeValue(value.toString())}"
+                        )
                     }
                 }
+                orderByDesc(User::cdate)
+            })
+        } else {
+            val page = BaseVo().setInfo()
+            PageHelper.startPage<Any>(page.pageNum, page.pageSize)
+            val orignSql = "SELECT DISTINCT u.* FROM `sip-base`.user u " +
+                    "LEFT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
+                    "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
+                    "WHERE "
+            var sql=""
+            //必有role
+            conditionJson.forEach { k, v ->
+                val systemField = !userTemplateMap.containsKey(k)
+                val key = if (!systemField) {
+                    "u.content->'$.$k'"
+                } else {
+                    if (k == "roleCode") {
+                        "r.code"
+                    } else {
+                        "u.$k"
+                    }
+                }
+                //判断是否是系统字段
+                val parameterObj = JSON.parseObject(v.toString())
+                val condition = Enum.Condition.valueOf(parameterObj.getString("condition"))
+                val value = parameterObj["value"]
+                when (condition) {
+                    Condition.IS_NULL -> sql += "and $key is null"
+                    Condition.IS_NOT_NULL -> sql += "and $key is not null"
+                    Condition.EQUAL_TO -> sql += "and $key = '$value'"
+                    Condition.NOT_EQUAL_TO -> sql += "and $key <> '$value'"
+                    Condition.GREATER_THEN -> sql += "and $key > '$value'"
+                    Condition.GREATER_THEN_OR_EQUAL_TO -> sql += "and $key >= '$value'"
+                    Condition.LESS_THEN -> sql += "and $key < '$value'"
+                    Condition.LESS_THEN_OR_EQUAL_TO -> sql += "and $key <= '$value'"
+                    Condition.IN -> {
+                        sql += if (!systemField) {
+                            " JSON_CONTAINS(user.content,'$value','\$.$key')=1"
+                        } else {
+                            " and $key in ('${StringUtils.join(JSON.parseArray(value.toString()).map { it }, "','")}')"
+                        }
+                    }
+                    Condition.NOT_IN -> {
+                        sql += if (!systemField) {
+                            " JSON_CONTAINS(user.content,'$value','\$.$key')=0"
+                        } else {
+                            " and $key not in ('${StringUtils.join(JSON.parseArray(value.toString()).map { it }, "','")}')"
+                        }
+                    }
+                    Condition.BETWEEN -> {
+                        val values = JSON.parseArray(value.toString())
+                        sql += " between ${values[0]} and ${values[1]}"
+                    }
+                    Condition.NOT_BETWEEN -> {
+                        val values = JSON.parseArray(value.toString())
+                        sql += "not between ${values[0]} and ${values[1]}"
+                    }
+                    Condition.LIKE -> sql += "and $key like ${SqlUtil.dealLikeValue(value.toString())}"
+                    Condition.NOT_LIKE -> sql += "and $key not like ${SqlUtil.dealLikeValue(value.toString())}"
+                }
             }
-            val result = mapper.selectBySql(sql)
+            sql = sql.trimStart()
+            if(sql.startsWith("and")){
+                sql=sql.substringAfter("and")
+            }
+            val result = mapper.selectBySql(orignSql+sql)
             pageList = PageInfo(to<UserDto>(result))
         }
         val users = pageList.list
