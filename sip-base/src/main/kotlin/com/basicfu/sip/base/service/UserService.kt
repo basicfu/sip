@@ -159,14 +159,14 @@ class UserService : BaseService<UserMapper, User>() {
                     Condition.LESS_THEN_OR_EQUAL_TO -> sql += "and $key <= '$value'"
                     Condition.IN -> {
                         sql += if (!systemField) {
-                            " JSON_CONTAINS(user.content,'$value','\$.$key')=1"
+                            " and JSON_CONTAINS(u.content,'$value','\$.$k')=1"
                         } else {
                             " and $key in ('${StringUtils.join(JSON.parseArray(value.toString()).map { it }, "','")}')"
                         }
                     }
                     Condition.NOT_IN -> {
                         sql += if (!systemField) {
-                            " JSON_CONTAINS(user.content,'$value','\$.$key')=0"
+                            " and JSON_CONTAINS(u.content,'$value','\$.$k')=0"
                         } else {
                             " and $key not in ('${StringUtils.join(JSON.parseArray(value.toString()).map { it }, "','")}')"
                         }
