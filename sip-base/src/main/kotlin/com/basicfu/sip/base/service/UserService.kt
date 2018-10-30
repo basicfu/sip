@@ -694,7 +694,7 @@ class UserService : BaseService<UserMapper, User>() {
                                 throw CustomException("找不到字典[$extra]下为[$item]的值")
                             }
                         }
-                        contentResult[enName] = value
+                        contentResult[enName] = arrayValue
                     }
                 }
             //不支持默认值、必选
