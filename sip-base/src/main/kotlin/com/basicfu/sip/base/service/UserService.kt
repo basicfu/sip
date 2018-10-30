@@ -684,11 +684,12 @@ class UserService : BaseService<UserMapper, User>() {
                 }
             //不支持默认值、必选
                 CHECK -> {
-                    if (value == null) {
+                    val arrayValue = contentJson.getJSONArray(enName)
+                    if (arrayValue.isEmpty()) {
                         contentResult[enName] = "[]"
                     } else {
                         val dictMap = DictUtil.getMap(extra)
-                        JSON.parseArray(value).forEach { item ->
+                        arrayValue.forEach { item ->
                             if (!dictMap.containsKey(item.toString())) {
                                 throw CustomException("找不到字典[$extra]下为[$item]的值")
                             }
