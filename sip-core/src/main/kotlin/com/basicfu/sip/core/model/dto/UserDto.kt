@@ -19,6 +19,7 @@ class UserDto {
 
     var cuname:String?=null
     var appCode:String?=null
+    var token:String?=null
 
     var roles: JSONArray? = null
     var menus: JSONArray? = null

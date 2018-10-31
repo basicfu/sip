@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.common.wrapper.RequestWrapper
+import com.basicfu.sip.core.model.dto.AppDto
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
@@ -62,9 +63,28 @@ object AppUtil {
     /**
      * 更新request中的app参数
      */
-    fun updateApp(app:JSONObject) {
+    fun updateApp(app: JSONObject) {
         val requestWrapper = RequestWrapper(RequestUtil.getRequest())
         requestWrapper.addParameter(Constant.System.APP_CODE, app.toJSONString())
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(requestWrapper))
+    }
+
+    /**
+     * 根据appId获取appCode
+     */
+    fun getAppCodeByAppId(appId: Long): String? {
+        val apps = RedisUtil.hGetAll<AppDto>(Constant.Redis.APP).map { it.value!! }.associateBy({ it.id }, { it.code })
+        return apps[appId]
+    }
+
+    /**
+     * 根据appCode获取appId
+     */
+    fun getAppIdByAppCode(appCode: String): Long? {
+        val app = RedisUtil.hGet<AppDto>(Constant.Redis.APP, appCode)
+        app?.let {
+            return it.id
+        }
+        return null
     }
 }

@@ -131,7 +131,7 @@ class UserService : BaseService<UserMapper, User>() {
                     "LEFT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
                     "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
                     "WHERE "
-            var sql=""
+            var sql = ""
             //必有role
             conditionJson.forEach { k, v ->
                 val systemField = !userTemplateMap.containsKey(k)
@@ -168,7 +168,10 @@ class UserService : BaseService<UserMapper, User>() {
                         sql += if (!systemField) {
                             " and JSON_CONTAINS(u.content,'$value','\$.$k')=0"
                         } else {
-                            " and $key not in ('${StringUtils.join(JSON.parseArray(value.toString()).map { it }, "','")}')"
+                            " and $key not in ('${StringUtils.join(
+                                JSON.parseArray(value.toString()).map { it },
+                                "','"
+                            )}')"
                         }
                     }
                     Condition.BETWEEN -> {
@@ -184,10 +187,10 @@ class UserService : BaseService<UserMapper, User>() {
                 }
             }
             sql = sql.trimStart()
-            if(sql.startsWith("and")){
-                sql=sql.substringAfter("and")
+            if (sql.startsWith("and")) {
+                sql = sql.substringAfter("and")
             }
-            val result = mapper.selectBySql(orignSql+sql)
+            val result = mapper.selectBySql(orignSql + sql)
             pageList = PageInfo(to<UserDto>(result))
         }
         val users = pageList.list
@@ -339,45 +342,18 @@ class UserService : BaseService<UserMapper, User>() {
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             RedisUtil.del(keys.map { it })
         }
-        AppUtil.appNotCheck()
-        val user = to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))
-        val currentTime = (System.currentTimeMillis() / 1000).toInt()
-        userAuthMapper.updateByPrimaryKeySelective(generate {
-            id = userAuth.id
-            ldate = currentTime
-        })
         // 后续需要更改当前应用ID
         val appInfo = JSONObject()
         appInfo[Constant.System.APP_ID] = appId
         appInfo[Constant.System.APP_CODE] = appCode
         AppUtil.updateApp(appInfo)
-        val permission =
-            com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user!!.id!!) ?: throw CustomException(
-                Enum.User.LOGIN_ERROR
-            )
-        val userAuths = userAuthMapper.select(generate {
-            uid = userAuth.uid
-        }).associateBy({ it.type }, { it })
-        user.appCode = appCode
-        user.mobile = userAuths[1]?.username
-        user.email = userAuths[2]?.username
-        user.ldate = currentTime
-        user.roles = permission.getJSONArray("roles")
-        user.menus = permission.getJSONArray("menus")
-        user.permissions = permission.getJSONArray("permissions")
-        user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
-            .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
-        //TODO 系统设置登录过期时间
-        val userToken = TokenUtil.generateUserToken(username)
-        val redisToken = TokenUtil.getRedisToken(userToken)
-        RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
-        val frontToken = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
-        val result = JSONObject()
-        result["token"] = frontToken
-        result["time"] = System.currentTimeMillis() / 1000
-        result["username"] = user.username
-        result["roles"] = user.roles
-        return result
+        val currentTime = (System.currentTimeMillis() / 1000).toInt()
+        userAuthMapper.updateByPrimaryKeySelective(generate {
+            id = userAuth.id
+            ldate = currentTime
+        })
+        val user = refreshLoginUser(userAuth.uid!!)
+        return UserUtil.toJson(user)
     }
 
     /**
@@ -571,6 +547,42 @@ class UserService : BaseService<UserMapper, User>() {
 
     fun delete(ids: List<Long>?): Int {
         return deleteByIds(ids)
+    }
+
+    /**
+     * 刷新登录的用户信息，登录或修改用户，权限变更时都应刷新
+     */
+    fun refreshLoginUser(uid: Long): UserDto {
+        val user = to<UserDto>(mapper.selectByPrimaryKey(uid))!!
+        val cuser = mapper.selectByPrimaryKey(user.cuid)
+        if (cuser == null) {
+            user.cuname = "系统"
+        } else {
+            user.cuname = cuser.nickname
+        }
+        val permission =
+            com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user.id!!) ?: throw CustomException(
+                com.basicfu.sip.core.common.Enum.SERVER_ERROR
+            )
+        val userAuth = userAuthMapper.select(generate {
+            this.uid = user.id
+        })
+        val userAuthMap = userAuth.associateBy({ it.type }, { it })
+        user.appCode = AppUtil.getAppCodeByAppId(user.appId!!)
+        user.mobile = userAuthMap[1]?.username
+        user.email = userAuthMap[2]?.username
+        user.ldate = userAuth.map { it.ldate!! }.max()
+        user.roles = permission.getJSONArray("roles")
+        user.menus = permission.getJSONArray("menus")
+        user.permissions = permission.getJSONArray("permissions")
+        user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
+            .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
+        //TODO 系统设置登录过期时间
+        val userToken = TokenUtil.generateUserToken(user.username!!)
+        val redisToken = TokenUtil.getRedisToken(userToken)
+        RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
+        user.token = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
+        return user
     }
 
     /**
