@@ -1,6 +1,7 @@
 package com.basicfu.sip.base.service
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.common.Enum.Condition
@@ -695,7 +696,7 @@ class UserService : BaseService<UserMapper, User>() {
                 CHECK -> {
                     val arrayValue = contentJson.getJSONArray(enName)
                     if (arrayValue.isEmpty()) {
-                        contentResult[enName] = "[]"
+                        contentResult[enName] = JSONArray()
                     } else {
                         val dictMap = DictUtil.getMap(extra)
                         arrayValue.forEach { item ->
