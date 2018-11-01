@@ -24,7 +24,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      * obj源对象,R目标对象
      */
     inline fun <reified R> to(obj: Any?): R? {
-        if(obj==null){
+        if (obj == null) {
             return null
         }
         val clazz = R::class.java
@@ -126,11 +126,25 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      * 根据指定条件
      */
     inline fun <reified R> selectPage(example: Example): PageInfo<R> {
+        startPage()
+        val result = mapper.selectByExample(example)!!
+        return getPageInfo(result as List<Any>)
+    }
+
+    /**
+     * 开始分页
+     */
+    fun startPage() {
         val page = BaseVo().setInfo()
         PageHelper.startPage<Any>(page.pageNum, page.pageSize)
-        val result = mapper.selectByExample(example)
-        val to = to<R>(result as List<Any>)
-        val pageList=result as Page<R>
+    }
+
+    /**
+     * 传入查询结果返回pageInfo对象
+     */
+    inline fun <reified R> getPageInfo(result: List<Any>): PageInfo<R> {
+        val to = to<R>(result)
+        val pageList = result as Page<R>
         pageList.clear()
         pageList.addAll(to)
         return PageInfo(pageList)

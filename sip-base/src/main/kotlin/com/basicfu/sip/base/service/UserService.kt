@@ -20,10 +20,8 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.AppDto
 import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.model.dto.UserDto
-import com.basicfu.sip.core.model.vo.BaseVo
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.*
-import com.github.pagehelper.PageHelper
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
 import org.apache.ibatis.session.RowBounds
@@ -125,8 +123,6 @@ class UserService : BaseService<UserMapper, User>() {
                 orderByDesc(User::cdate)
             })
         } else {
-            val page = BaseVo().setInfo()
-            PageHelper.startPage<Any>(page.pageNum, page.pageSize)
             val orignSql = "SELECT DISTINCT u.* FROM `sip-base`.user u " +
                     "LEFT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
                     "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
@@ -190,8 +186,9 @@ class UserService : BaseService<UserMapper, User>() {
             if (sql.startsWith("and")) {
                 sql = sql.substringAfter("and")
             }
+            startPage()
             val result = mapper.selectBySql(orignSql + sql)
-            pageList = PageInfo(to<UserDto>(result))
+            pageList = getPageInfo(result)
         }
         val users = pageList.list
         dealReturnUser(users)
