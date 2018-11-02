@@ -34,3 +34,5 @@ zuul:
     max-per-route-connections: 10000
     max-total-connections: 10000
   retryable: true
+  # 可解决zuul文件上乱码 https://cloud.spring.io/spring-cloud-netflix/multi/multi__router_and_filter_zuul.html
+  servlet-path: /
