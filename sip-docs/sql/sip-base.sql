@@ -61,7 +61,7 @@ create table user(
 drop table if exists user_auth;
 CREATE TABLE user_auth (
   id bigint auto_increment primary key,
-  app_id bigint not null default 0 comment '租户ID',
+  app_id bigint not null default 0 comment '应用ID',
   uid bigint not null comment '用户ID',
   type varchar(64) not null default '' comment 'auth类型字典',
   username varchar(100) not null default '' comment '登录标识',

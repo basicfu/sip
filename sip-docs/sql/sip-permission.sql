@@ -8,6 +8,8 @@ create table role(
   app_id bigint not null default 0 comment '应用Id',
   code varchar(32) not null default '' comment '角色code',
   name varchar(32) not null default '' comment '角色名',
+  cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
   enalbe tinyint not null default 0 comment '是否启用'
 )
 comment '角色表' engine=InnoDB;
@@ -17,7 +19,9 @@ create table user_role(
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
   user_id bigint not null default 0 comment '用户Id',
-  role_id bigint not null default 0 comment '角色Id'
+  role_id bigint not null default 0 comment '角色Id',
+  cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间'
 )
 comment '用户角色表' engine=InnoDB;
 
@@ -31,6 +35,8 @@ CREATE TABLE menu (
   sort int not null default 0 comment '菜单顺序',
   icon varchar(5000) not null default '' comment '菜单图标',
   type varchar(64) not null default '' comment '菜单类型(页面,元素)',
+  cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
   display tinyint not null default 0 comment '是否显示'
 )
 comment '菜单表' engine=InnoDB;
@@ -40,7 +46,9 @@ CREATE TABLE role_menu (
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
   role_id bigint not null default 0 comment '角色ID',
-  menu_id bigint not null default 0 comment '菜单ID'
+  menu_id bigint not null default 0 comment '菜单ID',
+  cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间'
 )comment '角色菜单表' engine=InnoDB;
 
 drop table if exists resource;
@@ -51,7 +59,9 @@ CREATE TABLE resource (
   url varchar(255) not null default '' comment '资源URL',
   method varchar(10) not null default '' comment '请求方法(一个接口有多种请求方式强制拆成多个接口)',
   name varchar(100) not null default '' comment '资源名',
-  unique key (service_id,url,method)
+  cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
+  unique key (app_id,service_id,url,method)
 )comment '资源表' engine=InnoDB;
 
 drop table if exists menu_resource;
@@ -59,7 +69,9 @@ CREATE TABLE menu_resource (
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
   menu_id bigint not null default 0 comment '菜单Id',
-  resource_id bigint not null default 0 comment '资源Id'
+  resource_id bigint not null default 0 comment '资源Id',
+  cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间'
 )comment '菜单资源表' engine=InnoDB;
 
 drop table if exists role_permission;
@@ -67,13 +79,17 @@ CREATE TABLE role_permission (
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
   role_id bigint not null default 0 comment '角色Id',
-  permission_id bigint not null default 0 comment '权限Id'
+  permission_id bigint not null default 0 comment '权限Id',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间'
 )comment '角色权限表' engine=InnoDB;
 
 create table permission(
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
-  name varchar(32) not null default '' comment '权限名'
+  name varchar(32) not null default '' comment '权限名',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间'
 )comment '权限表' engine=InnoDB;
 
 drop table if exists permission_resource;
@@ -81,21 +97,25 @@ CREATE TABLE permission_resource (
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
   permission_id bigint not null default 0 comment '权限Id',
-  resource_id bigint not null default 0 comment '资源Id'
+  resource_id bigint not null default 0 comment '资源Id',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间'
 )comment '权限资源表' engine=InnoDB;
 
 INSERT INTO menu (id,app_id, pid, name, path, sort, icon, type, display) VALUES
 CREATE TABLE `sip-permission`.menu
 (
-    id bigint(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    app_id bigint(20) DEFAULT '0' NOT NULL COMMENT '应用Id',
-    pid bigint(20) DEFAULT '0' NOT NULL COMMENT '父级Id',
-    name varchar(32) DEFAULT '' NOT NULL COMMENT '菜单名',
-    path varchar(255) DEFAULT '' NOT NULL COMMENT '菜单路径',
-    sort int(11) DEFAULT '0' NOT NULL COMMENT '菜单顺序',
-    icon varchar(5000) DEFAULT '' NOT NULL COMMENT '菜单图标',
-    type varchar(64) DEFAULT '' NOT NULL COMMENT '菜单类型(页面,元素)',
-    display tinyint(4) DEFAULT '0' NOT NULL COMMENT '是否显示'
+  id bigint(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  app_id bigint(20) DEFAULT '0' NOT NULL COMMENT '应用Id',
+  pid bigint(20) DEFAULT '0' NOT NULL COMMENT '父级Id',
+  name varchar(32) DEFAULT '' NOT NULL COMMENT '菜单名',
+  path varchar(255) DEFAULT '' NOT NULL COMMENT '菜单路径',
+  sort int(11) DEFAULT '0' NOT NULL COMMENT '菜单顺序',
+  icon varchar(5000) DEFAULT '' NOT NULL COMMENT '菜单图标',
+  type varchar(64) DEFAULT '' NOT NULL COMMENT '菜单类型(页面,元素)',
+	cdate int not null default 0 comment '创建时间',
+  udate int not null default 0 comment '更新时间',
+  display tinyint(4) DEFAULT '0' NOT NULL COMMENT '是否显示'
 );
 INSERT INTO `sip-permission`.menu (app_id, pid, name, path, sort, icon, type, display) VALUES (1, 0, '基础服务', '/base', 0, '<svg viewBox="0 0 1024 1024" width="24px" height="24px" fill="currentColor">
   <path d="M464 144H160c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V160c0-8.8-7.2-16-16-16zm-52 268H212V212h200v200zm452-268H560c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V160c0-8.8-7.2-16-16-16zm-52 268H612V212h200v200zM464 544H160c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V560c0-8.8-7.2-16-16-16zm-52 268H212V612h200v200zm452-268H560c-8.8 0-16 7.2-16 16v304c0 8.8 7.2 16 16 16h304c8.8 0 16-7.2 16-16V560c0-8.8-7.2-16-16-16zm-52 268H612V612h200v200z"></path>
