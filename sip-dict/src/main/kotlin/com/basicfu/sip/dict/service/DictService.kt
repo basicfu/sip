@@ -7,7 +7,7 @@ import com.basicfu.sip.core.model.dto.DictDto
 import com.basicfu.sip.core.model.po.Dict
 import com.basicfu.sip.core.model.vo.DictVo
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.dict.common.Enum
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.dict.mapper.DictMapper
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
@@ -70,13 +70,13 @@ class DictService : BaseService<DictMapper, Dict>() {
                 id = vo.pid
                 isdel = false
             }
-        }) ?: throw CustomException(Enum.Dict.NOT_FOUND)
+        }) ?: throw CustomException(Enum.NOT_FOUND_DICT)
         val count = mapper.selectCountBySql(
             "SELECT count(*) FROM dict AS d1,dict AS d2 " +
                     "WHERE d1.lft > d2.lft AND d1.lft<d2.rgt AND d2.value = '" + parentDict.value + "' AND d1.lvl=d2.lvl+1 and d1.value='" + vo.value + "' and d1.isdel=0"
         )
         if (count != 0) {
-            throw CustomException(Enum.Dict.VALUE_REPEAT)
+            throw CustomException(Enum.EXIST_DICT_VALUE)
         }
         mapper.updateBySql("set rgt=rgt+2 where rgt>=${parentDict.rgt} and isdel=0")
         mapper.updateBySql("set lft=lft+2 where lft>${parentDict.rgt} and isdel=0")
@@ -113,10 +113,10 @@ class DictService : BaseService<DictMapper, Dict>() {
     fun delete(ids: List<Long>): Int {
         ids.forEach { id ->
             if (id == 1L) {
-                throw CustomException(Enum.Dict.NO_DELETE_ROOT)
+                throw CustomException(Enum.NO_DELETE_ROOT_DICT)
             }
             val example = Example(Dict::class.java)
-            example.selectProperties("lft","rgt")
+            example.selectProperties("lft", "rgt")
             example.isForUpdate = true
             example.createCriteria().andEqualTo("id", id).andEqualTo("isdel", 0)
             val one = mapper.selectByExample(example)
@@ -142,7 +142,7 @@ class DictService : BaseService<DictMapper, Dict>() {
      */
     fun import(vo: DictVo) {
         if (vo.value.isNullOrBlank()) {
-            throw CustomException(Enum.Dict.IMPORT_FORMAT_ERROR)
+            throw CustomException(Enum.IMPORT_FORMAT_ERROR)
         }
         val splitDelimiter = if (vo.splitDelimiter == null) {
             defaultSplitDelimiter
@@ -170,7 +170,7 @@ class DictService : BaseService<DictMapper, Dict>() {
         for ((index, it) in list.withIndex()) {
             //第一条必须不能为子项
             if (preParentDict == null && index == 0 && it.startsWith(splitDelimiter)) throw CustomException(
-                Enum.Dict.IMPORT_FORMAT_ERROR
+                Enum.IMPORT_FORMAT_ERROR
             )
             val arrays = arrayListOf<String>()
             val level = if (preParentDict != null) {
@@ -190,7 +190,7 @@ class DictService : BaseService<DictMapper, Dict>() {
             ) {
                 continue
             }
-            if (arrays.size <= 2) throw CustomException(Enum.Dict.NAME_AND_VALUE_NOT_FOUND)
+            if (arrays.size <= 2) throw CustomException(Enum.NOT_NULL_DICT_NAME_AND_VALUE)
             val itemName = arrays[0]
             val itemValue = arrays[1]
             val itemDescrption = if (arrays.size >= 3) arrays[2] else null

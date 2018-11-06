@@ -4,7 +4,7 @@ import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.permission.common.Enum
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.PermissionMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -41,7 +41,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
     fun insert(vo: PermissionVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
-            }) != 0) throw CustomException(Enum.Permission.EXIST_NAME)
+            }) != 0) throw CustomException(Enum.EXIST_PERMISSION_NAME)
         val po = dealInsert(to<Permission>(vo))
         return mapper.insertSelective(po)
     }
@@ -50,7 +50,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         val ids = vo.resourceIds!!
         if (resourceMapper.selectCountByExample(example<Resource> {
                 andIn(Resource::id, ids)
-            }) != ids.size) throw CustomException(Enum.Permission.RESOURCE_NOT_FOUND)
+            }) != ids.size) throw CustomException(Enum.NOT_FOUND_RESOURCE)
         val permissionResources = arrayListOf<PermissionResource>()
         ids.forEach { it ->
             val pr = PermissionResource()
@@ -66,7 +66,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
             name = vo.name
         })
         if (checkPermission != null && checkPermission.id != vo.id) throw CustomException(
-            Enum.Permission.EXIST_NAME
+            Enum.EXIST_PERMISSION_NAME
         )
         val po = dealUpdate(to<Permission>(vo))
         return mapper.updateByPrimaryKeySelective(po)

@@ -1,9 +1,9 @@
 package com.basicfu.sip.base.service
 
-import com.basicfu.sip.base.common.Enum
 import com.basicfu.sip.base.mapper.AppServiceMapper
 import com.basicfu.sip.base.model.po.AppService
 import com.basicfu.sip.base.model.vo.AppServiceVo
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -35,35 +35,35 @@ class AppServiceService : BaseService<AppServiceMapper, AppService>() {
 
     fun insert(vo: AppServiceVo): Int {
         if (vo.serverId.isNullOrBlank() && vo.url.isNullOrBlank()) {
-            throw CustomException(Enum.Service.SERVER_ID_OR_URL)
+            throw CustomException(Enum.NOT_NULL_SERVER_ID_OR_URL)
         }
         if (mapper.selectCount(generate {
                 path = vo.path
-            }) != 0) throw CustomException(Enum.Service.PATH_EXISTS)
+            }) != 0) throw CustomException(Enum.EXIST_APP_SERVICE_PATH)
         if (!vo.serverId.isNullOrBlank() && mapper.selectCount(generate {
                 serverId = vo.serverId
-            }) != 0) throw CustomException(Enum.Service.SERVER_ID_EXISTS)
+            }) != 0) throw CustomException(Enum.EXIST_APP_SERVER_ID)
         if (!vo.url.isNullOrBlank() && mapper.selectCount(generate {
                 url = vo.url
-            }) != 0) throw CustomException(Enum.Service.URL_EXISTS)
+            }) != 0) throw CustomException(Enum.EXIST_APP_SERVER_URL)
         val po = dealInsert(to<AppService>(vo))
         return mapper.insertSelective(po)
     }
 
     fun update(vo: AppServiceVo): Int {
         if (vo.serverId.isNullOrBlank() && vo.url.isNullOrBlank()) {
-            throw CustomException(Enum.Service.SERVER_ID_OR_URL)
+            throw CustomException(Enum.NOT_NULL_SERVER_ID_OR_URL)
         }
         val checkPath = mapper.selectOne(generate {
             path = vo.path
         })
-        if (checkPath != null && checkPath.id != vo.id) throw CustomException(Enum.Service.PATH_EXISTS)
+        if (checkPath != null && checkPath.id != vo.id) throw CustomException(Enum.EXIST_APP_SERVICE_PATH)
         if (!vo.serverId.isNullOrBlank()) {
             val checkServiceId = mapper.selectOne(generate {
                 serverId = vo.serverId
             })
             if (checkServiceId != null && checkServiceId.id != vo.id) throw CustomException(
-                Enum.Service.SERVER_ID_EXISTS
+                Enum.EXIST_APP_SERVER_ID
             )
         }
         if (!vo.url.isNullOrBlank()) {
@@ -71,7 +71,7 @@ class AppServiceService : BaseService<AppServiceMapper, AppService>() {
                 url = vo.url
             })
             if (checkUrl != null && checkUrl.id != vo.id) throw CustomException(
-                Enum.Service.URL_EXISTS
+                Enum.EXIST_APP_SERVER_URL
             )
         }
         val po = dealUpdate(to<AppService>(vo))

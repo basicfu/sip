@@ -14,7 +14,7 @@ import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.RedisUtil
-import com.basicfu.sip.permission.common.Enum
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -38,9 +38,9 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
     @Autowired
     lateinit var springClientFactory: SpringClientFactory
     @Autowired
-    lateinit var permissionResourceMapper:PermissionResourceMapper
+    lateinit var permissionResourceMapper: PermissionResourceMapper
     @Autowired
-    lateinit var menuResourceMapper:MenuResourceMapper
+    lateinit var menuResourceMapper: MenuResourceMapper
 
     fun list(vo: ResourceVo): PageInfo<ResourceDto> {
         return selectPage(example<Resource> {
@@ -77,7 +77,7 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
         val serviceResource = existResources.groupBy { it.serviceId }
         val insertResource = arrayListOf<Resource>()
         val deleteIds = arrayListOf<Long>()
-        val result=JSONArray()
+        val result = JSONArray()
         syncList.forEach { service ->
             val serviceTag = if (service.serverId != null) {
                 service.serverId.toString()
@@ -86,13 +86,13 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
             }
             // TODO url的形式暂未考虑
             val loadBalancer = springClientFactory.getLoadBalancer(service.serverId)
-            var insertCount=0
-            var deleteCount=0
-            val insertDetail= arrayListOf<ResourceDto>()
-            val deleteDetail=arrayListOf<ResourceDto>()
-            var available=false
-            if(loadBalancer!=null&&loadBalancer.reachableServers.isNotEmpty()){
-                available=true
+            var insertCount = 0
+            var deleteCount = 0
+            val insertDetail = arrayListOf<ResourceDto>()
+            val deleteDetail = arrayListOf<ResourceDto>()
+            var available = false
+            if (loadBalancer != null && loadBalancer.reachableServers.isNotEmpty()) {
+                available = true
                 val resourceMap =
                     serviceResource[service.id]?.associateBy { it.url + it.method }?.toMutableMap() ?: hashMapOf()
                 val array = clientFeign.sipClientUrl(serviceTag).data
@@ -104,12 +104,12 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
                         methods.forEach { method ->
                             val resource = resourceMap[url + method]
                             if (resource == null) {
-                                val po=generate<Resource> {
+                                val po = generate<Resource> {
                                     serviceId = service.id
                                     this.url = url
                                     this.method = method
-                                    cdate=(java.lang.System.currentTimeMillis() / 1000).toInt()
-                                    udate=cdate
+                                    cdate = (java.lang.System.currentTimeMillis() / 1000).toInt()
+                                    udate = cdate
                                     name = ""
                                 }
                                 insertResource.add(po)
@@ -121,29 +121,29 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
                     }
                 }
                 val ids = resourceMap.values.map { it.id!! }
-                deleteCount=ids.size
+                deleteCount = ids.size
                 deleteDetail.addAll(to(resourceMap.values.toList()))
                 deleteIds.addAll(ids)
             }
-            val item=JSONObject()
-            item["name"]=service.name
-            item["serviceId"]=service.id
-            item["available"]=available
-            item["insertCount"]=insertCount
-            item["deleteCount"]=deleteCount
-            item["insertDetail"]=insertDetail
-            item["deleteDetail"]=deleteDetail
+            val item = JSONObject()
+            item["name"] = service.name
+            item["serviceId"] = service.id
+            item["available"] = available
+            item["insertCount"] = insertCount
+            item["deleteCount"] = deleteCount
+            item["insertDetail"] = insertDetail
+            item["deleteDetail"] = deleteDetail
             result.add(item)
         }
-        return if(vo.type==2){
+        return if (vo.type == 2) {
             if (insertResource.isNotEmpty()) {
                 mapper.insertList(insertResource)
             }
             if (deleteIds.isNotEmpty()) {
                 delete(deleteIds)
             }
-            Result.success(null,"操作成功")
-        }else{
+            Result.success(null, "操作成功")
+        } else {
             Result.success(result)
         }
     }
@@ -153,7 +153,7 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
                 serviceId = vo.serviceId
                 url = vo.url
                 method = vo.method
-            }) != 0) throw CustomException(Enum.Resource.SERVICE_URL_METHOD_UNIQUE)
+            }) != 0) throw CustomException(Enum.SERVICE_URL_METHOD_UNIQUE)
         val po = dealInsert(to<Resource>(vo))
         return mapper.insertSelective(po)
     }
@@ -164,7 +164,7 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
             url = vo.url
             method = vo.method
         })
-        if (checkUrl != null && checkUrl.id != vo.id) throw CustomException(Enum.Resource.SERVICE_URL_METHOD_UNIQUE)
+        if (checkUrl != null && checkUrl.id != vo.id) throw CustomException(Enum.SERVICE_URL_METHOD_UNIQUE)
         val po = dealUpdate(to<Resource>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }
@@ -173,12 +173,12 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
      * 删除资源时会删除权限/菜单-资源关系
      */
     fun delete(ids: List<Long>): Int {
-        if(ids.isNotEmpty()){
+        if (ids.isNotEmpty()) {
             permissionResourceMapper.deleteByExample(example<PermissionResource> {
-                andIn(PermissionResource::resourceId,ids)
+                andIn(PermissionResource::resourceId, ids)
             })
             menuResourceMapper.deleteByExample(example<MenuResource> {
-                andIn(MenuResource::resourceId,ids)
+                andIn(MenuResource::resourceId, ids)
             })
         }
         return deleteByIds(ids)

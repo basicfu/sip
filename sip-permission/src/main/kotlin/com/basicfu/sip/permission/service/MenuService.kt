@@ -6,7 +6,7 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.MenuUtil
-import com.basicfu.sip.permission.common.Enum
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -36,7 +36,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
     fun insert(vo: MenuVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
-            }) != 0) throw CustomException(Enum.Menu.EXIST_NAME)
+            }) != 0) throw CustomException(Enum.EXIST_MENU_NAME)
         val po = dealInsert(to<Menu>(vo))
         return mapper.insertSelective(po)
     }
@@ -45,7 +45,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         val ids = vo.resourceIds!!
         if (resourceMapper.selectCountByExample(example<Resource> {
                 andIn(Resource::id, ids)
-            }) != ids.size) throw CustomException(Enum.Menu.RESOURCE_NOT_FOUND)
+            }) != ids.size) throw CustomException(Enum.NOT_FOUND_RESOURCE)
         val menuResources = arrayListOf<MenuResource>()
         ids.forEach { it ->
             val mr = MenuResource()
@@ -60,7 +60,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         val checkMenu = mapper.selectOne(generate {
             name = vo.name
         })
-        if (checkMenu != null && checkMenu.id != vo.id) throw CustomException(Enum.Menu.EXIST_NAME)
+        if (checkMenu != null && checkMenu.id != vo.id) throw CustomException(Enum.EXIST_MENU_NAME)
         val po = dealUpdate(to<Menu>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }

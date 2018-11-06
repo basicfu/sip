@@ -1,6 +1,6 @@
 package com.basicfu.sip.base.util
 
-import com.basicfu.sip.base.common.Enum
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.client.util.DictUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import org.apache.commons.lang3.StringUtils

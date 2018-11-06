@@ -10,7 +10,7 @@ import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.MenuUtil
-import com.basicfu.sip.permission.common.Enum
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.*
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
@@ -139,7 +139,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
     fun insert(vo: RoleVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
-            }) != 0) throw CustomException(Enum.Role.EXIST_NAME)
+            }) != 0) throw CustomException(Enum.EXIST_ROLE_NAME)
         val po = dealInsert(to<Role>(vo))
         return mapper.insertSelective(po)
     }
@@ -147,7 +147,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
     fun insertUser(vo: RoleVo): Int {
         var userIds = vo.userIds!!
         if (UserUtil.listUsernameByIds(userIds).isEmpty()) {
-            throw CustomException(Enum.User.USER_NOT_FOUND)
+            throw CustomException(Enum.NOT_FOUND_USER_ID)
         }
         val existsUserIds = urMapper.selectByExample(example<UserRole> {
             andEqualTo(UserRole::roleId, vo.id)
@@ -168,7 +168,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         var ids = vo.menuIds!!
         if (menuMapper.selectCountByExample(example<Menu> {
                 andIn(Menu::id, ids)
-            }) != ids.size) throw CustomException(Enum.Role.MENU_NOT_FOUND)
+            }) != ids.size) throw CustomException(Enum.NOT_FOUND_MENU)
         val existsMenuIds = rmMapper.selectByExample(example<RoleMenu> {
             andEqualTo(RoleMenu::roleId, vo.id)
             andIn(RoleMenu::menuId, ids)
@@ -188,7 +188,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         var ids = vo.permissionIds!!
         if (permissionMapper.selectCountByExample(example<Permission> {
                 andIn(Permission::id, ids)
-            }) != ids.size) throw CustomException(Enum.Role.MENU_NOT_FOUND)
+            }) != ids.size) throw CustomException(Enum.NOT_FOUND_MENU)
         val existsPermissionIds = rpMapper.selectByExample(example<RolePermission> {
             andEqualTo(RolePermission::roleId, vo.id)
             andIn(RolePermission::permissionId, ids)
@@ -209,7 +209,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
             name = vo.name
             enalbe = vo.enalbe
         })
-        if (check != null && check.id != vo.id) throw CustomException(Enum.Role.EXIST_NAME)
+        if (check != null && check.id != vo.id) throw CustomException(Enum.EXIST_ROLE_NAME)
         val po = dealUpdate(to<Role>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }

@@ -3,9 +3,6 @@ package com.basicfu.sip.base.service
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.base.common.Enum
-import com.basicfu.sip.base.common.Enum.Condition
-import com.basicfu.sip.base.common.Enum.FieldType.*
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
 import com.basicfu.sip.base.model.po.User
@@ -14,6 +11,9 @@ import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.core.common.Enum.Condition
+import com.basicfu.sip.core.common.Enum.FieldType.*
 import com.basicfu.sip.core.common.Enum.UserType
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
@@ -272,7 +272,7 @@ class UserService : BaseService<UserMapper, User>() {
                 //如果用户名有@则是应用普通管理员,只获取用户类型为APP_ADMIN
                 val app =
                     RedisUtil.hGet<AppDto>(Constant.Redis.APP, username.substringBefore("@")) ?: throw CustomException(
-                        Enum.User.USERNAME_OR_PASSWORD_ERROR
+                        Enum.USERNAME_OR_PASSWORD_ERROR
                     )
                 appId = app.id
                 appCode = app.code
@@ -284,14 +284,14 @@ class UserService : BaseService<UserMapper, User>() {
                     this.username = username
                 })
                 if (userAuths.isEmpty()) {
-                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                    throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
                 }
                 val userAuthMap = userAuths.associateBy { it.uid }
                 AppUtil.appNotCheck()
                 val selectByIds = selectByIds(userAuths.map { it.uid!! })
-                val filter = selectByIds.filter { it.type == com.basicfu.sip.core.common.Enum.UserType.APP_ADMIN.name }
+                val filter = selectByIds.filter { it.type == Enum.UserType.APP_ADMIN.name }
                 if (filter.isEmpty()) {
-                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                    throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
                 }
                 userAuth = userAuthMap[filter[0].id]!!
             } else {
@@ -302,7 +302,7 @@ class UserService : BaseService<UserMapper, User>() {
                     type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
                 })
                 if (userAuths.isEmpty()) {
-                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                    throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
                 }
                 val userAuthMap = userAuths.associateBy { it.uid }
                 AppUtil.appNotCheck()
@@ -315,7 +315,7 @@ class UserService : BaseService<UserMapper, User>() {
                     ).contains(it.type)
                 }
                 if (filter.isEmpty()) {
-                    throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+                    throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
                 }
                 userAuth = userAuthMap[filter[0].id]!!
             }
@@ -323,10 +323,10 @@ class UserService : BaseService<UserMapper, User>() {
             userAuth = userAuthMapper.selectOne(generate {
                 this.username = username
                 type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
-            }) ?: throw CustomException(Enum.User.USERNAME_OR_PASSWORD_ERROR)
+            }) ?: throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
         }
         if (!PasswordUtil.matches(username + vo.password!!, userAuth.password!!)) throw CustomException(
-            Enum.User.USERNAME_OR_PASSWORD_ERROR
+            Enum.USERNAME_OR_PASSWORD_ERROR
         )
         //TODO 界面配置登录模式
         val loginModal = 3
@@ -334,7 +334,7 @@ class UserService : BaseService<UserMapper, User>() {
         if (loginModal == 1) {
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             if (keys.size >= 2) {
-                throw CustomException(Enum.User.THEN_USER_MAX_ONLINE)
+                throw CustomException(Enum.THEN_USER_MAX_ONLINE)
             }
         } else if (loginModal == 2) {
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
@@ -401,7 +401,7 @@ class UserService : BaseService<UserMapper, User>() {
         //检查用户名重复
         if (userAuthMapper.selectCount(generate {
                 username = vo.username
-            }) > 0) throw CustomException(Enum.User.EXIST_USER)
+            }) > 0) throw CustomException(Enum.EXIST_USER)
         //添加用户
         val user = dealInsert(generate<User> {
             username = vo.username
@@ -473,7 +473,7 @@ class UserService : BaseService<UserMapper, User>() {
         val checkUsername = mapper.selectOne(generate {
             username = vo.username
         })
-        if (checkUsername != null && checkUsername.id != vo.id) throw CustomException(Enum.User.EXIST_USER)
+        if (checkUsername != null && checkUsername.id != vo.id) throw CustomException(Enum.EXIST_USER)
         //更新用户内容
         mapper.updateByPrimaryKeySelective(dealUpdate(generate<User> {
             id = vo.id
@@ -579,7 +579,7 @@ class UserService : BaseService<UserMapper, User>() {
         val userToken = TokenUtil.generateUserToken(user.username!!)
         val redisToken = TokenUtil.getRedisToken(userToken)
         RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
-        user.token = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.User.LOGIN_ERROR)
+        user.token = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.LOGIN_ERROR)
         return user
     }
 
@@ -708,7 +708,7 @@ class UserService : BaseService<UserMapper, User>() {
                     }
                 }
             //不支持默认值、必选
-                RADIO -> {
+                Enum.FieldType.RADIO -> {
                     if (value == null) {
                         contentResult[enName] = ""
                     } else {

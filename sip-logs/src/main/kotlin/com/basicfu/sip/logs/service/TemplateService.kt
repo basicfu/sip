@@ -1,10 +1,10 @@
 package com.basicfu.sip.logs.service
 
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.logs.common.Enum
 import com.basicfu.sip.logs.mapper.TemplateFieldMapper
 import com.basicfu.sip.logs.mapper.TemplateMapper
 import com.basicfu.sip.logs.modal.dto.TemplateDto
@@ -41,12 +41,12 @@ class TemplateService : BaseService<TemplateMapper, Template>() {
     fun insert(vo: TemplateVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
-            }) != 0) throw CustomException(Enum.Template.EXISTS_NAME)
+            }) != 0) throw CustomException(Enum.EXIST_TEMPLATE_NAME)
         return mapper.insertSelective(dealInsert(to<Template>(vo)))
     }
 
     fun insertField(vo: TemplateVo): Int {
-        val template = mapper.selectByPrimaryKey(vo.id) ?: throw CustomException(Enum.Template.EXISTS_NAME)
+        val template = mapper.selectByPrimaryKey(vo.id) ?: throw CustomException(Enum.EXIST_TEMPLATE_NAME)
         val field = generate<TemplateField> {
             templateId = template.id
             name = vo.name
@@ -61,7 +61,7 @@ class TemplateService : BaseService<TemplateMapper, Template>() {
             name = vo.name
         })
         if (checkName != null && checkName.id != vo.id) throw CustomException(
-            Enum.Template.EXISTS_NAME
+            Enum.EXIST_TEMPLATE_NAME
         )
         val po = dealUpdate(to<Template>(vo))
         return mapper.updateByPrimaryKeySelective(po)
