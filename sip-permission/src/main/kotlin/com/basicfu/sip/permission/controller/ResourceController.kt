@@ -26,6 +26,11 @@ class ResourceController {
         return Result.success(resourceService.all())
     }
 
+    @PostMapping("/sync")
+    fun sync(@RequestBody vo: ResourceVo): Result<Any> {
+        return resourceService.sync(vo)
+    }
+
     @PostMapping("/insert")
     fun insert(@RequestBody vo: ResourceVo): Result<Any> {
         return Result.success(resourceService.insert(vo))
@@ -37,7 +42,7 @@ class ResourceController {
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(resourceService.delete(ids))
     }
 }

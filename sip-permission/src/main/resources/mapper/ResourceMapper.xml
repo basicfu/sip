@@ -10,5 +10,8 @@
     <result column="service_id" property="serviceId" jdbcType="BIGINT" />
     <result column="url" property="url" jdbcType="VARCHAR" />
     <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="method" property="name" jdbcType="VARCHAR" />
+    <result column="cdate" property="cdate" jdbcType="INTEGER" />
+    <result column="udate" property="udate" jdbcType="INTEGER" />
   </resultMap>
 </mapper>

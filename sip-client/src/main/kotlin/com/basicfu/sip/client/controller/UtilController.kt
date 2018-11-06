@@ -1,6 +1,7 @@
 package com.basicfu.sip.client.controller
 
 import com.alibaba.fastjson.JSONArray
+import com.basicfu.sip.client.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,7 +19,7 @@ class UtilController {
     lateinit var requestMappingHandlerMapping: RequestMappingHandlerMapping
 
     @GetMapping("/sip/client/url")
-    fun getServiceAllUrl(): JSONArray {
+    fun getServiceAllUrl(): Result<Any> {
         val result = JSONArray()
         val map = requestMappingHandlerMapping.handlerMethods
         for (m in map.entries) {
@@ -39,6 +40,6 @@ class UtilController {
             }
 
         }
-        return result
+        return Result(result)
     }
 }

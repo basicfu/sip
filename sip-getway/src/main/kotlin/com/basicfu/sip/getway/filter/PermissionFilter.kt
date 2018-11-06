@@ -52,6 +52,7 @@ class PermissionFilter : Filter {
      * 2.1.请求头Authorization
      */
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
+        // TODO 以后决定是否需要判断某些用户是否能执行 只有系统管理员能查看各个应用  app=sip  app=wutong&call=sip
         val request = RequestWrapper(servletRequest as HttpServletRequest)
         val response = servletResponse as HttpServletResponse
         var uri = request.requestURI
