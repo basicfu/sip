@@ -8,5 +8,8 @@
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="app_id" property="appId" jdbcType="BIGINT" />
     <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="cdate" property="cdate" jdbcType="INTEGER" />
+    <result column="udate" property="udate" jdbcType="INTEGER" />
   </resultMap>
 </mapper>

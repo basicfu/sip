@@ -1,10 +1,10 @@
 package com.basicfu.sip.permission.service
 
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.PermissionMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -14,7 +14,6 @@ import com.basicfu.sip.permission.model.po.PermissionResource
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.PermissionVo
 import com.github.pagehelper.PageInfo
-import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -25,15 +24,17 @@ import org.springframework.stereotype.Service
 @Service
 class PermissionService : BaseService<PermissionMapper, Permission>() {
     @Autowired
-    lateinit var prMapper: PermissionResourceMapper
+    lateinit var permissionResourceMapper: PermissionResourceMapper
     @Autowired
     lateinit var resourceMapper: ResourceMapper
 
     fun list(vo: PermissionVo): PageInfo<PermissionDto> {
         return selectPage(example<Permission> {
             andLike {
-                name = vo.keyword
+                name = vo.q
+                code = vo.q
             }
+            orderByDesc(Permission::cdate)
         })
     }
 
@@ -42,6 +43,9 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         if (mapper.selectCount(generate {
                 name = vo.name
             }) != 0) throw CustomException(Enum.EXIST_PERMISSION_NAME)
+        if (mapper.selectCount(generate {
+                code = vo.code
+            }) != 0) throw CustomException(Enum.EXIST_PERMISSION_CODE)
         val po = dealInsert(to<Permission>(vo))
         return mapper.insertSelective(po)
     }
@@ -58,15 +62,21 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
             pr.resourceId = it
             permissionResources.add(pr)
         }
-        return prMapper.insertList(permissionResources)
+        return permissionResourceMapper.insertList(permissionResources)
     }
 
     fun update(vo: PermissionVo): Int {
-        val checkPermission = mapper.selectOne(generate {
+        val checkPermissionName = mapper.selectOne(generate {
             name = vo.name
         })
-        if (checkPermission != null && checkPermission.id != vo.id) throw CustomException(
+        if (checkPermissionName != null && checkPermissionName.id != vo.id) throw CustomException(
             Enum.EXIST_PERMISSION_NAME
+        )
+        val checkPermissionCode = mapper.selectOne(generate {
+            code = vo.code
+        })
+        if (checkPermissionCode != null && checkPermissionCode.id != vo.id) throw CustomException(
+            Enum.EXIST_PERMISSION_CODE
         )
         val po = dealUpdate(to<Permission>(vo))
         return mapper.updateByPrimaryKeySelective(po)
@@ -74,13 +84,15 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
 
     fun delete(ids: List<Long>): Int {
         if (ids.isNotEmpty()) {
-            prMapper.deleteByIds(StringUtils.join(ids, ","))
+            permissionResourceMapper.deleteByExample(example<PermissionResource> {
+                andIn(PermissionResource::permissionId, ids)
+            })
         }
         return deleteByIds(ids)
     }
 
     fun deleteResource(vo: PermissionVo): Int {
-        return prMapper.deleteByExample(example<PermissionResource> {
+        return permissionResourceMapper.deleteByExample(example<PermissionResource> {
             andEqualTo(PermissionResource::permissionId, vo.id)
             andIn(PermissionResource::resourceId, vo.resourceIds!!)
         })

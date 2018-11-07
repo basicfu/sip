@@ -42,7 +42,7 @@ class PermissionController {
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(permissionService.delete(ids))
     }
 
