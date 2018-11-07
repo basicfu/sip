@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.client.feign.ClientFeign
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -14,7 +15,6 @@ import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.RedisUtil
-import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -92,38 +92,41 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
             val deleteDetail = arrayListOf<ResourceDto>()
             var available = false
             if (loadBalancer != null && loadBalancer.reachableServers.isNotEmpty()) {
-                available = true
-                val resourceMap =
-                    serviceResource[service.id]?.associateBy { it.url + it.method }?.toMutableMap() ?: hashMapOf()
-                val array = clientFeign.sipClientUrl(serviceTag).data
-                array?.forEach {
-                    val obj = it as LinkedHashMap<String, Any>
-                    val urls = obj["url"] as ArrayList<String>
-                    val methods = obj["requestMethod"] as ArrayList<String>
-                    urls.forEach { url ->
-                        methods.forEach { method ->
-                            val resource = resourceMap[url + method]
-                            if (resource == null) {
-                                val po = generate<Resource> {
-                                    serviceId = service.id
-                                    this.url = url
-                                    this.method = method
-                                    cdate = (java.lang.System.currentTimeMillis() / 1000).toInt()
-                                    udate = cdate
-                                    name = ""
+                try {
+                    val array = clientFeign.sipClientUrl(serviceTag).data
+                    available = true
+                    val resourceMap =serviceResource[service.id]?.associateBy { it.url + it.method }?.toMutableMap() ?: hashMapOf()
+                    array?.forEach {
+                        val obj = it as LinkedHashMap<String, Any>
+                        val urls = obj["url"] as ArrayList<String>
+                        val methods = obj["requestMethod"] as ArrayList<String>
+                        urls.forEach { url ->
+                            methods.forEach { method ->
+                                val resource = resourceMap[url + method]
+                                if (resource == null) {
+                                    val po = generate<Resource> {
+                                        serviceId = service.id
+                                        this.url = url
+                                        this.method = method
+                                        cdate = (java.lang.System.currentTimeMillis() / 1000).toInt()
+                                        udate = cdate
+                                        name = ""
+                                    }
+                                    insertResource.add(po)
+                                    insertCount++
+                                    insertDetail.add(to<ResourceDto>(po)!!)
                                 }
-                                insertResource.add(po)
-                                insertCount++
-                                insertDetail.add(to<ResourceDto>(po)!!)
+                                resourceMap.remove(url + method)
                             }
-                            resourceMap.remove(url + method)
                         }
                     }
+                    val ids = resourceMap.values.map { it.id!! }
+                    deleteCount = ids.size
+                    deleteDetail.addAll(to(resourceMap.values.toList()))
+                    deleteIds.addAll(ids)
+                }catch (e: Exception){
+                    available = false
                 }
-                val ids = resourceMap.values.map { it.id!! }
-                deleteCount = ids.size
-                deleteDetail.addAll(to(resourceMap.values.toList()))
-                deleteIds.addAll(ids)
             }
             val item = JSONObject()
             item["name"] = service.name
