@@ -1,12 +1,12 @@
 package com.basicfu.sip.permission.service
 
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.MenuDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.MenuUtil
-import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -38,6 +38,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
                 name = vo.name
             }) != 0) throw CustomException(Enum.EXIST_MENU_NAME)
         val po = dealInsert(to<Menu>(vo))
+        mapper.updateBySql("set sort=sort+1 where pid=${vo.pid} and sort>=${vo.sort}")
         return mapper.insertSelective(po)
     }
 
@@ -65,8 +66,50 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         return mapper.updateByPrimaryKeySelective(po)
     }
 
+    fun updateDisplay(id: Long, display: Boolean): Int {
+        val po = dealUpdate(generate<Menu> {
+            this.id = id
+            this.display = display
+        })
+        return mapper.updateByPrimaryKeySelective(po)
+    }
+
+    fun updateSort(dragId: Long, hoverId: Long): Int {
+        val menuMap = selectByIds(arrayListOf(dragId, hoverId)).associateBy { it.id!! }
+        if(menuMap.size!=2){
+            throw CustomException(Enum.NOT_FOUND_MENU_ID)
+        }
+        val dragMenu = menuMap[dragId]!!
+        val hoverMenu = menuMap[hoverId]!!
+        if(dragMenu.pid!!!=hoverMenu.pid!!){
+            throw CustomException(Enum.DRAG_SORT_NEED_SAME_LEVEL)
+        }
+        mapper.updateBySql("set sort=sort+1 where pid=${dragMenu.pid} and sort>=${hoverMenu.sort}")
+        mapper.updateBySql("set sort=sort-1 where pid=${dragMenu.pid} and sort<${hoverMenu.sort}")
+        dragMenu.sort=hoverMenu.sort
+        mapper.updateByPrimaryKeySelective(dragMenu)
+        return 1
+    }
+
     fun delete(ids: List<Long>): Int {
-        return deleteByIds(ids)
+        var deleteCount = 0
+        if (ids.isNotEmpty()) {
+            val deleteIds = arrayListOf<Long>()
+            val menus = to<MenuDto>(mapper.selectAll())
+            val recursive = MenuUtil.recursive(null, menus)
+            var menu: MenuDto?
+            ids.forEach { id ->
+                menu = MenuUtil.getItem(recursive, id)
+                if (menu != null) {
+                    val toMutableList = MenuUtil.getChildren(menu!!.children).map { it.id!! }.toMutableList()
+                    toMutableList.add(menu!!.id!!)
+                    deleteIds.addAll(toMutableList)
+                }
+            }
+            deleteByIds(deleteIds)
+            deleteCount = deleteIds.size
+        }
+        return deleteCount
     }
 
     fun deleteResource(vo: MenuVo): Int {

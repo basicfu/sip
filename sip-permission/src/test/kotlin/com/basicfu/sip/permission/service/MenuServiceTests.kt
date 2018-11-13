@@ -28,7 +28,7 @@ class MenuServiceTests {
             sort=1
             icon="menu"
             type="PAGE"
-            display=1
+            display=true
         }
         Assert.assertEquals(menuService.insert(vo), 1)
     }

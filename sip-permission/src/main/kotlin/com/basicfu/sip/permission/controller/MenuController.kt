@@ -36,6 +36,16 @@ class MenuController {
         return Result.success(menuService.update(vo))
     }
 
+    @PostMapping("/update/{id}/{display}")
+    fun updateDisplay(@PathVariable("id") id: Long, @PathVariable("display") display: Boolean): Result<Any> {
+        return Result.success(menuService.updateDisplay(id, display))
+    }
+
+    @PostMapping("/update/sort/{dragId}/{hoverId}")
+    fun updateSort(@PathVariable("dragId") dragId: Long, @PathVariable("hoverId") hoverId: Long): Result<Any> {
+        return Result.success(menuService.updateSort(dragId, hoverId))
+    }
+
     @DeleteMapping("/delete")
     fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(menuService.delete(ids))

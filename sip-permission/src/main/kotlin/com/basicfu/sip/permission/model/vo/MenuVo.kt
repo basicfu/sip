@@ -9,7 +9,8 @@ class MenuVo {
     var sort: Int? = null
     var icon: String? = null
     var type: String? = null
-    var display: Int? = null
+    var display: Boolean? = null
 
-    var resourceIds:List<Long>?=null
+//    var display: Long? = null
+    var resourceIds: List<Long>? = null
 }

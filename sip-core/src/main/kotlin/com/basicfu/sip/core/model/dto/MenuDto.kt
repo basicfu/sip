@@ -9,7 +9,7 @@ class MenuDto {
     var sort: Int? = null
     var icon: String? = null
     var type: String? = null
-    var display: Int? = null
+    var display: Boolean? = null
 
-    var children: List<MenuDto>?=null
+    var children: List<MenuDto>? = null
 }
