@@ -5,5 +5,7 @@ class RoleDto {
     var appId: Long? = null
     var name: String? = null
     var code: String? = null
-    var enalbe: Boolean? = null
+    var cdate: Int? = null
+    var udate: Int? = null
+    var enable: Boolean? = null
 }

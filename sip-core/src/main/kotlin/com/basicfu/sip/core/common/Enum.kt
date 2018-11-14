@@ -58,7 +58,9 @@ enum class Enum(val value: Int, val msg: String) {
     EXIST_TEMPLATE_NAME(3008, "模板名已存在"),
     EXIST_PERMISSION_CODE(3009, "权限名CODE已存在"),
     NOT_FOUND_MENU_ID(3010, "找不到菜单ID"),
-    DRAG_SORT_NEED_SAME_LEVEL(3011, "只能在同一层级拖动");
+    DRAG_SORT_NEED_SAME_LEVEL(3011, "只能在同一层级拖动"),
+    EXIST_ROLE_CODE(3012, "角色CODE已存在"),
+    EXIST_ADD_DATA(3013, "要添加的数据已存在");
 
     enum class UserType constructor(val system: Boolean) {
         SYSTEM_SUPER_ADMIN(true),

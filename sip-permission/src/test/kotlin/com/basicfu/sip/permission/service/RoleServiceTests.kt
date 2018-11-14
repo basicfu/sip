@@ -22,7 +22,7 @@ class RoleServiceTests {
     @Test
     fun insert() {
         val vo=generate<RoleVo> {
-            enalbe=true
+            enable=true
             name="测试角色"
         }
         Assert.assertEquals(roleService.insert(vo),1)

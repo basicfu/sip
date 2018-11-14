@@ -5,8 +5,9 @@ class RoleVo {
     var appId: Long? = null
     var name: String? = null
     var code: String? = null
-    var enalbe: Boolean? = null
+    var enable: Boolean? = null
 
+    var q:String?=null
     var userIds:List<Long>?=null
     var menuIds:List<Long>?=null
     var permissionIds:List<Long>?=null

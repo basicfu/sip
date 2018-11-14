@@ -26,6 +26,21 @@ class RoleController {
         return Result.success(roleService.list(vo))
     }
 
+    @GetMapping("/list/{id}/user")
+    fun listUserById(@PathVariable id: Long): Result<Any> {
+        return Result.success(roleService.listUserById(id))
+    }
+
+    @GetMapping("/list/{id}/menu")
+    fun listMenuById(@PathVariable id: Long): Result<Any> {
+        return Result.success(roleService.listMenuById(id))
+    }
+
+    @GetMapping("/list/{id}/permission")
+    fun listPermissionById(@PathVariable id: Long): Result<Any> {
+        return Result.success(roleService.listPermissionById(id))
+    }
+
     @GetMapping("/all")
     fun all(): Result<Any> {
         return Result.success(roleService.all())
@@ -57,22 +72,22 @@ class RoleController {
     }
 
     @DeleteMapping("/delete")
-    fun delete(ids: List<Long>): Result<Any> {
+    fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(roleService.delete(ids))
     }
 
     @DeleteMapping("/delete/user")
-    fun deleteUser(vo: RoleVo): Result<Any> {
+    fun deleteUser(@RequestBody vo: RoleVo): Result<Any> {
         return Result.success(roleService.deleteUser(vo))
     }
 
     @DeleteMapping("/delete/menu")
-    fun deleteMenu(vo: RoleVo): Result<Any> {
+    fun deleteMenu(@RequestBody vo: RoleVo): Result<Any> {
         return Result.success(roleService.deleteMenu(vo))
     }
 
     @DeleteMapping("/delete/permission")
-    fun deletePermission(vo: RoleVo): Result<Any> {
+    fun deletePermission(@RequestBody vo: RoleVo): Result<Any> {
         return Result.success(roleService.deletePermission(vo))
     }
 }

@@ -3,14 +3,15 @@ package com.basicfu.sip.permission.service
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.client.util.UserUtil
 import com.basicfu.sip.core.common.Constant
+import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.dto.MenuDto
+import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.AppUtil
 import com.basicfu.sip.core.util.MenuUtil
-import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.permission.mapper.*
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
@@ -90,33 +91,33 @@ class RoleService : BaseService<RoleMapper, Role>() {
             }).mapNotNull { it.resourceId }
         }
         roleIds.remove(noLoginRoleId)
-        val roles=if(roleIds.isNotEmpty()){
+        val roles = if (roleIds.isNotEmpty()) {
             to<RoleDto>(roleMapper.selectByExample(example<Role> {
                 andIn(Role::id, roleIds)
             }))
-        }else{
+        } else {
             arrayListOf()
         }
-        val menus = if(menuIds.isNotEmpty()){
+        val menus = if (menuIds.isNotEmpty()) {
             MenuUtil.recursive(null, to(menuMapper.selectByExample(example<Menu> {
                 andIn(Menu::id, menuIds)
             })))
-        }else{
+        } else {
             arrayListOf()
         }
-        val permissions = if(permissionIds.isNotEmpty()){
+        val permissions = if (permissionIds.isNotEmpty()) {
             to<MenuDto>(permissionMapper.selectByExample(example<Permission> {
                 andIn(Permission::id, permissionIds)
             }))
-        }else{
+        } else {
             arrayListOf()
         }
         val resourceIds = arrayListOf<Long>()
         resourceIds.addAll(menuResourceIds)
         resourceIds.addAll(permissionResourceIds)
-        val resources=ArrayList<Resource>()
+        val resources = ArrayList<Resource>()
         //其他应用可以有系统的应用resource，所以此处不使用appId
-        if(resourceIds.isNotEmpty()){
+        if (resourceIds.isNotEmpty()) {
             AppUtil.appNotCheck()
             resources.addAll(resourceMapper.selectByIds(StringUtils.join(resourceIds.distinct(), ",")))
         }
@@ -130,8 +131,45 @@ class RoleService : BaseService<RoleMapper, Role>() {
 
     fun list(vo: RoleVo): PageInfo<RoleDto> {
         return selectPage(example<Role> {
-            andLike(Role::name, vo.name)
+            orLike {
+                name = vo.q
+                code = vo.q
+            }
+            orderByDesc(Role::cdate)
         })
+    }
+
+    fun listUserById(id: Long): PageInfo<UserDto> {
+        startPage()
+        val result=urMapper.selectByExample(example<UserRole>{
+            andEqualTo(UserRole::roleId,id)
+            orderByDesc(UserRole::cdate)
+        })
+        val userRolePageInfo=getPageInfo<UserRole>(result)
+        val pageInfo = PageInfo<UserDto>()
+        pageInfo.total=userRolePageInfo.total
+        pageInfo.pageNum=userRolePageInfo.pageNum
+        pageInfo.pageSize=userRolePageInfo.pageSize
+        val userIds = result.map { it.userId!! }
+        if(userIds.isNotEmpty()){
+            val users = UserUtil.listByIds<UserDto>(userIds)
+            pageInfo.list=users
+        }else{
+            pageInfo.list= emptyList()
+        }
+        return pageInfo
+    }
+
+    fun listMenuById(id: Long): List<Long> {
+        return rmMapper.selectByExample(example<RoleMenu> {
+            andEqualTo(RoleMenu::roleId, id)
+        }).map { it.menuId!! }
+    }
+
+    fun listPermissionById(id: Long): List<Long> {
+        return rpMapper.selectByExample(example<RoleMenu> {
+            andEqualTo(RoleMenu::roleId, id)
+        }).map { it.permissionId!! }
     }
 
     fun all(): List<RoleDto> = to(mapper.selectAll())
@@ -140,6 +178,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
         if (mapper.selectCount(generate {
                 name = vo.name
             }) != 0) throw CustomException(Enum.EXIST_ROLE_NAME)
+        if (mapper.selectCount(generate {
+                code = vo.code
+            }) != 0) throw CustomException(Enum.EXIST_ROLE_CODE)
         val po = dealInsert(to<Role>(vo))
         return mapper.insertSelective(po)
     }
@@ -154,12 +195,15 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andIn(UserRole::userId, userIds)
         }).map { it.userId }
         userIds = userIds.filter { !existsUserIds.contains(it) }
+        if(userIds.isEmpty()){
+            throw CustomException(Enum.EXIST_ADD_DATA)
+        }
         val userRoles = arrayListOf<UserRole>()
         userIds.forEach { it ->
             val ur = UserRole()
             ur.roleId = vo.id
             ur.userId = it
-            userRoles.add(ur)
+            userRoles.add(dealInsert(ur))
         }
         return urMapper.insertList(userRoles)
     }
@@ -205,19 +249,29 @@ class RoleService : BaseService<RoleMapper, Role>() {
     }
 
     fun update(vo: RoleVo): Int {
-        val check = mapper.selectOne(generate {
+        val checkName = mapper.selectOne(generate {
             name = vo.name
-            enalbe = vo.enalbe
         })
-        if (check != null && check.id != vo.id) throw CustomException(Enum.EXIST_ROLE_NAME)
+        if (checkName != null && checkName.id != vo.id) throw CustomException(Enum.EXIST_ROLE_NAME)
+        val checkCode = mapper.selectOne(generate {
+            code = vo.code
+        })
+        if (checkCode != null && checkCode.id != vo.id) throw CustomException(Enum.EXIST_ROLE_CODE)
         val po = dealUpdate(to<Role>(vo))
         return mapper.updateByPrimaryKeySelective(po)
     }
 
     fun delete(ids: List<Long>): Int {
         if (ids.isNotEmpty()) {
-            rpMapper.deleteByIds(StringUtils.join(ids, ","))
-            rmMapper.deleteByIds(StringUtils.join(ids, ","))
+            urMapper.deleteByExample(example<UserRole>{
+                andIn(UserRole::roleId,ids)
+            })
+            rpMapper.deleteByExample(example<RolePermission> {
+                andIn(RolePermission::roleId,ids)
+            })
+            rmMapper.deleteByExample(example<RoleMenu> {
+                andIn(RoleMenu::roleId,ids)
+            })
         }
         return deleteByIds(ids)
     }

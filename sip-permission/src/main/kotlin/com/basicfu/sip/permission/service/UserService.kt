@@ -1,6 +1,5 @@
 package com.basicfu.sip.permission.service
 
-import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -8,7 +7,6 @@ import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.mapper.RoleMapper
 import com.basicfu.sip.permission.mapper.UserRoleMapper
-import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.Role
 import com.basicfu.sip.permission.model.po.UserRole
 import org.apache.commons.lang.StringUtils
@@ -29,7 +27,7 @@ class UserService : BaseService<RoleMapper, Role>() {
 
     fun listRoleByIds(ids: List<Long>): List<UserDto> {
         val userRoles = urMapper.selectByExample(example<UserRole> {
-            andIn(UserRole::userId,ids)
+            andIn(UserRole::userId, ids)
         })
         val userRoleMap = userRoles.groupBy({ it.userId }, { it.roleId })
         val roleIds = userRoles.map { it.roleId }
