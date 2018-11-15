@@ -2,15 +2,15 @@ package com.basicfu.sip.getway.filter
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.common.model.dto.AppDto
+import com.basicfu.sip.common.model.dto.AppServiceDto
+import com.basicfu.sip.common.model.dto.UserDto
+import com.basicfu.sip.common.util.TokenUtil
 import com.basicfu.sip.core.common.wrapper.RequestWrapper
-import com.basicfu.sip.core.model.Result
-import com.basicfu.sip.core.model.dto.AppDto
-import com.basicfu.sip.core.model.dto.AppServiceDto
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.util.RedisUtil
-import com.basicfu.sip.core.util.TokenUtil
 import org.springframework.http.HttpStatus
 import org.springframework.util.AntPathMatcher
 import java.net.URI
@@ -78,7 +78,7 @@ class PermissionFilter : Filter {
         //4.get path code
         if (appCode == null && pathArray.size >= 3) {
             appCode = pathArray[1]
-            uri=uri.substringAfter(appCode)
+            uri = uri.substringAfter(appCode)
             pathFull = true
         }
         if (appCode == null) {
@@ -99,7 +99,7 @@ class PermissionFilter : Filter {
         if (appCall == null) {
             appCall = request.getParameter(Constant.System.APP_CALL)
         }
-        if(appCall!=null&&apps[appCall]==null){
+        if (appCall != null && apps[appCall] == null) {
             returnMsg(response, Enum.NOT_FOUND_CALL_CODE)
             return
         }
@@ -111,27 +111,27 @@ class PermissionFilter : Filter {
         if (appSecret == null) {
             appSecret = request.getParameter(Constant.System.APP_SECRET)
         }
-        val appId=app.id!!
+        val appId = app.id!!
         //set current thread app info,overwrite app parameter
         val appInfo = JSONObject()
-        appInfo[Constant.System.APP_ID]=appId
-        appInfo[Constant.System.APP_CODE]=appCode
-        request.addParameter(Constant.System.APP_CODE,appInfo.toJSONString())
+        appInfo[Constant.System.APP_ID] = appId
+        appInfo[Constant.System.APP_CODE] = appCode
+        request.addParameter(Constant.System.APP_CODE, appInfo.toJSONString())
         var allow = false
         //有限判断用户token信息
         val frontToken = request.getHeader(Constant.System.AUTHORIZATION)
-        var user: UserDto? =null
-        if(frontToken!=null){
+        var user: UserDto? = null
+        if (frontToken != null) {
             user = TokenUtil.getCurrentUserByFrontToken(frontToken)
         }
         //针对user中type为0的跳过权限，0为系统超级管理员
-        if(user!=null&&user.type==Enum.UserType.SYSTEM_SUPER_ADMIN.name){
-            allow=true
-        }else{
+        if (user != null && user.type == Enum.UserType.SYSTEM_SUPER_ADMIN.name) {
+            allow = true
+        } else {
             //每个应用只能调用sip中的服务和自身应用的服务并配置权限
             val services = arrayListOf<AppServiceDto>()
             services.addAll(apps[Constant.System.APP_SYSTEM_CODE]?.services ?: arrayListOf())
-            if(Constant.System.APP_SYSTEM_CODE!=appCode){
+            if (Constant.System.APP_SYSTEM_CODE != appCode) {
                 services.addAll(apps[appCode]?.services ?: arrayListOf())
             }
             for (service in services) {
@@ -152,7 +152,7 @@ class PermissionFilter : Filter {
                     val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
                     if (frontToken == null) {
                         //未登录用户（排除访客接口）
-                        if(allowGuest(appId,service.id!!,serviceUrl)){
+                        if (allowGuest(appId, service.id!!, serviceUrl)) {
                             allow = true
                             break
                         }
@@ -160,7 +160,7 @@ class PermissionFilter : Filter {
                     } else {
                         if (user == null) {
                             //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
-                            if(allowGuest(appId,service.id!!,serviceUrl)){
+                            if (allowGuest(appId, service.id!!, serviceUrl)) {
                                 allow = true
                                 break
                             }
@@ -185,17 +185,17 @@ class PermissionFilter : Filter {
         //must permission pass allow forward
         if (allow) {
             if (!pathFull) {
-                uri = if(appCall!=null){
+                uri = if (appCall != null) {
                     "/$appCall$uri"
-                }else{
+                } else {
                     "/$appCode$uri"
                 }
                 request.getRequestDispatcher(uri).forward(request, response)
-            }else{
-                if(appCall!=null){
-                    uri="$appCall${uri.substringAfter(appCode)}"
+            } else {
+                if (appCall != null) {
+                    uri = "$appCall${uri.substringAfter(appCode)}"
                     request.getRequestDispatcher(uri).forward(request, response)
-                }else{
+                } else {
                     filterChain.doFilter(request, response)
                 }
             }
@@ -206,7 +206,7 @@ class PermissionFilter : Filter {
 
     override fun destroy() {}
 
-    private fun allowGuest(appId:Long,serviceId:Long,permissionUrl:String):Boolean{
+    private fun allowGuest(appId: Long, serviceId: Long, permissionUrl: String): Boolean {
         val noLoginUser = TokenUtil.getGuestUser(appId)
         if (noLoginUser != null) {
             val resources = noLoginUser.resources?.get(serviceId.toString())
@@ -216,8 +216,9 @@ class PermissionFilter : Filter {
         }
         return false
     }
+
     private fun returnMsg(response: HttpServletResponse, msg: Enum) {
-        val result = Result.error<String>(msg.msg,msg.value)
+        val result = Result.error<String>(msg.msg, msg.value)
         response.status = HttpStatus.OK.value()
         response.characterEncoding = "UTF-8"
         response.contentType = "application/json"

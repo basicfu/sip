@@ -1,6 +1,6 @@
 package com.basicfu.sip.getway.mapper
 
-import com.basicfu.sip.core.model.dto.*
+import com.basicfu.sip.common.model.dto.*
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Param
 import org.apache.ibatis.annotations.Select

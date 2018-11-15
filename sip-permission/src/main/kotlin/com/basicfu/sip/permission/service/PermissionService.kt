@@ -1,10 +1,10 @@
 package com.basicfu.sip.permission.service
 
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.model.dto.ResourceDto
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.SqlUtil
 import com.basicfu.sip.permission.mapper.PermissionMapper

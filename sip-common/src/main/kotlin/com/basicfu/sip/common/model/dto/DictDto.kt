@@ -1,7 +1,8 @@
-package com.basicfu.sip.core.model.vo
+package com.basicfu.sip.common.model.dto
 
-class DictVo {
+class DictDto {
     var id: Long? = null
+    var appId: Long? = null
     var name: String? = null
     var value: String? = null
     var description: String? = null
@@ -10,9 +11,5 @@ class DictVo {
     var lvl: Int? = null
     var sort: Int? = null
     var fixed: Boolean? = null
-    var isdel: Boolean? = null
-
-    /**父级pid*/
-    var pid: Long? = null
-    var splitDelimiter:String?=null
+    var children: List<DictDto>? = null
 }

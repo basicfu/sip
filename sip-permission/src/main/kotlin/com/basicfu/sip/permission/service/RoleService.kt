@@ -2,16 +2,16 @@ package com.basicfu.sip.permission.service
 
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.client.util.UserUtil
-import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.model.dto.MenuDto
+import com.basicfu.sip.common.model.dto.UserDto
+import com.basicfu.sip.common.util.AppUtil
+import com.basicfu.sip.common.util.MenuUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.MenuDto
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.core.util.AppUtil
-import com.basicfu.sip.core.util.MenuUtil
 import com.basicfu.sip.permission.mapper.*
 import com.basicfu.sip.permission.model.dto.RoleDto
 import com.basicfu.sip.permission.model.po.*
@@ -141,21 +141,21 @@ class RoleService : BaseService<RoleMapper, Role>() {
 
     fun listUserById(id: Long): PageInfo<UserDto> {
         startPage()
-        val result=urMapper.selectByExample(example<UserRole>{
-            andEqualTo(UserRole::roleId,id)
+        val result = urMapper.selectByExample(example<UserRole> {
+            andEqualTo(UserRole::roleId, id)
             orderByDesc(UserRole::cdate)
         })
-        val userRolePageInfo=getPageInfo<UserRole>(result)
+        val userRolePageInfo = getPageInfo<UserRole>(result)
         val pageInfo = PageInfo<UserDto>()
-        pageInfo.total=userRolePageInfo.total
-        pageInfo.pageNum=userRolePageInfo.pageNum
-        pageInfo.pageSize=userRolePageInfo.pageSize
+        pageInfo.total = userRolePageInfo.total
+        pageInfo.pageNum = userRolePageInfo.pageNum
+        pageInfo.pageSize = userRolePageInfo.pageSize
         val userIds = result.map { it.userId!! }
-        if(userIds.isNotEmpty()){
+        if (userIds.isNotEmpty()) {
             val users = UserUtil.listByIds<UserDto>(userIds)
-            pageInfo.list=users
-        }else{
-            pageInfo.list= emptyList()
+            pageInfo.list = users
+        } else {
+            pageInfo.list = emptyList()
         }
         return pageInfo
     }
@@ -195,7 +195,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andIn(UserRole::userId, userIds)
         }).map { it.userId }
         userIds = userIds.filter { !existsUserIds.contains(it) }
-        if(userIds.isEmpty()){
+        if (userIds.isEmpty()) {
             throw CustomException(Enum.EXIST_ADD_DATA)
         }
         val userRoles = arrayListOf<UserRole>()
@@ -218,7 +218,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andIn(RoleMenu::menuId, ids)
         }).map { it.menuId }
         ids = ids.filter { !existsMenuIds.contains(it) }
-        if(ids.isEmpty()){
+        if (ids.isEmpty()) {
             throw CustomException(Enum.EXIST_ADD_DATA)
         }
         val roleMenus = arrayListOf<RoleMenu>()
@@ -241,7 +241,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andIn(RolePermission::permissionId, ids)
         }).map { it.permissionId }
         ids = ids.filter { !existsPermissionIds.contains(it) }
-        if(ids.isEmpty()){
+        if (ids.isEmpty()) {
             throw CustomException(Enum.EXIST_ADD_DATA)
         }
         val rolePermissions = arrayListOf<RolePermission>()
@@ -269,14 +269,14 @@ class RoleService : BaseService<RoleMapper, Role>() {
 
     fun delete(ids: List<Long>): Int {
         if (ids.isNotEmpty()) {
-            urMapper.deleteByExample(example<UserRole>{
-                andIn(UserRole::roleId,ids)
+            urMapper.deleteByExample(example<UserRole> {
+                andIn(UserRole::roleId, ids)
             })
             rpMapper.deleteByExample(example<RolePermission> {
-                andIn(RolePermission::roleId,ids)
+                andIn(RolePermission::roleId, ids)
             })
             rmMapper.deleteByExample(example<RoleMenu> {
-                andIn(RoleMenu::roleId,ids)
+                andIn(RoleMenu::roleId, ids)
             })
         }
         return deleteByIds(ids)

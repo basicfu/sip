@@ -1,9 +1,9 @@
 package com.basicfu.sip.base.model.vo
 
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.validator.Dict
 import com.basicfu.sip.core.annotation.Insert
 import com.basicfu.sip.core.annotation.Update
-import com.basicfu.sip.core.annotation.validator.Dict
-import com.basicfu.sip.core.common.Constant
 import org.hibernate.validator.constraints.NotBlank
 import javax.validation.constraints.NotNull
 

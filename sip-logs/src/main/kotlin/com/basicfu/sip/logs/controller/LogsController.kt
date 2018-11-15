@@ -1,11 +1,12 @@
 package com.basicfu.sip.logs.controller
 
-import com.basicfu.sip.core.model.Result
+import com.basicfu.sip.common.model.Result
 import com.basicfu.sip.logs.modal.vo.TemplateVo
 import com.basicfu.sip.logs.service.LogsService
-import com.basicfu.sip.logs.service.TemplateService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 /**
  * @author basicfu

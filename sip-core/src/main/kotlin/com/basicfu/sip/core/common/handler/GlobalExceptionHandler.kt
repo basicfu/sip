@@ -2,9 +2,8 @@ package com.basicfu.sip.core.common.handler
 
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.model.Result
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.model.Result
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -22,6 +21,11 @@ import javax.servlet.http.HttpServletResponse
 @Suppress("unused")
 @ControllerAdvice
 class GlobalExceptionHandler {
+    enum class Enum(val value: Int, val msg: String) {
+        SERVER_ERROR(-1, "系统内部错误"),
+        INVALID_PARAMETER(3, "无效的参数"),
+    }
+
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     @Autowired

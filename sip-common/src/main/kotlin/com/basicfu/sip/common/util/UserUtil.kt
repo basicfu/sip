@@ -1,9 +1,9 @@
-package com.basicfu.sip.core.util
+package com.basicfu.sip.common.util
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.serializer.SerializerFeature
-import com.basicfu.sip.core.model.dto.UserDto
+import com.basicfu.sip.common.model.dto.UserDto
 import org.springframework.util.ReflectionUtils
 
 object UserUtil {
@@ -32,17 +32,17 @@ object UserUtil {
         return result
     }
 
-    inline fun <reified T> toUser(map:Map<String,Any>):T{
-        val content=JSONObject()
-        val beanFields=T::class.java.declaredFields.map { it.name }
+    inline fun <reified T> toUser(map: Map<String, Any>): T {
+        val content = JSONObject()
+        val beanFields = T::class.java.declaredFields.map { it.name }
         map.keys.filter { !beanFields.contains(it) }.forEach {
-            content[it]=map[it]
+            content[it] = map[it]
         }
-        val user=JSON.toJavaObject(JSON.parseObject(JSON.toJSONString(map)),T::class.java)
+        val user = JSON.toJavaObject(JSON.parseObject(JSON.toJSONString(map)), T::class.java)
         val field = ReflectionUtils.findField(T::class.java, "content")
         field?.let {
-            it.isAccessible=true
-            it.set(user,content)
+            it.isAccessible = true
+            it.set(user, content)
         }
         return user
     }

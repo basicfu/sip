@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.model
+package com.basicfu.sip.common.model
 
 import com.alibaba.fastjson.JSONObject
 import com.github.pagehelper.PageInfo
@@ -13,7 +13,7 @@ class Result<T> {
     var data: T? = null
 
     companion object {
-        inline fun <reified T> success(data: T?, msg: String?=null): Result<T> {
+        inline fun <reified T> success(data: T?, msg: String? = null): Result<T> {
             val result = Result<T>()
             when (data) {
                 is Int -> result.msg = "操作成功" + data.toString() + "条数据"

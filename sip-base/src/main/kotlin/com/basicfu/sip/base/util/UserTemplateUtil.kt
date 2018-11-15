@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.util
 
-import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.client.util.DictUtil
+import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import org.apache.commons.lang3.StringUtils
 import java.math.BigDecimal
@@ -15,9 +15,9 @@ object UserTemplateUtil {
     /**
      * 检查用户模板扩展字段格式和
      */
-    fun checkFormat(type: String, extra: String,value:String?) {
-        val prefix="扩展信息:"
-        val default="默认值不符合设置的扩展信息:"
+    fun checkFormat(type: String, extra: String, value: String?) {
+        val prefix = "扩展信息:"
+        val default = "默认值不符合设置的扩展信息:"
         when (Enum.FieldType.valueOf(type)) {
         //2~32
             Enum.FieldType.TEXT -> {
@@ -30,9 +30,9 @@ object UserTemplateUtil {
                 if (!StringUtils.isNumeric(start) || !StringUtils.isNumeric(end)) {
                     throw CustomException("${prefix}约束格式不正确,需要为整数数字,如:2~32")
                 }
-                val startLength=start.toInt()
-                val endLength=end.toInt()
-                if(start.startsWith("0")||end.startsWith("0")){
+                val startLength = start.toInt()
+                val endLength = end.toInt()
+                if (start.startsWith("0") || end.startsWith("0")) {
                     throw CustomException("${prefix}约束格式不正确,请输入非0开头的整数,如:2~32")
                 }
                 if (startLength !in 1..999999999 || endLength !in 1..999999999) {
@@ -41,7 +41,7 @@ object UserTemplateUtil {
                 if (startLength > endLength) {
                     throw CustomException("${prefix}结束值不能大于开始值")
                 }
-                if (!value.isNullOrBlank()&&value!!.length !in startLength..endLength) {
+                if (!value.isNullOrBlank() && value!!.length !in startLength..endLength) {
                     throw CustomException("${default}长度需要[$startLength~$endLength]个字符")
                 }
             }
@@ -58,22 +58,22 @@ object UserTemplateUtil {
                 }
                 val lengthRange = extraArray[0].split(",")
                 val valueRange = extraArray[1].split("~")
-                if ((lengthRange.size != 2||lengthRange[1].isEmpty()) || (valueRange.size != 2||valueRange[1].isEmpty())) {
+                if ((lengthRange.size != 2 || lengthRange[1].isEmpty()) || (valueRange.size != 2 || valueRange[1].isEmpty())) {
                     throw CustomException("${prefix}约束格式不正确,如:3,0&0~100")
                 }
-                if(!value.isNullOrBlank()){
+                if (!value.isNullOrBlank()) {
                     val startLength = lengthRange[0].toInt()
                     val endLength = lengthRange[1].toInt()
                     val startValue = valueRange[0].toFloat()
                     val endValue = valueRange[1].toFloat()
-                    if(startLength>20){
+                    if (startLength > 20) {
                         throw CustomException("${prefix}整数位最大20位")
                     }
-                    if(endLength>10){
+                    if (endLength > 10) {
                         throw CustomException("${prefix}小数位最大10位")
                     }
                     val splitValue = value!!.split(".")
-                    if(splitValue.contains(".")&&(splitValue.size!=2||splitValue[1].isEmpty())){
+                    if (splitValue.contains(".") && (splitValue.size != 2 || splitValue[1].isEmpty())) {
                         throw CustomException("${default}不能只有点没有小数")
                     }
                     if (splitValue.size == 1) {
@@ -82,7 +82,11 @@ object UserTemplateUtil {
                             throw CustomException("${default}整数位需要[1~$startLength]位")
                         }
                         if (splitValue[0].toLong() !in startValue..endValue) {
-                            throw CustomException("${default}值范围需要[${BigDecimal(startValue.toString()).setScale(endLength)}~${BigDecimal(endValue.toString()).setScale(endLength)}]之间")
+                            throw CustomException(
+                                "${default}值范围需要[${BigDecimal(startValue.toString()).setScale(
+                                    endLength
+                                )}~${BigDecimal(endValue.toString()).setScale(endLength)}]之间"
+                            )
                         }
                     }
                     if (splitValue.size == 2) {
@@ -95,34 +99,38 @@ object UserTemplateUtil {
                         //小数为不够自动补0
                         val floatValue = BigDecimal(value).setScale(endLength).toFloat()
                         if (floatValue !in startValue..endValue) {
-                            throw CustomException("${default}值范围需要[${BigDecimal(startValue.toString()).setScale(endLength)}~${BigDecimal(endValue.toString()).setScale(endLength)}]之间")
+                            throw CustomException(
+                                "${default}值范围需要[${BigDecimal(startValue.toString()).setScale(
+                                    endLength
+                                )}~${BigDecimal(endValue.toString()).setScale(endLength)}]之间"
+                            )
                         }
                     }
                 }
             }
             Enum.FieldType.CHECK, Enum.FieldType.RADIO, Enum.FieldType.SELECT -> {
                 //TODO 待修改为缓存格式
-                val dict=DictUtil.get(extra)
-                if (dict==null||dict.isEmpty()) {
+                val dict = DictUtil.get(extra)
+                if (dict == null || dict.isEmpty()) {
                     throw CustomException("${prefix}字典${extra}不存在")
                 }
-                if(!value.isNullOrBlank()){
-                    if(!dict.associateBy{it.value}.containsKey(value)){
+                if (!value.isNullOrBlank()) {
+                    if (!dict.associateBy { it.value }.containsKey(value)) {
                         throw CustomException("${default}不在字典${extra}中")
                     }
                 }
             }
             Enum.FieldType.DATE -> {
-                val sdf:SimpleDateFormat
+                val sdf: SimpleDateFormat
                 try {
-                    sdf=SimpleDateFormat(extra)
+                    sdf = SimpleDateFormat(extra)
                 } catch (e: Exception) {
                     throw CustomException("${prefix}日期格式不正确,需要输入支持Java SimpleDateFormat的格式")
                 }
-                if(!value.isNullOrBlank()){
+                if (!value.isNullOrBlank()) {
                     try {
                         sdf.parse(value)
-                    }catch (e:Exception){
+                    } catch (e: Exception) {
                         throw CustomException("${default}格式不正确")
                     }
                 }

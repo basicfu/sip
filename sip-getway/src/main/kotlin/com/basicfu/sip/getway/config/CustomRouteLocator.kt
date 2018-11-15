@@ -1,7 +1,7 @@
 package com.basicfu.sip.getway.config
 
-import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.model.dto.AppDto
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.model.dto.AppDto
 import com.basicfu.sip.core.util.RedisUtil
 import org.springframework.cloud.netflix.zuul.filters.RefreshableRouteLocator
 import org.springframework.cloud.netflix.zuul.filters.SimpleRouteLocator

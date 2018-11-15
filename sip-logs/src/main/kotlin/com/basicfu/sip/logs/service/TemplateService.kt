@@ -1,6 +1,6 @@
 package com.basicfu.sip.logs.service
 
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate

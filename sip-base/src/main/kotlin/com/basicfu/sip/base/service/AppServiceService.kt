@@ -3,11 +3,11 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.mapper.AppServiceMapper
 import com.basicfu.sip.base.model.po.AppService
 import com.basicfu.sip.base.model.vo.AppServiceVo
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.model.dto.AppServiceDto
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.AppServiceDto
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service

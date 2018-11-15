@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.model.dto
+package com.basicfu.sip.common.model.dto
 
 class ResourceDto {
     var id: Long? = null

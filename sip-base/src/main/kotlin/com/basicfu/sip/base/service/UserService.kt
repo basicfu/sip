@@ -10,19 +10,23 @@ import com.basicfu.sip.base.model.po.UserAuth
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
-import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.common.Enum
-import com.basicfu.sip.core.common.Enum.Condition
-import com.basicfu.sip.core.common.Enum.FieldType.*
-import com.basicfu.sip.core.common.Enum.UserType
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.enum.Enum.Condition
+import com.basicfu.sip.common.enum.Enum.FieldType.*
+import com.basicfu.sip.common.enum.Enum.UserType
+import com.basicfu.sip.common.model.dto.AppDto
+import com.basicfu.sip.common.model.dto.ResourceDto
+import com.basicfu.sip.common.model.dto.UserDto
+import com.basicfu.sip.common.util.AppUtil
+import com.basicfu.sip.common.util.TokenUtil
+import com.basicfu.sip.common.util.UserUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.AppDto
-import com.basicfu.sip.core.model.dto.ResourceDto
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.core.util.*
+import com.basicfu.sip.core.util.RedisUtil
+import com.basicfu.sip.core.util.SqlUtil
 import com.github.pagehelper.PageInfo
 import org.apache.commons.lang3.StringUtils
 import org.apache.ibatis.session.RowBounds
@@ -231,7 +235,7 @@ class UserService : BaseService<UserMapper, User>() {
             userIds = userAuthMapper.selectByExampleAndRowBounds(example<UserAuth> {
                 select(UserAuth::uid)
                 distinct()
-                andLike {
+                orLike {
                     username = q
                 }
             }, RowBounds(0, size)).mapNotNull { it.uid }
@@ -280,7 +284,7 @@ class UserService : BaseService<UserMapper, User>() {
                 AppUtil.appNotCheck()
                 val userAuths = userAuthMapper.select(generate {
                     this.appId = appId
-                    type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
+                    type = com.basicfu.sip.common.enum.Enum.LoginType.USERNAME.value
                     this.username = username
                 })
                 if (userAuths.isEmpty()) {
@@ -299,7 +303,7 @@ class UserService : BaseService<UserMapper, User>() {
                 AppUtil.appNotCheck()
                 val userAuths = userAuthMapper.select(generate {
                     this.username = username
-                    type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
+                    type = com.basicfu.sip.common.enum.Enum.LoginType.USERNAME.value
                 })
                 if (userAuths.isEmpty()) {
                     throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
@@ -309,9 +313,9 @@ class UserService : BaseService<UserMapper, User>() {
                 val selectByIds = selectByIds(userAuths.map { it.uid!! })
                 val filter = selectByIds.filter {
                     listOf(
-                        com.basicfu.sip.core.common.Enum.UserType.SYSTEM_SUPER_ADMIN.name,
-                        com.basicfu.sip.core.common.Enum.UserType.SYSTEM_ADMIN.name,
-                        com.basicfu.sip.core.common.Enum.UserType.APP_SUPER_ADMIN.name
+                        com.basicfu.sip.common.enum.Enum.UserType.SYSTEM_SUPER_ADMIN.name,
+                        com.basicfu.sip.common.enum.Enum.UserType.SYSTEM_ADMIN.name,
+                        com.basicfu.sip.common.enum.Enum.UserType.APP_SUPER_ADMIN.name
                     ).contains(it.type)
                 }
                 if (filter.isEmpty()) {
@@ -322,7 +326,7 @@ class UserService : BaseService<UserMapper, User>() {
         } else {
             userAuth = userAuthMapper.selectOne(generate {
                 this.username = username
-                type = com.basicfu.sip.core.common.Enum.LoginType.USERNAME.value
+                type = com.basicfu.sip.common.enum.Enum.LoginType.USERNAME.value
             }) ?: throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
         }
         if (!PasswordUtil.matches(username + vo.password!!, userAuth.password!!)) throw CustomException(
@@ -380,22 +384,22 @@ class UserService : BaseService<UserMapper, User>() {
                 cuid = currentUser.id!!
             }
             when (vo.type) {
-                UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
+                UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
                 UserType.SYSTEM_ADMIN.name ->
-                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name && throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_ADMIN)
-                UserType.APP_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN)
+                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name && throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_SYSTEM_ADMIN)
+                UserType.APP_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN)
                 UserType.APP_ADMIN.name ->
                     currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name &&
                             currentUser.type != UserType.SYSTEM_ADMIN.name &&
                             currentUser.type != UserType.APP_SUPER_ADMIN.name &&
-                            throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
+                            throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
             //允许普通用户通过分配的角色添加普通用户
 //                UserType.NORMAL.name->
 //                    currentUser.type!=UserType.SYSTEM_SUPER_ADMIN.name&&
 //                    currentUser.type!=UserType.SYSTEM_ADMIN.name&&
 //                    currentUser.type!=UserType.APP_SUPER_ADMIN.name&&
 //                    currentUser.type!=UserType.APP_ADMIN.name&&
-//                            throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_NORMAL)
+//                            throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_NORMAL)
             }
         }
         //检查用户名重复
@@ -451,22 +455,22 @@ class UserService : BaseService<UserMapper, User>() {
         if (user.type != vo.type) {
             //超级管理员无法变更用户类型
             if (user.type == UserType.SYSTEM_SUPER_ADMIN.name || user.type == UserType.APP_SUPER_ADMIN.name) {
-                throw CustomException(com.basicfu.sip.core.common.Enum.SUPER_ADMIN_NOT_CHANGE_USER_TYPE)
+                throw CustomException(com.basicfu.sip.common.enum.Enum.SUPER_ADMIN_NOT_CHANGE_USER_TYPE)
             }
             //如果发生系统/应用级别变化禁止
             if (UserType.valueOf(user.type!!).system != UserType.valueOf(vo.type!!).system) {
-                throw CustomException(com.basicfu.sip.core.common.Enum.SYSTEM_USER_NOT_EXCHANGE_APP_USER)
+                throw CustomException(com.basicfu.sip.common.enum.Enum.SYSTEM_USER_NOT_EXCHANGE_APP_USER)
             }
             when (vo.type) {
-                UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
+                UserType.SYSTEM_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_SYSTEM_SUPER_ADMIN)
                 UserType.SYSTEM_ADMIN.name ->
-                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name && throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_SYSTEM_ADMIN)
-                UserType.APP_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN)
+                    currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name && throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_SYSTEM_ADMIN)
+                UserType.APP_SUPER_ADMIN.name -> throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_APP_SYSTEM_ADMIN)
                 UserType.APP_ADMIN.name ->
                     currentUser.type != UserType.SYSTEM_SUPER_ADMIN.name &&
                             currentUser.type != UserType.SYSTEM_ADMIN.name &&
                             currentUser.type != UserType.APP_SUPER_ADMIN.name &&
-                            throw CustomException(com.basicfu.sip.core.common.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
+                            throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
             }
         }
         //检查用户名重复
@@ -560,7 +564,7 @@ class UserService : BaseService<UserMapper, User>() {
         }
         val permission =
             com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user.id!!) ?: throw CustomException(
-                com.basicfu.sip.core.common.Enum.SERVER_ERROR
+                com.basicfu.sip.common.enum.Enum.SERVER_ERROR
             )
         val userAuth = userAuthMapper.select(generate {
             this.uid = user.id

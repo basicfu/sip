@@ -1,6 +1,6 @@
-package com.basicfu.sip.core.util
+package com.basicfu.sip.common.util
 
-import com.basicfu.sip.core.model.dto.MenuDto
+import com.basicfu.sip.common.model.dto.MenuDto
 
 object MenuUtil {
     fun recursive(parentMenu: MenuDto?, menus: List<MenuDto>?): List<MenuDto> {
@@ -27,29 +27,31 @@ object MenuUtil {
         }
         return childList
     }
-    fun getItem(menus: List<MenuDto>?,id:Long):MenuDto?{
+
+    fun getItem(menus: List<MenuDto>?, id: Long): MenuDto? {
         if (menus == null) {
             return null
         }
-        menus.forEach { menu->
-            if(menu.id==id){
+        menus.forEach { menu ->
+            if (menu.id == id) {
                 return menu
             }
-            if(menu.children!=null&&menu.children!!.isNotEmpty()){
+            if (menu.children != null && menu.children!!.isNotEmpty()) {
                 val item = getItem(menu.children, id)
-                if(item!=null){
+                if (item != null) {
                     return item
                 }
             }
         }
         return null
     }
-    fun getChildren(menus: List<MenuDto>?):List<MenuDto>{
+
+    fun getChildren(menus: List<MenuDto>?): List<MenuDto> {
         val childList = arrayListOf<MenuDto>()
         if (menus == null) {
             return childList
         }
-        menus.forEach { menu->
+        menus.forEach { menu ->
             childList.add(menu)
             childList.addAll(getChildren(menu.children))
         }

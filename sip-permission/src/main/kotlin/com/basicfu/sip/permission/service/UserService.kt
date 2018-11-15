@@ -1,9 +1,9 @@
 package com.basicfu.sip.permission.service
 
 import com.alibaba.fastjson.JSONArray
+import com.basicfu.sip.common.model.dto.UserDto
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.permission.mapper.RoleMapper
 import com.basicfu.sip.permission.mapper.UserRoleMapper

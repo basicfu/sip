@@ -3,9 +3,9 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.mapper.AppSecretMapper
 import com.basicfu.sip.base.model.po.AppSecret
 import com.basicfu.sip.base.model.vo.AppSecretVo
+import com.basicfu.sip.common.model.dto.AppSecretDto
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.AppSecretDto
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service
@@ -34,7 +34,7 @@ class AppSecretService : BaseService<AppSecretMapper, AppSecret>() {
 
     fun insert(vo: AppSecretVo): Int {
         val po = dealInsert(generate<AppSecret> {
-            secret=UUID.randomUUID().toString().replace("-", "")
+            secret = UUID.randomUUID().toString().replace("-", "")
             description = vo.description
         })
         return mapper.insertSelective(po)

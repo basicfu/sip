@@ -5,11 +5,11 @@ import com.basicfu.sip.base.model.dto.UserTemplateDto
 import com.basicfu.sip.base.model.po.UserTemplate
 import com.basicfu.sip.base.model.vo.UserTemplateVo
 import com.basicfu.sip.base.util.UserTemplateUtil
-import com.basicfu.sip.core.common.Enum
+import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.model.dto.UserDto
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
-import com.basicfu.sip.core.model.dto.UserDto
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.springframework.stereotype.Service

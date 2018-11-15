@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.common
+package com.basicfu.sip.common.constant
 
 /**
  * Constant

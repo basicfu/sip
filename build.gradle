@@ -119,6 +119,11 @@ project(":sip-core") {
         }
     }
 }
+project(":sip-common") {
+    dependencies {
+        compile project(':sip-core')
+    }
+}
 project(":sip-eureka") {
     dependencies {
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-server")
@@ -126,7 +131,7 @@ project(":sip-eureka") {
 }
 project(":sip-getway") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("org.springframework.cloud:spring-cloud-starter-netflix-zuul")
         compile("org.springframework.cloud:spring-cloud-starter-openfeign")
@@ -137,7 +142,7 @@ project(":sip-getway") {
 }
 project(":sip-base") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
@@ -145,7 +150,7 @@ project(":sip-base") {
 }
 project(":sip-dict") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
@@ -153,7 +158,7 @@ project(":sip-dict") {
 }
 project(":sip-notify") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile("org.springframework.boot:spring-boot-starter-mail")
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
@@ -161,7 +166,7 @@ project(":sip-notify") {
 }
 project(":sip-permission") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
@@ -169,7 +174,7 @@ project(":sip-permission") {
 }
 project(":sip-tools") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
         compile("ch.ethz.ganymed:ganymed-ssh2:262")
@@ -190,7 +195,7 @@ project(":sip-api") {
 }
 project(":sip-logs") {
     dependencies {
-        compile project(':sip-core')
+        compile project(':sip-common')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
     }

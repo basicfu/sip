@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.annotation.validator
+package com.basicfu.sip.common.validator
 
 import javax.validation.Constraint
 import javax.validation.Payload

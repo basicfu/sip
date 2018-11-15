@@ -4,9 +4,9 @@ import com.alibaba.druid.sql.SQLUtils
 import com.alibaba.druid.sql.ast.SQLExpr
 import com.alibaba.druid.sql.ast.expr.*
 import com.alibaba.druid.sql.ast.statement.*
-import com.basicfu.sip.core.common.Constant
+import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.autoconfig.Config
-import com.basicfu.sip.core.util.AppUtil
+import com.basicfu.sip.core.util.RequestUtil
 import com.basicfu.sip.core.util.ThreadLocalUtil
 import com.google.common.base.CaseFormat
 import com.mysql.jdbc.DatabaseMetaData
@@ -57,13 +57,14 @@ import java.util.*
 )
 class SqlInterceptor : Interceptor {
     val dialect = "MYSQL"
+    val appSkip = "skip"
     @Autowired
     lateinit var config: Config
 
     override fun intercept(invocation: Invocation): Any {
         val proceed: Any
         try {
-            if (ThreadLocalUtil.get<Boolean>(Constant.System.APP_SKIP) != null) {
+            if (ThreadLocalUtil.get<Boolean>(appSkip) != null) {
                 return invocation.proceed()
             }
             //过滤应用在实际修改的地方判断，在连库查询时数据库可能不一样
@@ -84,28 +85,29 @@ class SqlInterceptor : Interceptor {
                 /**
                  * 这里无法获取到数据库名,因此只判断了表明
                  */
-                val mappedStatement=(invocation.args[0] as MappedStatement)
-                if(mappedStatement.sqlCommandType == SqlCommandType.INSERT){
-                    val statementList = SQLUtils.parseStatements(mappedStatement.getBoundSql(invocation.args[1]).sql, dialect)
-                    val tableName=(statementList[0] as SQLInsertStatement).tableName.simpleName
-                    val allTable= arrayListOf<String>()
+                val mappedStatement = (invocation.args[0] as MappedStatement)
+                if (mappedStatement.sqlCommandType == SqlCommandType.INSERT) {
+                    val statementList =
+                        SQLUtils.parseStatements(mappedStatement.getBoundSql(invocation.args[1]).sql, dialect)
+                    val tableName = (statementList[0] as SQLInsertStatement).tableName.simpleName
+                    val allTable = arrayListOf<String>()
                     config.appExecuteTable.values.forEach {
                         allTable.addAll(it)
                     }
                     if (!allTable.contains(tableName)) {
                         val bean = invocation.args[1]
                         val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
-                        val appId: Long = AppUtil.getAppId()
+                        val appId: Long = getAppId()
                                 ?: //log
                                 throw RuntimeException("not found app code")
-                        if(bean is HashMap<*, *>){
-                            val list=bean["list"] as ArrayList<*>
+                        if (bean is HashMap<*, *>) {
+                            val list = bean["list"] as ArrayList<*>
                             list.forEach {
                                 val field = it::class.java.getDeclaredField(appField)
                                 field.isAccessible = true
                                 field.set(it, appId)
                             }
-                        }else{
+                        } else {
                             val field = bean::class.java.getDeclaredField(appField)
                             field.isAccessible = true
                             field.set(bean, appId)
@@ -116,7 +118,7 @@ class SqlInterceptor : Interceptor {
             proceed = invocation.proceed()
         } finally {
             //只针对一次sql有效，执行完不论是否抛错一定释放
-            AppUtil.releaseAppNotCheck()
+            ThreadLocalUtil.remove(appSkip)
         }
         return proceed
     }
@@ -251,7 +253,7 @@ class SqlInterceptor : Interceptor {
         return if (executeTable != null && executeTable.contains(tableName)) {
             originCondition
         } else {
-            val appId: Long = AppUtil.getAppId()
+            val appId: Long = getAppId()
                     ?: //log
                     throw RuntimeException("not found app code")
             val filedName = if (StringUtils.isBlank(tableAlias)) fieldName else "$tableAlias.$fieldName"
@@ -284,6 +286,19 @@ class SqlInterceptor : Interceptor {
                 )
             }
         }
+    }
+
+    private fun getAppId(): Long? {
+        val parameter = RequestUtil.getParameter("app")
+        if (parameter != null) {
+            return try {
+                val json = JSON.parseObject(parameter)
+                json.getLong("appId")
+            } catch (e: Exception) {
+                null
+            }
+        }
+        return null
     }
 
 }

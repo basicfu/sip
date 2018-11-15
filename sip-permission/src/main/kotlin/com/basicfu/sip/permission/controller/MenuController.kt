@@ -1,6 +1,6 @@
 package com.basicfu.sip.permission.controller
 
-import com.basicfu.sip.core.model.Result
+import com.basicfu.sip.common.model.Result
 import com.basicfu.sip.permission.model.vo.MenuVo
 import com.basicfu.sip.permission.service.MenuService
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,8 +22,8 @@ class MenuController {
     }
 
     @GetMapping("/list/{id}/resource")
-    fun listResourceById(@PathVariable id: Long,@RequestParam(required = false) q:String?): Result<Any> {
-        return Result.success(menuService.listResourceById(id,q))
+    fun listResourceById(@PathVariable id: Long, @RequestParam(required = false) q: String?): Result<Any> {
+        return Result.success(menuService.listResourceById(id, q))
     }
 
     @PostMapping("/insert")

@@ -1,7 +1,10 @@
-package com.basicfu.sip.core.util
+package com.basicfu.sip.common.util
 
-import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.model.dto.UserDto
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.model.dto.UserDto
+import com.basicfu.sip.core.util.AESUtil
+import com.basicfu.sip.core.util.RedisUtil
+import com.basicfu.sip.core.util.RequestUtil
 import java.util.*
 
 object TokenUtil {
@@ -24,21 +27,21 @@ object TokenUtil {
      * 生成用户token
      */
     fun generateUserToken(username: String): String {
-        return getUserTokenPrefix(username)+ generateToken()
+        return getUserTokenPrefix(username) + generateToken()
     }
 
     /**
      * 获取redis中用户token前缀
      */
     fun getRedisUserTokenPrefix(username: String): String {
-        return getRedisTokenPrefix()+ getUserTokenPrefix(username)
+        return getRedisTokenPrefix() + getUserTokenPrefix(username)
     }
 
     /**
      * 获取redis中完整的token
      */
-    fun getRedisToken(userToken: String?=null): String {
-        return getRedisTokenPrefix()+ userToken
+    fun getRedisToken(userToken: String? = null): String {
+        return getRedisTokenPrefix() + userToken
     }
 
     /**
@@ -58,12 +61,12 @@ object TokenUtil {
     /**
      * 获取实际token
      */
-    fun getCurrentToken(frontToken:String?=null): String? {
-        return if(frontToken==null){
+    fun getCurrentToken(frontToken: String? = null): String? {
+        return if (frontToken == null) {
             getFrontToken()?.let {
                 AESUtil.decrypt(it, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
             }
-        }else{
+        } else {
             AESUtil.decrypt(frontToken, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
         }
     }
@@ -71,8 +74,8 @@ object TokenUtil {
     /**
      * 获取访客对象
      */
-    fun getGuestUser(appId:Long?=null): UserDto? {
-        return RedisUtil.get<UserDto>("${Constant.Redis.TOKEN_GUEST}${appId?:AppUtil.getAppId()}")
+    fun getGuestUser(appId: Long? = null): UserDto? {
+        return RedisUtil.get<UserDto>("${Constant.Redis.TOKEN_GUEST}${appId ?: AppUtil.getAppId()}")
     }
 
     /**
@@ -85,7 +88,7 @@ object TokenUtil {
     /**
      * 根据前台token获取用户
      */
-    fun getCurrentUserByFrontToken(frontToken:String?=null): UserDto? {
+    fun getCurrentUserByFrontToken(frontToken: String? = null): UserDto? {
         return getCurrentToken(frontToken)?.let { RedisUtil.get<UserDto>(it) }
     }
 

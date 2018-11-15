@@ -1,7 +1,7 @@
 package com.basicfu.sip.permission.controller
 
-import com.basicfu.sip.core.common.Constant
-import com.basicfu.sip.core.model.Result
+import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.common.model.Result
 import com.basicfu.sip.permission.model.vo.ResourceVo
 import com.basicfu.sip.permission.service.ResourceService
 import org.springframework.beans.factory.annotation.Autowired

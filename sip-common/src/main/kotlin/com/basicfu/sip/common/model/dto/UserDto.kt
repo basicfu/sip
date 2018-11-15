@@ -1,4 +1,4 @@
-package com.basicfu.sip.core.model.dto
+package com.basicfu.sip.common.model.dto
 
 import com.alibaba.fastjson.JSONArray
 
@@ -17,9 +17,9 @@ class UserDto {
     var type: String? = null
     var status: Int? = null
 
-    var cuname:String?=null
-    var appCode:String?=null
-    var token:String?=null
+    var cuname: String? = null
+    var appCode: String? = null
+    var token: String? = null
 
     var roles: JSONArray? = null
     var menus: JSONArray? = null
