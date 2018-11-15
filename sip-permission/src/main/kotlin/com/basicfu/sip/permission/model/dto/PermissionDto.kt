@@ -7,4 +7,6 @@ class PermissionDto {
     var code: String? = null
     var cdate: Int? = null
     var udate: Int? = null
+
+    var resourceCount: Long? = null
 }

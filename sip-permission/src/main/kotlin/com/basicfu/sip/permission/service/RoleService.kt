@@ -218,6 +218,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andIn(RoleMenu::menuId, ids)
         }).map { it.menuId }
         ids = ids.filter { !existsMenuIds.contains(it) }
+        if(ids.isEmpty()){
+            throw CustomException(Enum.EXIST_ADD_DATA)
+        }
         val roleMenus = arrayListOf<RoleMenu>()
         ids.forEach { it ->
             val rm = RoleMenu()
@@ -238,6 +241,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andIn(RolePermission::permissionId, ids)
         }).map { it.permissionId }
         ids = ids.filter { !existsPermissionIds.contains(it) }
+        if(ids.isEmpty()){
+            throw CustomException(Enum.EXIST_ADD_DATA)
+        }
         val rolePermissions = arrayListOf<RolePermission>()
         ids.forEach { it ->
             val rp = RolePermission()

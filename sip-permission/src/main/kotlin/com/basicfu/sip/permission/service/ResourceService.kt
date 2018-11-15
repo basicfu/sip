@@ -23,6 +23,7 @@ import com.basicfu.sip.permission.model.po.PermissionResource
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.ResourceVo
 import com.github.pagehelper.PageInfo
+import org.apache.ibatis.session.RowBounds
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.netflix.ribbon.SpringClientFactory
 import org.springframework.stereotype.Service
@@ -57,6 +58,15 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
 
     fun all(): List<ResourceDto> {
         return to(mapper.selectAll())
+    }
+
+    fun suggest(q: String, limit: Int): List<ResourceDto> {
+        return to(mapper.selectByExampleAndRowBounds(example<Resource> {
+            orLike {
+                name = q
+                url = q
+            }
+        }, RowBounds(0, limit)))
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -95,7 +105,8 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
                 try {
                     val array = clientFeign.sipClientUrl(serviceTag).data
                     available = true
-                    val resourceMap =serviceResource[service.id]?.associateBy { it.url + it.method }?.toMutableMap() ?: hashMapOf()
+                    val resourceMap =
+                        serviceResource[service.id]?.associateBy { it.url + it.method }?.toMutableMap() ?: hashMapOf()
                     array?.forEach {
                         val obj = it as LinkedHashMap<String, Any>
                         val urls = obj["url"] as ArrayList<String>
@@ -124,7 +135,7 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
                     deleteCount = ids.size
                     deleteDetail.addAll(to(resourceMap.values.toList()))
                     deleteIds.addAll(ids)
-                }catch (e: Exception){
+                } catch (e: Exception) {
                     available = false
                 }
             }

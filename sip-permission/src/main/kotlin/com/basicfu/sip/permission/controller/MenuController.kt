@@ -21,6 +21,11 @@ class MenuController {
         return Result.success(menuService.all())
     }
 
+    @GetMapping("/list/{id}/resource")
+    fun listResourceById(@PathVariable id: Long,@RequestParam(required = false) q:String?): Result<Any> {
+        return Result.success(menuService.listResourceById(id,q))
+    }
+
     @PostMapping("/insert")
     fun insert(@RequestBody vo: MenuVo): Result<Any> {
         return Result.success(menuService.insert(vo))

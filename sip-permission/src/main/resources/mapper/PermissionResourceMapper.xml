@@ -9,6 +9,5 @@
     <result column="permission_id" property="permissionId" jdbcType="BIGINT" />
     <result column="resource_id" property="resourceId" jdbcType="BIGINT" />
     <result column="cdate" property="cdate" jdbcType="INTEGER" />
-    <result column="udate" property="udate" jdbcType="INTEGER" />
   </resultMap>
 </mapper>

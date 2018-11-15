@@ -15,5 +15,4 @@ class PermissionResource {
     @Column(name = "resource_id")
     var resourceId: Long? = null
     var cdate: Int? = null
-    var udate: Int? = null
 }

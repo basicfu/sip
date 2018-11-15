@@ -4,7 +4,9 @@ import com.basicfu.sip.core.common.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
+import com.basicfu.sip.core.model.dto.ResourceDto
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.SqlUtil
 import com.basicfu.sip.permission.mapper.PermissionMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
@@ -29,13 +31,35 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
     lateinit var resourceMapper: ResourceMapper
 
     fun list(vo: PermissionVo): PageInfo<PermissionDto> {
-        return selectPage(example<Permission> {
+        val pageInfo = selectPage<PermissionDto>(example<Permission> {
             andLike {
                 name = vo.q
                 code = vo.q
             }
             orderByDesc(Permission::cdate)
         })
+        val ids = pageInfo.list.map { it.id!! }
+        if (ids.isNotEmpty()) {
+            val permissionResourceMap = permissionResourceMapper.selectByExample(example<PermissionResource> {
+                select(PermissionResource::permissionId, PermissionResource::resourceId)
+                andIn(PermissionResource::permissionId, ids)
+            }).groupBy { it.permissionId }
+            pageInfo.list.forEach {
+                it.resourceCount = permissionResourceMap[it.id!!]?.size?.toLong() ?: 0
+            }
+        }
+        return pageInfo
+    }
+
+    fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {
+        val likeValue = SqlUtil.dealLikeValue(q)
+        startPage()
+        var sql =
+            "select r.id as id,service_id as serviceId,url,method,name,pr.cdate as cdate from permission_resource pr LEFT JOIN resource r on pr.resource_id=r.id WHERE pr.permission_id=$id"
+        likeValue?.let { sql += " and (r.url like $likeValue or r.name like $likeValue)" }
+        sql += " ORDER BY pr.cdate DESC"
+        val result = resourceMapper.selectBySql(sql)
+        return getPageInfo(result)
     }
 
     fun all(): List<PermissionDto> = to(mapper.selectAll())
@@ -51,16 +75,24 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
     }
 
     fun insertResource(vo: PermissionVo): Int {
-        val ids = vo.resourceIds!!
+        var ids = vo.resourceIds!!
         if (resourceMapper.selectCountByExample(example<Resource> {
                 andIn(Resource::id, ids)
             }) != ids.size) throw CustomException(Enum.NOT_FOUND_RESOURCE)
+        val existsResourceIds = permissionResourceMapper.selectByExample(example<PermissionResource> {
+            andEqualTo(PermissionResource::permissionId, vo.id)
+            andIn(PermissionResource::resourceId, ids)
+        }).map { it.resourceId }
+        ids = ids.filter { !existsResourceIds.contains(it) }
+        if (ids.isEmpty()) {
+            throw CustomException(Enum.EXIST_ADD_DATA)
+        }
         val permissionResources = arrayListOf<PermissionResource>()
         ids.forEach { it ->
             val pr = PermissionResource()
             pr.permissionId = vo.id
             pr.resourceId = it
-            permissionResources.add(pr)
+            permissionResources.add(dealInsert(pr))
         }
         return permissionResourceMapper.insertList(permissionResources)
     }

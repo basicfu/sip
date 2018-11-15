@@ -10,7 +10,9 @@ create table role(
   name varchar(32) not null default '' comment '角色名',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
-  enalbe tinyint not null default 0 comment '是否启用'
+  enable tinyint not null default 0 comment '是否启用',
+  unique key (app_id,code),
+  unique key (app_id,name)
 )
 comment '角色表' engine=InnoDB;
 
@@ -21,7 +23,7 @@ create table user_role(
   user_id bigint not null default 0 comment '用户Id',
   role_id bigint not null default 0 comment '角色Id',
   cdate int not null default 0 comment '创建时间',
-  udate int not null default 0 comment '更新时间'
+  unique key (user_id,role_id)
 )
 comment '用户角色表' engine=InnoDB;
 
@@ -48,7 +50,7 @@ CREATE TABLE role_menu (
   role_id bigint not null default 0 comment '角色ID',
   menu_id bigint not null default 0 comment '菜单ID',
   cdate int not null default 0 comment '创建时间',
-  udate int not null default 0 comment '更新时间'
+  unique key (role_id,menu_id)
 )comment '角色菜单表' engine=InnoDB;
 
 drop table if exists resource;
@@ -71,7 +73,7 @@ CREATE TABLE menu_resource (
   menu_id bigint not null default 0 comment '菜单Id',
   resource_id bigint not null default 0 comment '资源Id',
   cdate int not null default 0 comment '创建时间',
-  udate int not null default 0 comment '更新时间'
+  unique key (menu_id,resource_id)
 )comment '菜单资源表' engine=InnoDB;
 
 drop table if exists role_permission;
@@ -81,7 +83,7 @@ CREATE TABLE role_permission (
   role_id bigint not null default 0 comment '角色Id',
   permission_id bigint not null default 0 comment '权限Id',
 	cdate int not null default 0 comment '创建时间',
-  udate int not null default 0 comment '更新时间'
+  unique key (role_id,permission_id)
 )comment '角色权限表' engine=InnoDB;
 
 drop table if exists permission;
@@ -92,6 +94,7 @@ create table permission(
   code varchar(32) not null default '' comment '权限code',
 	cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
+  unique key (app_id,name),
   unique key (app_id,code)
 )comment '权限表' engine=InnoDB;
 
@@ -102,8 +105,10 @@ CREATE TABLE permission_resource (
   permission_id bigint not null default 0 comment '权限Id',
   resource_id bigint not null default 0 comment '资源Id',
 	cdate int not null default 0 comment '创建时间',
-  udate int not null default 0 comment '更新时间'
+  unique key (permission_id,resource_id)
 )comment '权限资源表' engine=InnoDB;
+
+INSERT INTO role (id, app_id, code, name, cdate, udate, enable) VALUES (1, 1, 'GUEST', '访客', 0, 0, 1);
 
 INSERT INTO permission (app_id, name, code, cdate, udate) VALUES (1, '访客', 'GUEST', unix_timestamp(), unix_timestamp());
 

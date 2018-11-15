@@ -1,5 +1,6 @@
 package com.basicfu.sip.permission.controller
 
+import com.basicfu.sip.core.common.Constant
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.permission.model.vo.ResourceVo
 import com.basicfu.sip.permission.service.ResourceService
@@ -24,6 +25,11 @@ class ResourceController {
     @GetMapping("/all")
     fun all(): Result<Any> {
         return Result.success(resourceService.all())
+    }
+
+    @GetMapping("/suggest")
+    fun suggest(@RequestParam q: String, @RequestParam(defaultValue = Constant.System.PAGE_SIZE_STR) limit: Int): Result<Any> {
+        return Result.success(resourceService.suggest(q, limit))
     }
 
     @PostMapping("/sync")

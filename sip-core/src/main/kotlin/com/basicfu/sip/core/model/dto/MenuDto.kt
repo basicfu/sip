@@ -11,5 +11,6 @@ class MenuDto {
     var type: String? = null
     var display: Boolean? = null
 
+    var resourceCount: Long? = null
     var children: List<MenuDto>? = null
 }

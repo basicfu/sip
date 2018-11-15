@@ -21,6 +21,11 @@ class PermissionController {
         return Result.success(permissionService.list(vo))
     }
 
+    @GetMapping("/list/{id}/resource")
+    fun listResourceById(@PathVariable id: Long,@RequestParam(required = false) q:String?): Result<Any> {
+        return Result.success(permissionService.listResourceById(id,q))
+    }
+
     @GetMapping("/all")
     fun all(): Result<Any> {
         return Result.success(permissionService.all())
