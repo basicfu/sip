@@ -40,6 +40,7 @@ enum class Enum(val value: Int, val msg: String) {
     NOT_PERMISSION_ADD_APP_NORMAL(1017, "无权操作普通用户"),
     SUPER_ADMIN_NOT_CHANGE_USER_TYPE(1018, "超级管理员无法变更用户类型"),
     SYSTEM_USER_NOT_EXCHANGE_APP_USER(1019, "系统用户和应用用户不能变换"),
+    PASSWORD_ERROR(1020, "密码错误"),
 
     NOT_FOUND_DICT(2000, "找不到字典"),
     NO_DELETE_ROOT_DICT(2001, "不能删除根字典"),

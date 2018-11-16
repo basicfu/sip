@@ -16,14 +16,14 @@ class RoleController {
     @Autowired
     lateinit var roleService: RoleService
 
-    @GetMapping("/get/permission/{uid}")
-    fun getPermissionByUid(@PathVariable uid: Long): Result<Any> {
-        return Result.success(roleService.getPermissionByUid(uid))
-    }
-
     @GetMapping("/list")
     fun list(vo: RoleVo): Result<Any> {
         return Result.success(roleService.list(vo))
+    }
+
+    @GetMapping("/list/{uid}/role")
+    fun listRoleByUid(@PathVariable uid: Long): Result<Any> {
+        return Result.success(roleService.listRoleByUid(uid))
     }
 
     @GetMapping("/list/{id}/user")

@@ -50,7 +50,9 @@ create table user(
   app_id bigint not null default 0 comment '租户ID',
   username varchar(32) not null default '' comment '用户名',
   nickname varchar(32) not null default '' comment '昵称',
-  content varchar(20000) null default '' comment '用户json信息(mysql8)',
+  mobile varchar(11) not null default '' comment '手机号',
+  email varchar(100) not null default '' comment '邮箱',
+  content varchar(10000) null default '' comment '用户json信息(mysql,数据量大需要使用替代方案)',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   cuid bigint not null default 0 comment '创建人ID',
@@ -66,11 +68,9 @@ CREATE TABLE user_auth (
   type varchar(64) not null default '' comment 'auth类型字典',
   username varchar(100) not null default '' comment '登录标识',
   password varchar(100) not null default '' comment '密码凭证',
-  salt varchar(64) not null default '' comment '盐值',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   ldate int not null default 0 comment '最后一次登录时间',
-  status tinyint not null default 0 comment '0正常,1删除,2黑名单',
   unique key (uid,type)
 )comment '用户授权表' engine=InnoDB;
 
@@ -93,4 +93,4 @@ CREATE TABLE user_template (
 
 INSERT INTO app (id,name, code, cdate, udate) VALUES (1,'SIP', 'sip', 1531389485, 1531389485);
 INSERT INTO user (id,app_id, username, nickname, content, cdate, udate, cuid, type, status) VALUES (1,1, 'test', 'test', '{}', 1533019466, 1539054488, 0, 'SYSTEM_SUPER_ADMIN', 0);
-INSERT INTO user_auth (id,app_id,uid, type, username, password, salt, cdate, udate, ldate,status) VALUES (1,1,1, 0, 'test', '$2a$10$3d7ykD7OxOTglE6DcLdhWerSpViDhIAyz6CylkBg.QkRlTgtduQCa', '', 1533019466, 1539002195, 1538995227,0);
+INSERT INTO user_auth (id,app_id,uid, type, username, password, cdate, udate, ldate) VALUES (1,1,1, 0, 'test', '$2a$10$3d7ykD7OxOTglE6DcLdhWerSpViDhIAyz6CylkBg.QkRlTgtduQCa', 1533019466, 1539002195, 1538995227);

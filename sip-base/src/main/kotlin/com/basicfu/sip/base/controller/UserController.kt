@@ -76,6 +76,12 @@ class UserController {
         return Result.success(userService.update(map))
     }
 
+    @PostMapping("/update/password")
+    fun update(@RequestBody vo: UserVo): Result<Any> {
+        userService.updatePassword(vo)
+        return Result.success("修改成功")
+    }
+
     @DeleteMapping("/delete")
     fun delete(@RequestBody ids: List<Long>): Result<Any> {
         return Result.success(userService.delete(ids))

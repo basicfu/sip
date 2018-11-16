@@ -1,4 +1,4 @@
-package com.basicfu.sip.permission.model.po
+package com.basicfu.sip.common.model.po
 
 import javax.persistence.Column
 import javax.persistence.GeneratedValue
@@ -6,8 +6,8 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
 
-@Table(name = "role_permission")
-class RolePermission {
+@Table(name = "menu_resource")
+class MenuResource {
     /**
      * @return id
      */
@@ -21,34 +21,34 @@ class RolePermission {
     @Column(name = "app_id")
     var appId: Long? = null
     /**
-     * 角色Id
+     * 菜单Id
      */
     /**
-     * 获取角色Id
+     * 获取菜单Id
      *
-     * @return role_id - 角色Id
+     * @return menu_id - 菜单Id
      */
     /**
-     * 设置角色Id
+     * 设置菜单Id
      *
-     * @param roleId 角色Id
+     * @param menuId 菜单Id
      */
-    @Column(name = "role_id")
-    var roleId: Long? = null
+    @Column(name = "menu_id")
+    var menuId: Long? = null
 
     /**
-     * 权限Id
+     * 资源Id
      */
     /**
-     * 获取权限Id
+     * 获取资源Id
      *
-     * @return permission_id - 权限Id
+     * @return resource_id - 资源Id
      */
     /**
-     * 设置权限Id
+     * 设置资源Id
      *
-     * @param permissionId 权限Id
+     * @param resourceId 资源Id
      */
-    @Column(name = "permission_id")
-    var permissionId: Long? = null
+    @Column(name = "resource_id")
+    var resourceId: Long? = null
 }

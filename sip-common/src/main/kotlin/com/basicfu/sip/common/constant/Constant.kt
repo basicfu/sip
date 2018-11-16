@@ -28,7 +28,7 @@ object Constant {
         const val TOKEN_PREFIX = "TOKEN_"
         const val TOKEN_GUEST = TOKEN_PREFIX + System.GUEST + "_"
         const val APP = "APP"
-        const val DICT = "DICT_"
+        const val ROLE_PERMISSION = "ROLE_PERMISSION_"
     }
 
     object Dict {

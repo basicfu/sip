@@ -6,8 +6,8 @@ drop table if exists role;
 create table role(
   id bigint auto_increment primary key,
   app_id bigint not null default 0 comment '应用Id',
-  code varchar(32) not null default '' comment '角色code',
   name varchar(32) not null default '' comment '角色名',
+  code varchar(32) not null default '' comment '角色code',
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   enable tinyint not null default 0 comment '是否启用',

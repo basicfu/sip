@@ -1,8 +1,11 @@
 package com.basicfu.sip.getway.mapper
 
 import com.basicfu.sip.common.model.dto.*
+import com.basicfu.sip.common.model.po.MenuResource
+import com.basicfu.sip.common.model.po.PermissionResource
+import com.basicfu.sip.common.model.po.RoleMenu
+import com.basicfu.sip.common.model.po.RolePermission
 import org.apache.ibatis.annotations.Mapper
-import org.apache.ibatis.annotations.Param
 import org.apache.ibatis.annotations.Select
 
 /**
@@ -11,7 +14,6 @@ import org.apache.ibatis.annotations.Select
  */
 @Mapper
 interface Mapper {
-
     @Select("SELECT id,name,code from app")
     fun selectApp(): List<AppDto>
 
@@ -21,16 +23,24 @@ interface Mapper {
     @Select("SELECT id,app_id as appId,secret,description,cdate,udate from app_secret")
     fun selectSecret(): List<AppSecretDto>
 
-    @Select("SELECT m.id as id,m.app_id as appId,m.pid as pid,m.name as name,m.path as path,m.sort as sort,m.icon as icon,m.type as type,m.display as display FROM role r INNER JOIN role_menu rm on r.id=rm.role_id INNER JOIN menu m on rm.menu_id=m.id WHERE r.code=#{code}")
-    fun selectMenuByRoleCode(@Param("code") code: String): List<MenuDto>
+    /**
+     * 只处理启用的role
+     */
+    @Select("select id,app_id as appId,name,code from role where enable=1")
+    fun selectRole(): List<RoleDto>
 
-    @Select("SELECT r.app_id as appId,resource.app_id as appId,resource.service_id as serviceId,resource.url as url,resource.method as method FROM role r INNER JOIN role_permission rp on r.id=rp.role_id INNER JOIN permission_resource pr ON rp.permission_id=pr.permission_id INNER JOIN resource on resource.id=pr.resource_id where r.code=#{code}")
-    fun selectMenuResourceIdByRoleCode(@Param("code") code: String): List<ResourceDto>
+    @Select("select id,app_id as appId,service_id as serviceId,url,method,name from resource")
+    fun selectResource(): List<ResourceDto>
 
-    @Select("SELECT r.app_id as appId,resource.app_id as appId,resource.service_id as serviceId,resource.url as url,resource.method as method FROM role r INNER JOIN role_menu rm on r.id=rm.role_id INNER JOIN menu_resource mr ON rm.menu_id=mr.menu_id INNER JOIN resource on resource.id=mr.resource_id where r.code=#{code}")
-    fun selectPermissionResourceIdByRoleCode(@Param("code") code: String): List<ResourceDto>
+    @Select("select id,app_id as appId,role_id as roleId,menu_id as menuId from role_menu")
+    fun selectRoleMenu(): List<RoleMenu>
 
-    @Select("SELECT id,app_id as appId,name,value,description,lft,rgt,lvl,sort,fixed,isdel from dict where isdel=0")
-    fun selectDict(): List<DictDto>
+    @Select("select id,app_id as appId,role_id as roleId,permission_id as permissionId from role_permission")
+    fun selectRolePermission(): List<RolePermission>
 
+    @Select("select id,app_id as appId,menu_id as menuId,resource_id as resourceId from menu_resource")
+    fun selectMenuResource(): List<MenuResource>
+
+    @Select("select id,app_id as appId,permission_id as permissionId,resource_id as resourceId from permission_resource")
+    fun selectPermissionResource(): List<PermissionResource>
 }

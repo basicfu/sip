@@ -1,7 +1,6 @@
 package com.basicfu.sip.client.util
 
 import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.client.feign.RoleFeign
 import com.basicfu.sip.client.feign.UserFeign
@@ -81,23 +80,16 @@ class UserUtil {
         }
 
         /**
-         * 根据用户id获取用户拥有的roles/menus/permissions/resources
+         * 根据用户id获取用户拥有的roleCode
          */
-        inline fun <reified T> getPermissionByUid(uid: Long): T? {
-            return dealUser(roleFeign.getPermissionByUid(uid).data)
-        }
-
-        /**
-         * 根据用户id获取用户拥有的roles/menus/permissions/resources
-         */
-        fun getPermissionByUidJson(uid: Long): JSONObject? {
-            return roleFeign.getPermissionByUid(uid).data
+        fun listRoleCodeByUid(uid: Long): List<String> {
+            return roleFeign.listRoleByUid(uid).data!!
         }
 
         /**
          * 根据用户ID查询用户角色
          */
-        fun listRoleByIds(userIds: List<Long>): Map<Long, JSONArray> {
+        fun listRoleByIds(userIds: List<Long>): Map<Long, List<String>> {
             val listRoleByIds = roleFeign.listRoleByIds(userIds.toTypedArray()).data
             return listRoleByIds?.associateBy(
                 { it.id!! },
@@ -161,7 +153,7 @@ class UserUtil {
                     } else if (it.name == "resources") {
                         it.isAccessible = true
                         val obj = tmpUser.getJSONObject(it.name)
-                        if(obj!=null){
+                        if (obj != null) {
                             it.set(u, tmpUser.getJSONObject(it.name) as Map<String, List<String>>)
                         }
                     }

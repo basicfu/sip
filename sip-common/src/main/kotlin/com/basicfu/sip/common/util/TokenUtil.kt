@@ -1,7 +1,11 @@
 package com.basicfu.sip.common.util
 
+import com.alibaba.fastjson.JSON
 import com.basicfu.sip.common.constant.Constant
 import com.basicfu.sip.common.model.dto.UserDto
+import com.basicfu.sip.common.model.po.RolePermission
+import com.basicfu.sip.common.model.redis.RoleToken
+import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.util.AESUtil
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.RequestUtil
@@ -72,24 +76,14 @@ object TokenUtil {
     }
 
     /**
-     * 获取访客对象
-     */
-    fun getGuestUser(appId: Long? = null): UserDto? {
-        return RedisUtil.get<UserDto>("${Constant.Redis.TOKEN_GUEST}${appId ?: AppUtil.getAppId()}")
-    }
-
-    /**
      * 获取当前用户
      */
     fun getCurrentUser(): UserDto? {
-        return getCurrentToken()?.let { RedisUtil.get<UserDto>(it) }
-    }
-
-    /**
-     * 根据前台token获取用户
-     */
-    fun getCurrentUserByFrontToken(frontToken: String? = null): UserDto? {
-        return getCurrentToken(frontToken)?.let { RedisUtil.get<UserDto>(it) }
+        return getCurrentToken()?.let {
+            RedisUtil.get<String>(it)?.let {
+                JSON.parseObject(it).toJavaObject(UserDto::class.java)
+            }
+        }
     }
 
     /**

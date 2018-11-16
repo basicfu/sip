@@ -1,12 +1,11 @@
-package com.basicfu.sip.permission.model.dto
+package com.basicfu.sip.common.model.dto
 
-class PermissionDto {
+class RoleDto {
     var id: Long? = null
     var appId: Long? = null
     var name: String? = null
     var code: String? = null
     var cdate: Int? = null
     var udate: Int? = null
-
-    var resourceCount: Long? = null
+    var enable: Boolean? = null
 }

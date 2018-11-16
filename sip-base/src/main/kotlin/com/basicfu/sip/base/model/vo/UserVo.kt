@@ -20,6 +20,10 @@ class UserVo {
 
     var ids:List<Long>?=null
     var roleIds:List<Long>?=null
+    /**
+     * 源密码
+     */
+    var orignPassword: String? = null
 
     var condition:String?=null
 }

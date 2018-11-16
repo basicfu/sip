@@ -9,6 +9,8 @@
     <result column="app_id" jdbcType="BIGINT" property="appId" />
     <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
     <result column="content" jdbcType="VARCHAR" property="content" />
     <result column="cdate" jdbcType="INTEGER" property="cdate" />
     <result column="udate" jdbcType="INTEGER" property="udate" />

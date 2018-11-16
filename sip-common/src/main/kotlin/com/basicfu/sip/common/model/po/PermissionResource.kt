@@ -1,4 +1,4 @@
-package com.basicfu.sip.permission.model.po
+package com.basicfu.sip.common.model.po
 
 import javax.persistence.*
 

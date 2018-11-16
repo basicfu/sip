@@ -3,6 +3,7 @@ package com.basicfu.sip.base.service
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import com.basicfu.sip.base.feign.RoleFeign
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
 import com.basicfu.sip.base.model.po.User
@@ -16,9 +17,10 @@ import com.basicfu.sip.common.enum.Enum.Condition
 import com.basicfu.sip.common.enum.Enum.FieldType.*
 import com.basicfu.sip.common.enum.Enum.UserType
 import com.basicfu.sip.common.model.dto.AppDto
-import com.basicfu.sip.common.model.dto.ResourceDto
 import com.basicfu.sip.common.model.dto.UserDto
+import com.basicfu.sip.common.model.redis.RoleToken
 import com.basicfu.sip.common.util.AppUtil
+import com.basicfu.sip.common.util.MenuUtil
 import com.basicfu.sip.common.util.TokenUtil
 import com.basicfu.sip.common.util.UserUtil
 import com.basicfu.sip.core.common.exception.CustomException
@@ -40,6 +42,8 @@ import java.text.SimpleDateFormat
 /**
  * @author basicfu
  * @date 2018/6/30
+ * get单个返回创建人、最后登录时间、角色、appCode
+ * list多个返回创建人、最后登录时间，需要多个用户的角色用listRoleByIds
  */
 @Service
 class UserService : BaseService<UserMapper, User>() {
@@ -47,21 +51,38 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var userAuthMapper: UserAuthMapper
     @Autowired
     lateinit var userTemplateService: UserTemplateService
+    @Autowired
+    lateinit var roleFeign: RoleFeign
 
     fun getCurrentUser(): JSONObject? {
         var user = TokenUtil.getCurrentUser()
+        val menuIds = arrayListOf<Long>()
         if (user == null) {
-            user = TokenUtil.getGuestUser()
+            user = generate<UserDto> {
+                roles = listOf(Constant.System.GUEST)
+            }
+            menuIds.addAll(
+                RedisUtil.hGet<RoleToken>(
+                    "${Constant.Redis.ROLE_PERMISSION}${AppUtil.getAppCode()}",
+                    Constant.System.GUEST
+                )!!.menus!!
+            )
+        } else {
+            val roleCodes = user.roles!!
+            val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}${AppUtil.getAppCode()}")
+            menuIds.addAll(appRoleToken.filter { roleCodes.contains(it.key) }.values.map { it!!.menus!! }.flatMap { it })
         }
+        val allMenu = roleFeign.allMenu().data
+        val menus = MenuUtil.recursive(null, MenuUtil.getItems(allMenu, menuIds)?.filter { menuIds.contains(it.id) })
+        user.menus = menus
         return UserUtil.toJson(user)
     }
 
     fun get(id: Long): JSONObject? {
-        val result = to<UserDto>(mapper.selectByPrimaryKey(id))
-        if (result != null) {
-            val list = arrayListOf(result)
-            dealReturnUser(list)
-            return UserUtil.toJson(list[0])
+        val user = to<UserDto>(mapper.selectByPrimaryKey(id))
+        if (user != null) {
+            dealUser(user)
+            return UserUtil.toJson(user)
         }
         return null
     }
@@ -196,7 +217,7 @@ class UserService : BaseService<UserMapper, User>() {
             pageList = getPageInfo(result)
         }
         val users = pageList.list
-        dealReturnUser(users)
+        dealUserList(users)
         val result = PageInfo<JSONObject>()
         BeanUtils.copyProperties(pageList, result)
         result.list = UserUtil.toJson(users)
@@ -207,7 +228,7 @@ class UserService : BaseService<UserMapper, User>() {
         val users = to<UserDto>(mapper.selectByExample(example<User> {
             andIn(User::id, ids)
         }))
-        dealReturnUser(users)
+        dealUserList(users)
         return UserUtil.toJson(users)
     }
 
@@ -232,24 +253,28 @@ class UserService : BaseService<UserMapper, User>() {
 //        mapper.selectBySql("SELECT u.id,u.tenant_id,u.content,u.cdate,u.udate,status,ua.username,ua.type from user u LEFT JOIN user_auth ua on u.id=ua.uid INNER JOIN (select DISTINCT(uid) from user_auth WHERE username like '%1%' limit 10) as sub on u.id=sub.uid;")
         val userIds: List<Long>
         if (roleCode.isNullOrBlank()) {
-            userIds = userAuthMapper.selectByExampleAndRowBounds(example<UserAuth> {
-                select(UserAuth::uid)
-                distinct()
+            userIds = mapper.selectByExampleAndRowBounds(example<User> {
+                select(User::id)
                 orLike {
                     username = q
+                    nickname = q
+                    mobile = q
+                    email = q
                 }
-            }, RowBounds(0, size)).mapNotNull { it.uid }
+            }, RowBounds(0, size)).map { it.id!! }
         } else {
+            val likeValue = SqlUtil.dealLikeValue(q)
             val users = mapper.selectBySql(
-                "SELECT DISTINCT uid as id FROM `sip-base`.user_auth ua " +
-                        "RIGHT JOIN `sip-permission`.user_role ur on ua.uid=ur.user_id " +
+                "SELECT DISTINCT uid as id FROM `sip-base`.user u " +
+                        "RIGHT JOIN `sip-permission`.user_role ur on u.uid=ur.user_id " +
                         "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
-                        "WHERE ua.username LIKE ${SqlUtil.dealLikeValue(q)} AND r.code='$roleCode' LIMIT 0,$size"
+                        "WHERE (u.username LIKE $likeValue or u.nickname LIKE $likeValue or u.mobile LIKE $likeValue or u.email LIKE $likeValue)" +
+                        " AND r.code='$roleCode' LIMIT 0,$size"
             )
             userIds = users.map { it.id!! }
         }
         val users = to<UserDto>(selectByIds(userIds))
-        dealReturnUser(users)
+        dealUserList(users)
         return UserUtil.toJson(users)
     }
 
@@ -354,7 +379,13 @@ class UserService : BaseService<UserMapper, User>() {
             id = userAuth.id
             ldate = currentTime
         })
-        val user = refreshLoginUser(userAuth.uid!!)
+        val user = to<UserDto>(mapper.selectByPrimaryKey(userAuth.uid))!!
+        dealUser(user)
+        //TODO 系统设置登录过期时间
+        val userToken = TokenUtil.generateUserToken(user.username!!)
+        val redisToken = TokenUtil.getRedisToken(userToken)
+        RedisUtil.set(redisToken, JSON.toJSONString(user), Constant.System.SESSION_TIMEOUT)
+        user.token = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.LOGIN_ERROR)
         return UserUtil.toJson(user)
     }
 
@@ -403,13 +434,15 @@ class UserService : BaseService<UserMapper, User>() {
             }
         }
         //检查用户名重复
-        if (userAuthMapper.selectCount(generate {
+        if (mapper.selectCount(generate {
                 username = vo.username
             }) > 0) throw CustomException(Enum.EXIST_USER)
         //添加用户
         val user = dealInsert(generate<User> {
             username = vo.username
             nickname = vo.nickname
+            mobile = vo.mobile
+            email = vo.email
             content = dealUserTemplate(vo.content).toJSONString()
             type = vo.type
             this.cuid = cuid
@@ -427,23 +460,6 @@ class UserService : BaseService<UserMapper, User>() {
             type = 0
         })
         userAuthMapper.insertSelective(userAuth)
-        //mobile、phone特殊处理
-        if (vo.mobile != null) {
-            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
-                uid = user.id
-                username = vo.mobile
-                password = BCryptPasswordEncoder().encode(vo.mobile + vo.password)
-                type = 1
-            }))
-        }
-        if (vo.email != null) {
-            userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
-                uid = user.id
-                username = vo.email
-                password = BCryptPasswordEncoder().encode(vo.email + vo.password)
-                type = 2
-            }))
-        }
         return 1
     }
 
@@ -484,6 +500,8 @@ class UserService : BaseService<UserMapper, User>() {
             type = vo.type
             content = dealUserTemplate(vo.content).toJSONString()
             nickname = vo.nickname
+            mobile = vo.mobile
+            email = vo.email
         }))
         //处理用户角色
         if (vo.roleIds != null) {
@@ -508,108 +526,76 @@ class UserService : BaseService<UserMapper, User>() {
             }))
         }
         //mobile、phone特殊处理
-        if (vo.mobile != null) {
-            if (mobileAuth == null) {
-                userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
-                    uid = vo.id
-                    username = vo.mobile
-                    password = BCryptPasswordEncoder().encode(vo.mobile + vo.password)
-                    type = 1
-                }))
-            } else if (vo.mobile != mobileAuth.username) {
+        if (vo.mobile != null && mobileAuth != null) {
+            if (vo.mobile != mobileAuth.username) {
                 userAuthMapper.updateByPrimaryKeySelective(dealUpdate(generate<UserAuth> {
                     id = mobileAuth.id
                     username = vo.mobile
                     password = BCryptPasswordEncoder().encode(vo.mobile + vo.password)
                 }))
             }
-        } else if (mobileAuth != null) {
-            userAuthMapper.deleteByPrimaryKey(mobileAuth.id)
         }
-        if (vo.email != null) {
-            if (emailAuth == null) {
-                userAuthMapper.insertSelective(dealInsert(generate<UserAuth> {
-                    uid = vo.id
-                    username = vo.email
-                    password = BCryptPasswordEncoder().encode(vo.email + vo.password)
-                    type = 2
-                }))
-            } else if (vo.email != emailAuth.username) {
+        if (vo.email != null && emailAuth != null) {
+            if (vo.email != emailAuth.username) {
                 userAuthMapper.updateByPrimaryKeySelective(dealUpdate(generate<UserAuth> {
                     id = emailAuth.id
                     username = vo.email
                     password = BCryptPasswordEncoder().encode(vo.email + vo.password)
                 }))
             }
-        } else if (emailAuth != null) {
-            userAuthMapper.deleteByPrimaryKey(emailAuth.id)
         }
         return 1
     }
 
-    fun delete(ids: List<Long>?): Int {
+    fun updatePassword(vo: UserVo) {
+        val userAuth = userAuthMapper.selectOneByExample(example<UserAuth> {
+            andEqualTo {
+                uid = vo.id
+                type = Enum.LoginType.USERNAME.value
+            }
+        }) ?: throw CustomException(Enum.NOT_FOUND_USER_ID)
+        if (PasswordUtil.matches(userAuth.username + vo.orignPassword!!, userAuth.password!!)) {
+            userAuth.password = BCryptPasswordEncoder().encode(userAuth.username + vo.password)
+            userAuthMapper.updateByPrimaryKeySelective(userAuth)
+        } else {
+            throw CustomException(Enum.PASSWORD_ERROR)
+        }
+    }
+
+    /**
+     * 前期物理删除
+     */
+    fun delete(ids: List<Long>): Int {
+        if (ids.isNotEmpty()) {
+            userAuthMapper.deleteByExample(example<UserAuth> {
+                andEqualTo(UserAuth::uid, ids)
+            })
+        }
         return deleteByIds(ids)
     }
 
-    /**
-     * 刷新登录的用户信息，登录或修改用户，权限变更时都应刷新
-     */
-    fun refreshLoginUser(uid: Long): UserDto {
-        val user = to<UserDto>(mapper.selectByPrimaryKey(uid))!!
-        val cuser = mapper.selectByPrimaryKey(user.cuid)
-        if (cuser == null) {
-            user.cuname = "系统"
-        } else {
-            user.cuname = cuser.nickname
-        }
-        val permission =
-            com.basicfu.sip.client.util.UserUtil.getPermissionByUidJson(user.id!!) ?: throw CustomException(
-                com.basicfu.sip.common.enum.Enum.SERVER_ERROR
-            )
-        val userAuth = userAuthMapper.select(generate {
-            this.uid = user.id
-        })
-        val userAuthMap = userAuth.associateBy({ it.type }, { it })
+    fun dealUser(user: UserDto) {
+        val createUser = mapper.selectByPrimaryKey(user.id)
+        user.roles = com.basicfu.sip.client.util.UserUtil.listRoleCodeByUid(user.id!!)
+        user.cuname = createUser?.nickname ?: "系统"
         user.appCode = AppUtil.getAppCodeByAppId(user.appId!!)
-        user.mobile = userAuthMap[1]?.username
-        user.email = userAuthMap[2]?.username
-        user.ldate = userAuth.map { it.ldate!! }.max()
-        user.roles = permission.getJSONArray("roles")
-        user.menus = permission.getJSONArray("menus")
-        user.permissions = permission.getJSONArray("permissions")
-        user.resources = permission.getJSONArray("resources").toJavaList(ResourceDto::class.java)
-            .groupBy({ it.serviceId.toString() }, { "/" + it.method + it.url })
-        //TODO 系统设置登录过期时间
-        val userToken = TokenUtil.generateUserToken(user.username!!)
-        val redisToken = TokenUtil.getRedisToken(userToken)
-        RedisUtil.set(redisToken, user, Constant.System.SESSION_TIMEOUT)
-        user.token = TokenUtil.generateFrontToken(userToken) ?: throw CustomException(Enum.LOGIN_ERROR)
-        return user
+        user.ldate = userAuthMapper.selectByExample(example<UserAuth> {
+            andEqualTo(UserAuth::uid, user.id)
+        }).map { it.ldate!! }.max() ?: 0
     }
 
-    /**
-     * 处理返回的用户，创建人、邮箱、手机、最后登录时间、角色
-     */
-    fun dealReturnUser(users: List<UserDto>) {
+    fun dealUserList(users: List<UserDto>) {
         if (users.isNotEmpty()) {
             val userIds = users.map { it.id!! }
             val createUserMap = selectByIds(users.map { it.cuid!! }).associateBy { it.id }
-            val listRoleByIds = com.basicfu.sip.client.util.UserUtil.listRoleByIds(userIds)
             users.forEach {
-                it.roles = listRoleByIds[it.id]
                 it.cuname = createUserMap[it.cuid]?.nickname ?: "系统"
             }
-            val userAuths = userAuthMapper.selectByExample(example<UserAuth> {
+            val userAuthMap = userAuthMapper.selectByExample(example<UserAuth> {
                 andIn(UserAuth::uid, userIds)
             }).groupBy({ it.uid }, { it })
             users.forEach {
-                val userAuth = userAuths[it.id]
-                if (userAuth != null) {
-                    val userAuthMap = userAuth.associateBy({ it.type!! }, { it })
-                    it.mobile = userAuthMap[1]?.username
-                    it.email = userAuthMap[2]?.username
-                    it.ldate = userAuth.map { it.ldate!! }.max()
-                }
+                it.ldate = userAuthMap[it.id]?.map { it.ldate!! }?.max() ?: 0
             }
         }
     }

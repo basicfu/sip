@@ -38,7 +38,7 @@ class UserService : BaseService<RoleMapper, Role>() {
             userRoleMap.forEach { k, v ->
                 result.add(generate {
                     id = k
-                    this.roles = com.alibaba.fastjson.JSON.toJSON(v.map { roleMap[it] }) as JSONArray
+                    this.roles = v.map { roleMap[it]!! }.map { it.code!! }
                 })
             }
         }

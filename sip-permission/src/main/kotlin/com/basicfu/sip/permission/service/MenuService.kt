@@ -13,7 +13,7 @@ import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.po.Menu
-import com.basicfu.sip.permission.model.po.MenuResource
+import com.basicfu.sip.common.model.po.MenuResource
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.MenuVo
 import com.github.pagehelper.PageInfo
@@ -88,6 +88,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             mr.resourceId = it
             menuResources.add(dealInsert(mr))
         }
+        //TODO 处理权限
         return mrMapper.insertList(menuResources)
     }
 
@@ -97,6 +98,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         })
         if (checkMenu != null && checkMenu.id != vo.id) throw CustomException(Enum.EXIST_MENU_NAME)
         val po = dealUpdate(to<Menu>(vo))
+        //TODO 处理权限
         return mapper.updateByPrimaryKeySelective(po)
     }
 
@@ -143,6 +145,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             deleteByIds(deleteIds)
             deleteCount = deleteIds.size
         }
+        //TODO 处理权限
         return deleteCount
     }
 
@@ -151,5 +154,6 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             andEqualTo(MenuResource::menuId, vo.id)
             andIn(MenuResource::resourceId, vo.resourceIds!!)
         })
+        //TODO 处理权限
     }
 }

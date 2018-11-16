@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam
 
 @FeignClient(value = "sip-permission", url = "\${sip.permission.url:}")
 interface RoleFeign {
-    @GetMapping("/role/get/permission/{uid}")
-    fun getPermissionByUid(@PathVariable("uid") uid: Long): Result<JSONObject>
+    @GetMapping("/role/list/{uid}/role")
+    fun listRoleByUid(@PathVariable("uid") uid: Long): Result<List<String>>
 
     @GetMapping("/user/list/role/{ids}")
     fun listRoleByIds(@PathVariable("ids") ids: Array<Long>): Result<List<UserDto>>

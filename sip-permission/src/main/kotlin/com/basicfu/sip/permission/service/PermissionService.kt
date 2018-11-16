@@ -10,9 +10,9 @@ import com.basicfu.sip.core.util.SqlUtil
 import com.basicfu.sip.permission.mapper.PermissionMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
-import com.basicfu.sip.permission.model.dto.PermissionDto
+import com.basicfu.sip.common.model.dto.PermissionDto
 import com.basicfu.sip.permission.model.po.Permission
-import com.basicfu.sip.permission.model.po.PermissionResource
+import com.basicfu.sip.common.model.po.PermissionResource
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.PermissionVo
 import com.github.pagehelper.PageInfo
@@ -94,6 +94,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
             pr.resourceId = it
             permissionResources.add(dealInsert(pr))
         }
+        //TODO 处理权限  查询拥有权限的角色 拿出resourceIds加入当前
         return permissionResourceMapper.insertList(permissionResources)
     }
 
@@ -120,10 +121,12 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
                 andIn(PermissionResource::permissionId, ids)
             })
         }
+        //TODO 处理权限
         return deleteByIds(ids)
     }
 
     fun deleteResource(vo: PermissionVo): Int {
+        //TODO 处理权限  查询拥有权限的角色，拿出resourceIds删除当前b   1,2,  4
         return permissionResourceMapper.deleteByExample(example<PermissionResource> {
             andEqualTo(PermissionResource::permissionId, vo.id)
             andIn(PermissionResource::resourceId, vo.resourceIds!!)
