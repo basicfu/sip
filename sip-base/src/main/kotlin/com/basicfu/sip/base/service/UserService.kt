@@ -69,11 +69,11 @@ class UserService : BaseService<UserMapper, User>() {
             )
         } else {
             val roleCodes = user.roles!!
-            val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}${AppUtil.getAppCode()}")
+            val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}${user.appCode}")
             menuIds.addAll(appRoleToken.filter { roleCodes.contains(it.key) }.values.map { it!!.menus!! }.flatMap { it })
         }
-        val allMenu = roleFeign.allMenu().data
-        val menus = MenuUtil.recursive(null, MenuUtil.getItems(allMenu, menuIds)?.filter { menuIds.contains(it.id) })
+        val allMenu = roleFeign.listMenuByIds(menuIds.toTypedArray()).data
+        val menus = MenuUtil.recursive(null, allMenu).filter { menuIds.contains(it.id) }
         user.menus = menus
         return UserUtil.toJson(user)
     }
@@ -424,7 +424,7 @@ class UserService : BaseService<UserMapper, User>() {
                             currentUser.type != UserType.SYSTEM_ADMIN.name &&
                             currentUser.type != UserType.APP_SUPER_ADMIN.name &&
                             throw CustomException(com.basicfu.sip.common.enum.Enum.NOT_PERMISSION_ADD_APP_ADMIN)
-            //允许普通用户通过分配的角色添加普通用户
+                //允许普通用户通过分配的角色添加普通用户
 //                UserType.NORMAL.name->
 //                    currentUser.type!=UserType.SYSTEM_SUPER_ADMIN.name&&
 //                    currentUser.type!=UserType.SYSTEM_ADMIN.name&&
@@ -682,7 +682,7 @@ class UserService : BaseService<UserMapper, User>() {
                         }
                     }
                 }
-            //不支持默认值、必选
+                //不支持默认值、必选
                 CHECK -> {
                     val arrayValue = contentJson.getJSONArray(enName)
                     if (arrayValue.isEmpty()) {
@@ -697,7 +697,7 @@ class UserService : BaseService<UserMapper, User>() {
                         contentResult[enName] = arrayValue
                     }
                 }
-            //不支持默认值、必选
+                //不支持默认值、必选
                 Enum.FieldType.RADIO -> {
                     if (value == null) {
                         contentResult[enName] = ""
@@ -709,7 +709,7 @@ class UserService : BaseService<UserMapper, User>() {
                         contentResult[enName] = value
                     }
                 }
-            //下拉不支持默认值，支持必选
+                //下拉不支持默认值，支持必选
                 SELECT -> {
                     if (value == null) {
                         if (required) {

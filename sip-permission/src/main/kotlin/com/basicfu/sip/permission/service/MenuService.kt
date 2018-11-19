@@ -3,6 +3,8 @@ package com.basicfu.sip.permission.service
 import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.common.model.dto.MenuDto
 import com.basicfu.sip.common.model.dto.ResourceDto
+import com.basicfu.sip.common.model.po.MenuResource
+import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.common.util.MenuUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
@@ -13,7 +15,6 @@ import com.basicfu.sip.permission.mapper.MenuMapper
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.permission.model.po.Menu
-import com.basicfu.sip.common.model.po.MenuResource
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.MenuVo
 import com.github.pagehelper.PageInfo
@@ -46,6 +47,14 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             }
         }
         return MenuUtil.recursive(null, menus)
+    }
+
+    /**
+     * 不检查应用，临时解决方案
+     */
+    fun listByIds(ids: List<Long>): List<MenuDto> {
+        AppUtil.appNotCheck()
+        return to(selectByIds(ids))
     }
 
     fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {

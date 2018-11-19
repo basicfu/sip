@@ -21,6 +21,11 @@ class MenuController {
         return Result.success(menuService.all())
     }
 
+    @GetMapping("/list/{ids}")
+    fun listByIds(@PathVariable @RequestBody ids:List<Long>): Result<Any> {
+        return Result.success(menuService.listByIds(ids))
+    }
+
     @GetMapping("/list/{id}/resource")
     fun listResourceById(@PathVariable id: Long, @RequestParam(required = false) q: String?): Result<Any> {
         return Result.success(menuService.listResourceById(id, q))
