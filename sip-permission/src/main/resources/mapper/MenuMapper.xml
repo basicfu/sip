@@ -13,6 +13,8 @@
     <result column="sort" property="sort" jdbcType="INTEGER" />
     <result column="icon" property="icon" jdbcType="VARCHAR" />
     <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="cdate" property="cdate" jdbcType="INTEGER" />
+    <result column="udate" property="udate" jdbcType="INTEGER" />
     <result column="display" property="display" jdbcType="TINYINT" />
   </resultMap>
 </mapper>

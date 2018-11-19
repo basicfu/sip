@@ -151,7 +151,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
             val rm = RoleMenu()
             rm.roleId = vo.id
             rm.menuId = it
-            roleMenus.add(rm)
+            roleMenus.add(dealInsert(rm))
         }
         //TODO 处理权限
         return rmMapper.insertList(roleMenus)
@@ -175,7 +175,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
             val rp = RolePermission()
             rp.roleId = vo.id
             rp.permissionId = it
-            rolePermissions.add(rp)
+            rolePermissions.add(dealInsert(rp))
         }
         //TODO 处理权限
         return rpMapper.insertList(rolePermissions)

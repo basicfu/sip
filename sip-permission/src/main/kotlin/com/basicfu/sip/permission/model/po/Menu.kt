@@ -17,5 +17,7 @@ class Menu {
     var sort: Int? = null
     var icon: String? = null
     var type: String? = null
+    var cdate: Int? = null
+    var udate: Int? = null
     var display: Boolean? = null
 }
