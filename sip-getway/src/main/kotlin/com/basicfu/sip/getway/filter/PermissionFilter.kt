@@ -210,7 +210,7 @@ class PermissionFilter : Filter {
         val values = appRoleToken.filter { roleCodes.contains(it.key) }.values
         val resources= arrayListOf<String>()
         values.forEach {roleToken->
-            roleToken!!.resources!![serviceId]?.let { resources.addAll(it) }
+            roleToken!!.resources[serviceId]?.let { resources.addAll(it) }
         }
         if (resources.any { antPathMatcher.match(it, url) }) {
             if(login){
