@@ -68,9 +68,11 @@ class UserService : BaseService<UserMapper, User>() {
             val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}${user.appCode}")
             menuIds.addAll(appRoleToken.filter { roleCodes.contains(it.key) }.values.map { it!!.menus }.flatMap { it })
         }
-        val allMenu = roleFeign.listMenuByIds(menuIds.toTypedArray()).data
-        val menus = MenuUtil.recursive(null, allMenu).filter { menuIds.contains(it.id) }
-        user.menus = menus
+        if (menuIds.isNotEmpty()) {
+            val allMenu = roleFeign.listMenuByIds(menuIds.toTypedArray()).data
+            val menus = MenuUtil.recursive(null, allMenu).filter { menuIds.contains(it.id) }
+            user.menus = menus
+        }
         return UserUtil.toJson(user)
     }
 
