@@ -86,8 +86,8 @@ class UserService : BaseService<UserMapper, User>() {
     }
 
     /**
-     * 支持多个and条件，暂不支持or
-     * 更多查询条件待开发
+     * 支持多个and条件，暂不支持or，更多查询条件待开发
+     * 界面的list接口，需要查询role
      */
     fun list(vo: UserVo): PageInfo<JSONObject> {
         val pageList: PageInfo<UserDto>
@@ -216,6 +216,10 @@ class UserService : BaseService<UserMapper, User>() {
         }
         val users = pageList.list
         dealUserList(users)
+        val roleMap = com.basicfu.sip.client.util.UserUtil.listRoleByIds(users.map { it.id!! })
+        users.forEach {
+            it.roles=roleMap[it.id]
+        }
         val result = PageInfo<JSONObject>()
         BeanUtils.copyProperties(pageList, result)
         result.list = UserUtil.toJson(users)

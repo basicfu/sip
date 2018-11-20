@@ -65,6 +65,7 @@ class UserService : BaseService<RoleMapper, Role>() {
                 generate<UserRole> {
                     roleId = it
                     userId = id
+                    cdate=(System.currentTimeMillis()/1000).toInt()
                 }
             })
         }
