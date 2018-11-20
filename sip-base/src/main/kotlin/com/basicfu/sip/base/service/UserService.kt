@@ -549,6 +549,9 @@ class UserService : BaseService<UserMapper, User>() {
         return 1
     }
 
+    /**
+     * TODO 界面可配置在修改完密码后是否强制退出当前登录
+     */
     fun updatePassword(vo: UserVo) {
         val userAuth = userAuthMapper.selectOneByExample(example<UserAuth> {
             andEqualTo {
@@ -559,6 +562,8 @@ class UserService : BaseService<UserMapper, User>() {
         if (PasswordUtil.matches(userAuth.username + vo.orignPassword!!, userAuth.password!!)) {
             userAuth.password = BCryptPasswordEncoder().encode(userAuth.username + vo.password)
             userAuthMapper.updateByPrimaryKeySelective(userAuth)
+            val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(userAuth.username!!) + "*")
+            RedisUtil.del(keys.map { it })
         } else {
             throw CustomException(Enum.PASSWORD_ERROR)
         }
