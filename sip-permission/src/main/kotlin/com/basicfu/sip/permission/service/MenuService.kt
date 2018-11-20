@@ -33,6 +33,8 @@ class MenuService : BaseService<MenuMapper, Menu>() {
     lateinit var resourceMapper: ResourceMapper
     @Autowired
     lateinit var menuResourceMapper: MenuResourceMapper
+    @Autowired
+    lateinit var roleService: RoleService
 
     fun all(): List<Any> {
         val menus = to<MenuDto>(mapper.selectAll())
@@ -68,6 +70,15 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         return getPageInfo(result)
     }
 
+    /**
+     * 内部使用,根据菜单ids获取resourceIds
+     */
+//    fun listResourceIdsByMenuIds(ids: List<Long>): List<Long> {
+//        return menuResourceMapper.selectByExample(example<MenuResource> {
+//            andIn(MenuResource::menuId,ids)
+//        }).map { it.resourceId!! }
+//    }
+
     fun insert(vo: MenuVo): Int {
         if (mapper.selectCount(generate {
                 name = vo.name
@@ -97,8 +108,9 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             mr.resourceId = it
             menuResources.add(dealInsert(mr))
         }
-        //TODO 处理权限
-        return mrMapper.insertList(menuResources)
+        val count = mrMapper.insertList(menuResources)
+        roleService.refreshRolePermission()
+        return count
     }
 
     fun update(vo: MenuVo): Int {
@@ -107,8 +119,9 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         })
         if (checkMenu != null && checkMenu.id != vo.id) throw CustomException(Enum.EXIST_MENU_NAME)
         val po = dealUpdate(to<Menu>(vo))
-        //TODO 处理权限
-        return mapper.updateByPrimaryKeySelective(po)
+        val count = mapper.updateByPrimaryKeySelective(po)
+        roleService.refreshRolePermission()
+        return count
     }
 
     fun updateDisplay(id: Long, display: Boolean): Int {
@@ -154,15 +167,16 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             deleteByIds(deleteIds)
             deleteCount = deleteIds.size
         }
-        //TODO 处理权限
+        roleService.refreshRolePermission()
         return deleteCount
     }
 
     fun deleteResource(vo: MenuVo): Int {
-        return mrMapper.deleteByExample(example<MenuResource> {
+        val count = mrMapper.deleteByExample(example<MenuResource> {
             andEqualTo(MenuResource::menuId, vo.id)
             andIn(MenuResource::resourceId, vo.resourceIds!!)
         })
-        //TODO 处理权限
+        roleService.refreshRolePermission()
+        return count
     }
 }

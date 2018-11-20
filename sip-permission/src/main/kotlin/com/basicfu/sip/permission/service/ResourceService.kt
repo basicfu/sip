@@ -9,6 +9,8 @@ import com.basicfu.sip.common.model.Result
 import com.basicfu.sip.common.model.dto.AppDto
 import com.basicfu.sip.common.model.dto.AppServiceDto
 import com.basicfu.sip.common.model.dto.ResourceDto
+import com.basicfu.sip.common.model.po.MenuResource
+import com.basicfu.sip.common.model.po.PermissionResource
 import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
@@ -18,8 +20,6 @@ import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.permission.mapper.MenuResourceMapper
 import com.basicfu.sip.permission.mapper.PermissionResourceMapper
 import com.basicfu.sip.permission.mapper.ResourceMapper
-import com.basicfu.sip.common.model.po.MenuResource
-import com.basicfu.sip.common.model.po.PermissionResource
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.ResourceVo
 import com.github.pagehelper.PageInfo
@@ -42,6 +42,8 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
     lateinit var permissionResourceMapper: PermissionResourceMapper
     @Autowired
     lateinit var menuResourceMapper: MenuResourceMapper
+    @Autowired
+    lateinit var roleService: RoleService
 
     fun list(vo: ResourceVo): PageInfo<ResourceDto> {
         return selectPage(example<Resource> {
@@ -71,7 +73,6 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
 
     @Suppress("UNCHECKED_CAST")
     fun sync(vo: ResourceVo): Result<Any> {
-        //TODO 处理权限
         val app = RedisUtil.hGet<AppDto>(Constant.Redis.APP, AppUtil.getAppCode()!!)!!
         val syncList = arrayListOf<AppServiceDto>()
         val existResources = arrayListOf<Resource>()
@@ -157,6 +158,7 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
             if (deleteIds.isNotEmpty()) {
                 delete(deleteIds)
             }
+            roleService.refreshRolePermission()
             Result.success(null, "操作成功")
         } else {
             Result.success(result)
@@ -181,7 +183,6 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
         })
         if (checkUrl != null && checkUrl.id != vo.id) throw CustomException(Enum.SERVICE_URL_METHOD_UNIQUE)
         val po = dealUpdate(to<Resource>(vo))
-        //TODO 处理权限
         return mapper.updateByPrimaryKeySelective(po)
     }
 
@@ -197,7 +198,8 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
                 andIn(MenuResource::resourceId, ids)
             })
         }
-        //TODO 处理权限
-        return deleteByIds(ids)
+        val count=deleteByIds(ids)
+        roleService.refreshRolePermission()
+        return count
     }
 }

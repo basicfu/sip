@@ -1,15 +1,21 @@
 package com.basicfu.sip.permission.service
 
 import com.basicfu.sip.client.util.UserUtil
+import com.basicfu.sip.common.constant.Constant
 import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.common.model.dto.AppDto
+import com.basicfu.sip.common.model.dto.ResourceDto
 import com.basicfu.sip.common.model.dto.RoleDto
 import com.basicfu.sip.common.model.dto.UserDto
 import com.basicfu.sip.common.model.po.RoleMenu
 import com.basicfu.sip.common.model.po.RolePermission
+import com.basicfu.sip.common.util.AppUtil
+import com.basicfu.sip.common.util.PermissionUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.permission.mapper.*
 import com.basicfu.sip.permission.model.po.Menu
 import com.basicfu.sip.permission.model.po.Permission
@@ -37,7 +43,13 @@ class RoleService : BaseService<RoleMapper, Role>() {
     @Autowired
     lateinit var roleMapper: RoleMapper
     @Autowired
+    lateinit var resourceMapper: ResourceMapper
+    @Autowired
     lateinit var permissionMapper: PermissionMapper
+    @Autowired
+    lateinit var menuResourceMapper: MenuResourceMapper
+    @Autowired
+    lateinit var permissionResourceMapper: PermissionResourceMapper
 
     fun listRoleByUid(uid: Long): List<String> {
         val roleIds = urMapper.selectByExample(example<UserRole> {
@@ -105,9 +117,10 @@ class RoleService : BaseService<RoleMapper, Role>() {
         if (mapper.selectCount(generate {
                 code = vo.code
             }) != 0) throw CustomException(Enum.EXIST_ROLE_CODE)
-        val po = dealInsert(to<Role>(vo))
-        //TODO 处理权限
-        return mapper.insertSelective(po)
+        val po = dealInsert(to<Role>(vo))!!
+        val count = mapper.insertSelective(po)
+        refreshRolePermission()
+        return count
     }
 
     fun insertUser(vo: RoleVo): Int {
@@ -153,8 +166,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
             rm.menuId = it
             roleMenus.add(dealInsert(rm))
         }
-        //TODO 处理权限
-        return rmMapper.insertList(roleMenus)
+        val count = rmMapper.insertList(roleMenus)
+        refreshRolePermission()
+        return count
     }
 
     fun insertPermission(vo: RoleVo): Int {
@@ -177,8 +191,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
             rp.permissionId = it
             rolePermissions.add(dealInsert(rp))
         }
-        //TODO 处理权限
-        return rpMapper.insertList(rolePermissions)
+        val count = rpMapper.insertList(rolePermissions)
+        refreshRolePermission()
+        return count
     }
 
     fun update(vo: RoleVo): Int {
@@ -191,7 +206,6 @@ class RoleService : BaseService<RoleMapper, Role>() {
         })
         if (checkCode != null && checkCode.id != vo.id) throw CustomException(Enum.EXIST_ROLE_CODE)
         val po = dealUpdate(to<Role>(vo))
-        //TODO 处理权限
         return mapper.updateByPrimaryKeySelective(po)
     }
 
@@ -207,8 +221,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
                 andIn(RoleMenu::roleId, ids)
             })
         }
-        //TODO 处理权限
-        return deleteByIds(ids)
+        val count = deleteByIds(ids)
+        refreshRolePermission()
+        return count
     }
 
     fun deleteUser(vo: RoleVo): Int {
@@ -216,22 +231,46 @@ class RoleService : BaseService<RoleMapper, Role>() {
             andEqualTo(UserRole::roleId, vo.id)
             andIn(UserRole::userId, vo.userIds!!)
         })
-        //TODO 处理权限
     }
 
     fun deleteMenu(vo: RoleVo): Int {
-        return rmMapper.deleteByExample(example<RoleMenu> {
+        val count = rmMapper.deleteByExample(example<RoleMenu> {
             andEqualTo(RoleMenu::roleId, vo.id)
             andIn(RoleMenu::menuId, vo.menuIds!!)
         })
-        //TODO 处理权限
+        refreshRolePermission()
+        return count
     }
 
     fun deletePermission(vo: RoleVo): Int {
-        return rpMapper.deleteByExample(example<RolePermission> {
+        val count = rpMapper.deleteByExample(example<RolePermission> {
             andEqualTo(RolePermission::roleId, vo.id)
             andIn(RolePermission::permissionId, vo.permissionIds!!)
         })
-        //TODO 处理权限
+        refreshRolePermission()
+        return count
+    }
+
+    /**
+     * 刷新一个用户的权限
+     */
+    fun refreshRolePermission() {
+        val apps = RedisUtil.hGetAll<AppDto>(Constant.Redis.APP).values.toList().map { it!! }
+        val roles = to<RoleDto>(mapper.selectAll())
+        AppUtil.appNotCheck()
+        val resources = to<ResourceDto>(resourceMapper.selectAll())
+        val roleMenus = rmMapper.selectAll()
+        val rolePermissions = rpMapper.selectAll()
+        val menuResources = menuResourceMapper.selectAll()
+        val permissionResources = permissionResourceMapper.selectAll()
+        PermissionUtil.initRolePermission(
+            apps,
+            roles,
+            resources,
+            roleMenus,
+            rolePermissions,
+            menuResources,
+            permissionResources
+        )
     }
 }

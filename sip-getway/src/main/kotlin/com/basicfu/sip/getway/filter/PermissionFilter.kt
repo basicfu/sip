@@ -9,7 +9,6 @@ import com.basicfu.sip.common.model.dto.AppDto
 import com.basicfu.sip.common.model.dto.AppServiceDto
 import com.basicfu.sip.common.model.dto.UserDto
 import com.basicfu.sip.common.model.redis.RoleToken
-import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.common.util.TokenUtil
 import com.basicfu.sip.core.common.wrapper.RequestWrapper
 import com.basicfu.sip.core.util.RedisUtil
@@ -136,7 +135,7 @@ class PermissionFilter : Filter {
             if (Constant.System.APP_SYSTEM_CODE != appCode) {
                 services.addAll(apps[appCode]?.services ?: arrayListOf())
             }
-            val roleCodes=arrayListOf(Constant.System.GUEST)
+            val roleCodes = arrayListOf(Constant.System.GUEST)
             user?.roles?.let { roleCodes.addAll(it) }
             for (service in services) {
                 //多个service的path一致也不影响匹配
@@ -156,7 +155,7 @@ class PermissionFilter : Filter {
                     val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
                     if (frontToken == null) {
                         //未登录用户（排除访客接口）
-                        if (allowRequest(false,roleCodes,appCode, service.id!!, serviceUrl)) {
+                        if (allowRequest(false, roleCodes, appCode, service.id!!, serviceUrl)) {
                             allow = true
                             break
                         }
@@ -164,14 +163,14 @@ class PermissionFilter : Filter {
                     } else {
                         if (user == null) {
                             //auth存在但是redis不存在，可能是auth已过期或压根不存在返回为登录超时（排除访客接口）
-                            if (allowRequest(false,roleCodes,appCode, service.id!!, serviceUrl)) {
+                            if (allowRequest(false, roleCodes, appCode, service.id!!, serviceUrl)) {
                                 allow = true
                                 break
                             }
                             returnMsg(response, Enum.NOT_LOGIN)
                         } else {
                             //auth存在并且redis存在无过期
-                            if (allowRequest(true,roleCodes,appCode, service.id!!, serviceUrl)) {
+                            if (allowRequest(true, roleCodes, appCode, service.id!!, serviceUrl)) {
                                 allow = true
                                 break
                             }
@@ -205,16 +204,22 @@ class PermissionFilter : Filter {
 
     override fun destroy() {}
 
-    private fun allowRequest(login:Boolean,roleCodes:List<String>,appCode: String, serviceId: Long, url: String): Boolean {
+    private fun allowRequest(
+        login: Boolean,
+        roleCodes: List<String>,
+        appCode: String,
+        serviceId: Long,
+        url: String
+    ): Boolean {
         val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}$appCode")
         val values = appRoleToken.filter { roleCodes.contains(it.key) }.values
-        val resources= arrayListOf<String>()
-        values.forEach {roleToken->
+        val resources = arrayListOf<String>()
+        values.forEach { roleToken ->
             roleToken!!.resources[serviceId]?.let { resources.addAll(it) }
         }
         if (resources.any { antPathMatcher.match(it, url) }) {
-            if(login){
-                RedisUtil.expire(TokenUtil.getCurrentToken()!!,Constant.System.SESSION_TIMEOUT)
+            if (login) {
+                RedisUtil.expire(TokenUtil.getCurrentToken()!!, Constant.System.SESSION_TIMEOUT)
             }
             return true
         }

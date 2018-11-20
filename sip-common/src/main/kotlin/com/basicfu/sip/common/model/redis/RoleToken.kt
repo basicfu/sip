@@ -11,13 +11,13 @@ class RoleToken {
     /**
      * 菜单ID
      */
-    var menus: List<Long> = arrayListOf()
+    var menus: Set<Long> = linkedSetOf()
     /**
      * 权限ID
      */
-    var permissions: List<Long> = arrayListOf()
+    var permissions: Set<Long> = linkedSetOf()
     /**
      * 资源
      */
-    var resources: Map<Long, List<String>> = hashMapOf()
+    var resources: Map<Long, List<String>> = linkedMapOf()
 }

@@ -29,6 +29,8 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
     lateinit var permissionResourceMapper: PermissionResourceMapper
     @Autowired
     lateinit var resourceMapper: ResourceMapper
+    @Autowired
+    lateinit var roleService: RoleService
 
     fun list(vo: PermissionVo): PageInfo<PermissionDto> {
         val pageInfo = selectPage<PermissionDto>(example<Permission> {
@@ -94,8 +96,9 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
             pr.resourceId = it
             permissionResources.add(dealInsert(pr))
         }
-        //TODO 处理权限  查询拥有权限的角色 拿出resourceIds加入当前
-        return permissionResourceMapper.insertList(permissionResources)
+        val count=permissionResourceMapper.insertList(permissionResources)
+        roleService.refreshRolePermission()
+        return count
     }
 
     fun update(vo: PermissionVo): Int {
@@ -121,15 +124,17 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
                 andIn(PermissionResource::permissionId, ids)
             })
         }
-        //TODO 处理权限
-        return deleteByIds(ids)
+        val count= deleteByIds(ids)
+        roleService.refreshRolePermission()
+        return count
     }
 
     fun deleteResource(vo: PermissionVo): Int {
-        //TODO 处理权限  查询拥有权限的角色，拿出resourceIds删除当前b   1,2,  4
-        return permissionResourceMapper.deleteByExample(example<PermissionResource> {
+        val count= permissionResourceMapper.deleteByExample(example<PermissionResource> {
             andEqualTo(PermissionResource::permissionId, vo.id)
             andIn(PermissionResource::resourceId, vo.resourceIds!!)
         })
+        roleService.refreshRolePermission()
+        return count
     }
 }
