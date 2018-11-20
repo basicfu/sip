@@ -308,7 +308,7 @@ class UserService : BaseService<UserMapper, User>() {
                 appId = app.id
                 appCode = app.code
                 username = username.substringAfter("@")
-                AppUtil.appNotCheck()
+                AppUtil.notCheckApp()
                 val userAuths = userAuthMapper.select(generate {
                     this.appId = appId
                     type = com.basicfu.sip.common.enum.Enum.LoginType.USERNAME.value
@@ -318,7 +318,7 @@ class UserService : BaseService<UserMapper, User>() {
                     throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
                 }
                 val userAuthMap = userAuths.associateBy { it.uid }
-                AppUtil.appNotCheck()
+                AppUtil.notCheckApp()
                 val selectByIds = selectByIds(userAuths.map { it.uid!! })
                 val filter = selectByIds.filter { it.type == Enum.UserType.APP_ADMIN.name }
                 if (filter.isEmpty()) {
@@ -327,7 +327,7 @@ class UserService : BaseService<UserMapper, User>() {
                 userAuth = userAuthMap[filter[0].id]!!
             } else {
                 //三种用户类型，可能属于多个应用，但用户名唯一
-                AppUtil.appNotCheck()
+                AppUtil.notCheckApp()
                 val userAuths = userAuthMapper.select(generate {
                     this.username = username
                     type = com.basicfu.sip.common.enum.Enum.LoginType.USERNAME.value
@@ -336,7 +336,7 @@ class UserService : BaseService<UserMapper, User>() {
                     throw CustomException(Enum.USERNAME_OR_PASSWORD_ERROR)
                 }
                 val userAuthMap = userAuths.associateBy { it.uid }
-                AppUtil.appNotCheck()
+                AppUtil.notCheckApp()
                 val selectByIds = selectByIds(userAuths.map { it.uid!! })
                 val filter = selectByIds.filter {
                     listOf(

@@ -25,8 +25,8 @@ class AppServiceController {
     }
 
     @GetMapping("/all")
-    fun all(): Result<Any> {
-        return Result.success(appServiceService.all())
+    fun all(@RequestParam(defaultValue = "0") type:Int): Result<Any> {
+        return Result.success(appServiceService.all(type))
     }
 
     @PostMapping("/insert")

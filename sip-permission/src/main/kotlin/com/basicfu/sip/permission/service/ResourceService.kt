@@ -63,10 +63,19 @@ class ResourceService : BaseService<ResourceMapper, Resource>() {
     }
 
     fun suggest(q: String, limit: Int): List<ResourceDto> {
+        AppUtil.notCheckApp()
+        val appIds= arrayListOf(AppUtil.getAppId())
+        val appCode = AppUtil.getAppCode()
+        if(Constant.System.APP_SYSTEM_CODE!=appCode){
+            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
+        }
         return to(mapper.selectByExampleAndRowBounds(example<Resource> {
-            orLike {
-                name = q
-                url = q
+            andIn(Resource::appId,appIds)
+            where {
+                orLike {
+                    name = q
+                    url = q
+                }
             }
         }, RowBounds(0, limit)))
     }

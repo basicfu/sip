@@ -257,7 +257,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
     fun refreshRolePermission() {
         val apps = RedisUtil.hGetAll<AppDto>(Constant.Redis.APP).values.toList().map { it!! }
         val roles = to<RoleDto>(mapper.selectAll())
-        AppUtil.appNotCheck()
+        AppUtil.notCheckApp()
         val resources = to<ResourceDto>(resourceMapper.selectAll())
         val roleMenus = rmMapper.selectAll()
         val rolePermissions = rpMapper.selectAll()

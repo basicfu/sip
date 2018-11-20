@@ -6,6 +6,8 @@ import com.alibaba.druid.sql.ast.expr.*
 import com.alibaba.druid.sql.ast.statement.*
 import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.autoconfig.Config
+import com.basicfu.sip.core.common.constant.CoreConstant
+import com.basicfu.sip.core.common.exception.SqlInterceptorException
 import com.basicfu.sip.core.util.RequestUtil
 import com.basicfu.sip.core.util.ThreadLocalUtil
 import com.google.common.base.CaseFormat
@@ -57,14 +59,15 @@ import java.util.*
 )
 class SqlInterceptor : Interceptor {
     val dialect = "MYSQL"
-    val appSkip = "skip"
     @Autowired
     lateinit var config: Config
 
     override fun intercept(invocation: Invocation): Any {
         val proceed: Any
+        var throwError = false
+        val count = ThreadLocalUtil.get<Int>(CoreConstant.NOT_CHECK_APP)
         try {
-            if (ThreadLocalUtil.get<Boolean>(appSkip) != null) {
+            if (count != null) {
                 return invocation.proceed()
             }
             //过滤应用在实际修改的地方判断，在连库查询时数据库可能不一样
@@ -98,8 +101,8 @@ class SqlInterceptor : Interceptor {
                         val bean = invocation.args[1]
                         val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
                         val appId: Long = getAppId()
-                                ?: //log
-                                throw RuntimeException("not found app code")
+                            ?: //log
+                            throw RuntimeException("not found app code")
                         if (bean is HashMap<*, *>) {
                             val list = bean["list"] as ArrayList<*>
                             list.forEach {
@@ -116,9 +119,20 @@ class SqlInterceptor : Interceptor {
                 }
             }
             proceed = invocation.proceed()
+        } catch (e: Exception) {
+            //出错一定释放
+            throwError = true
+            throw SqlInterceptorException()
         } finally {
-            //只针对一次sql有效，执行完不论是否抛错一定释放
-            ThreadLocalUtil.remove(appSkip)
+            //如果出错就不在处理此处，因为sqlInterceptor已经删除标识
+            if (!throwError && count != null) {
+                //如果非>=1不处理，需要主动释放
+                if (count == 1) {
+                    ThreadLocalUtil.remove(CoreConstant.NOT_CHECK_APP)
+                } else if (count > 1) {
+                    ThreadLocalUtil[CoreConstant.NOT_CHECK_APP] = count - 1
+                }
+            }
         }
         return proceed
     }
@@ -254,8 +268,8 @@ class SqlInterceptor : Interceptor {
             originCondition
         } else {
             val appId: Long = getAppId()
-                    ?: //log
-                    throw RuntimeException("not found app code")
+                ?: //log
+                throw RuntimeException("not found app code")
             val filedName = if (StringUtils.isBlank(tableAlias)) fieldName else "$tableAlias.$fieldName"
             val condition =
                 SQLBinaryOpExpr(SQLIdentifierExpr(filedName), SQLCharExpr(appId.toString()), SQLBinaryOperator.Equality)

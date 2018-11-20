@@ -50,17 +50,17 @@ object AppUtil {
     }
 
     /**
-     * 下一句sql不拼接appId
+     * 不检查app
+     * forever默认为false一次有效，下次sql不在检查，true为当前线程中永久不在检查app，除非主动释放
      */
-    fun appNotCheck() {
-        ThreadLocalUtil[Constant.System.APP_SKIP] = true
+    fun notCheckApp(count:Int=1){
+        ThreadLocalUtil[Constant.System.NOT_CHECK_APP] = count
     }
-
     /**
-     * 释放下一句sql继续拼接
+     * 继续检查app
      */
-    fun releaseAppNotCheck() {
-        ThreadLocalUtil.remove(Constant.System.APP_SKIP)
+    fun releaseNotCheckApp() {
+        ThreadLocalUtil.remove(Constant.System.NOT_CHECK_APP)
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.basicfu.sip.permission.service
 
+import com.basicfu.sip.common.constant.Constant
 import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.common.model.dto.ResourceDto
 import com.basicfu.sip.core.common.exception.CustomException
@@ -13,9 +14,11 @@ import com.basicfu.sip.permission.mapper.ResourceMapper
 import com.basicfu.sip.common.model.dto.PermissionDto
 import com.basicfu.sip.permission.model.po.Permission
 import com.basicfu.sip.common.model.po.PermissionResource
+import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.permission.model.po.Resource
 import com.basicfu.sip.permission.model.vo.PermissionVo
 import com.github.pagehelper.PageInfo
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -53,13 +56,24 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         return pageInfo
     }
 
+    /**
+     * 查询permissionResource,resource自己的appId和sip的，appNotCheck目前无法满足，分页时有count语句
+     */
     fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {
         val likeValue = SqlUtil.dealLikeValue(q)
         startPage()
+        val appIds= arrayListOf(AppUtil.getAppId())
+        val appCode = AppUtil.getAppCode()
+        if(Constant.System.APP_SYSTEM_CODE!=appCode){
+            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
+        }
         var sql =
-            "select r.id as id,service_id as serviceId,url,method,name,pr.cdate as cdate from permission_resource pr LEFT JOIN resource r on pr.resource_id=r.id WHERE pr.permission_id=$id"
+            "select r.id as id,service_id as serviceId,url,method,name,pr.cdate as cdate from permission_resource pr " +
+                    "LEFT JOIN resource r on pr.resource_id=r.id WHERE pr.permission_id=$id " +
+                    "and pr.app_id in (${StringUtils.join(appIds,",")}) and r.app_id in (${StringUtils.join(appIds,",")})"
         likeValue?.let { sql += " and (r.url like $likeValue or r.name like $likeValue)" }
         sql += " ORDER BY pr.cdate DESC"
+        AppUtil.notCheckApp(2)
         val result = resourceMapper.selectBySql(sql)
         return getPageInfo(result)
     }
@@ -76,9 +90,19 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         return mapper.insertSelective(po)
     }
 
+    /**
+     * 允许添加自己和sip的资源
+     */
     fun insertResource(vo: PermissionVo): Int {
         var ids = vo.resourceIds!!
+        AppUtil.notCheckApp()
+        val appIds= arrayListOf(AppUtil.getAppId())
+        val appCode = AppUtil.getAppCode()
+        if(Constant.System.APP_SYSTEM_CODE!=appCode){
+            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
+        }
         if (resourceMapper.selectCountByExample(example<Resource> {
+                andIn(Resource::appId,appIds)
                 andIn(Resource::id, ids)
             }) != ids.size) throw CustomException(Enum.NOT_FOUND_RESOURCE)
         val existsResourceIds = permissionResourceMapper.selectByExample(example<PermissionResource> {

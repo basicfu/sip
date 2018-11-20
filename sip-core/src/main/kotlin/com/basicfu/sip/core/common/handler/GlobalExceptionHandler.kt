@@ -3,7 +3,10 @@ package com.basicfu.sip.core.common.handler
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.common.constant.CoreConstant
 import com.basicfu.sip.core.common.exception.CustomException
+import com.basicfu.sip.core.common.exception.SqlInterceptorException
+import com.basicfu.sip.core.util.ThreadLocalUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -67,6 +70,17 @@ class GlobalExceptionHandler {
         log.error("自定义异常-", e)
         log.error("自定义异常--【code】--" + e.code + "--【msg】--" + e.msg + "--【data】--" + e.data)
         return Result.error(e.msg, e.code, e.data)
+    }
+
+    /**
+     * 针对不检查app过滤时抛出的错误单独释放标识
+     */
+    @ResponseBody
+    @ExceptionHandler(SqlInterceptorException::class)
+    private fun sqlInterceptorException(response: HttpServletResponse): Result<Any> {
+        ThreadLocalUtil.remove(CoreConstant.NOT_CHECK_APP)
+        response.status = 500
+        return Result.error(Enum.SERVER_ERROR.msg, -1)
     }
 
     /**

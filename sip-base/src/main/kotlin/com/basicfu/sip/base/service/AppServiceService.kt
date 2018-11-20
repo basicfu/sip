@@ -3,8 +3,10 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.mapper.AppServiceMapper
 import com.basicfu.sip.base.model.po.AppService
 import com.basicfu.sip.base.model.vo.AppServiceVo
+import com.basicfu.sip.common.constant.Constant
 import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.common.model.dto.AppServiceDto
+import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -29,8 +31,24 @@ class AppServiceService : BaseService<AppServiceMapper, AppService>() {
         })
     }
 
-    fun all(): List<AppServiceDto> {
-        return to(mapper.selectAll().sortedBy { it.cdate })
+    /**
+     * 0只查询自己的service
+     * 1查询自己和sip的service
+     */
+    fun all(type:Int=0): List<AppServiceDto> {
+        return if(type==0){
+            to(mapper.selectAll().sortedBy { it.cdate })
+        }else{
+            val appIds= arrayListOf(AppUtil.getAppId())
+            val appCode = AppUtil.getAppCode()
+            if(Constant.System.APP_SYSTEM_CODE!=appCode){
+                appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
+            }
+            AppUtil.notCheckApp()
+            to(mapper.selectByExample(example<AppService> {
+                andIn(AppService::appId,appIds)
+            }))
+        }
     }
 
     fun insert(vo: AppServiceVo): Int {
