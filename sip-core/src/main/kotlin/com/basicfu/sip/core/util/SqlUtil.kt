@@ -4,7 +4,7 @@ package com.basicfu.sip.core.util
  * @author basicfu
  * @date 2018/8/29
  */
-object SqlUtil{
+object SqlUtil {
     /**
      * 已添加''
      */
@@ -12,14 +12,10 @@ object SqlUtil{
         if (v == null) {
             return null
         }
-        var value = v.replace("'","\\'")
+        var value = v.replace("'", "\\'")
         if (value.contains("%") || value.contains("_")) {
-            value = value.replace("%", "/%").replace("_", "/_")
-            value = "'%$value%'"
-            value += " escape '/'"
-        } else {
-            value = "'%$value%'"
+            value = value.replace("%", "\\%").replace("_", "\\_")
         }
-        return value
+        return "'%$value%'"
     }
 }
