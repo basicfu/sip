@@ -218,7 +218,7 @@ class UserService : BaseService<UserMapper, User>() {
         dealUserList(users)
         val roleMap = com.basicfu.sip.client.util.UserUtil.listRoleByIds(users.map { it.id!! })
         users.forEach {
-            it.roles=roleMap[it.id]
+            it.roles = roleMap[it.id]
         }
         val result = PageInfo<JSONObject>()
         BeanUtils.copyProperties(pageList, result)
@@ -267,8 +267,8 @@ class UserService : BaseService<UserMapper, User>() {
         } else {
             val likeValue = SqlUtil.dealLikeValue(q)
             val users = mapper.selectBySql(
-                "SELECT DISTINCT uid as id FROM `sip-base`.user u " +
-                        "RIGHT JOIN `sip-permission`.user_role ur on u.uid=ur.user_id " +
+                "SELECT u.id as id FROM `sip-base`.user u " +
+                        "RIGHT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
                         "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
                         "WHERE (u.username LIKE $likeValue or u.nickname LIKE $likeValue or u.mobile LIKE $likeValue or u.email LIKE $likeValue)" +
                         " AND r.code='$roleCode' LIMIT 0,$size"
