@@ -90,6 +90,9 @@ class UserUtil {
          * 根据用户ID查询用户角色
          */
         fun listRoleByIds(userIds: List<Long>): Map<Long, List<String>> {
+            if(userIds.isEmpty()){
+                return hashMapOf()
+            }
             val listRoleByIds = roleFeign.listRoleByIds(userIds.toTypedArray()).data
             return listRoleByIds?.associateBy(
                 { it.id!! },

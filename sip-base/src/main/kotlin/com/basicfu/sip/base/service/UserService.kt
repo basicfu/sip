@@ -215,10 +215,12 @@ class UserService : BaseService<UserMapper, User>() {
             pageList = getPageInfo(result)
         }
         val users = pageList.list
-        dealUserList(users)
-        val roleMap = com.basicfu.sip.client.util.UserUtil.listRoleByIds(users.map { it.id!! })
-        users.forEach {
-            it.roles = roleMap[it.id]
+        if(users.isNotEmpty()){
+            dealUserList(users)
+            val roleMap = com.basicfu.sip.client.util.UserUtil.listRoleByIds(users.map { it.id!! })
+            users.forEach {
+                it.roles = roleMap[it.id]
+            }
         }
         val result = PageInfo<JSONObject>()
         BeanUtils.copyProperties(pageList, result)
