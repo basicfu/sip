@@ -38,7 +38,7 @@ class UserService : BaseService<RoleMapper, Role>() {
             userRoleMap.forEach { k, v ->
                 result.add(generate {
                     id = k
-                    this.roles = v.map { roleMap[it]!! }.map { it.code!! }
+                    this.roles =roleMap.filter { v.contains(it.key) }.values.map { it.code!! }
                 })
             }
         }
