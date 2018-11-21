@@ -210,6 +210,7 @@ class UserService : BaseService<UserMapper, User>() {
             if (sql.startsWith("and")) {
                 sql = sql.substringAfter("and")
             }
+            sql+=" order by u.cdate desc"
             startPage()
             val result = mapper.selectBySql(orignSql + sql)
             pageList = getPageInfo(result)
