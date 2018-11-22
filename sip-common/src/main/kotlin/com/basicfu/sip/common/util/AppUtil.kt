@@ -50,6 +50,17 @@ object AppUtil {
     }
 
     /**
+     * 获取当前应用id和系统应用id
+     */
+    fun getAppIdAndSipId(): List<Long> {
+        val appIds= arrayListOf(AppUtil.getAppId()!!)
+        val appCode = AppUtil.getAppCode()
+        if(Constant.System.APP_SYSTEM_CODE!=appCode){
+            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE)!!)
+        }
+        return appIds
+    }
+    /**
      * 不检查app
      * forever默认为false一次有效，下次sql不在检查，true为当前线程中永久不在检查app，除非主动释放
      */

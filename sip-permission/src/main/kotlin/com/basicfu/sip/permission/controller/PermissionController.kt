@@ -55,4 +55,15 @@ class PermissionController {
     fun deleteResource(@RequestBody vo: PermissionVo): Result<Any> {
         return Result.success(permissionService.deleteResource(vo))
     }
+
+    @PostMapping("/import")
+    fun import(@RequestBody vo: PermissionVo): Result<Any> {
+        permissionService.import(vo)
+        return Result.success(null,"导入成功")
+    }
+
+    @GetMapping("/export")
+    fun export(): Result<Any> {
+        return Result.success(permissionService.export())
+    }
 }

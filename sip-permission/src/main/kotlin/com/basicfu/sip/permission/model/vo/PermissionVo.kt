@@ -6,6 +6,8 @@ class PermissionVo {
     var name: String? = null
     var code: String? = null
 
+    /**导入的value*/
+    var value:String?=null
     var q: String? = null
     var resourceIds: List<Long>? = null
 }
