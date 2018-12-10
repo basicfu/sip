@@ -1,7 +1,7 @@
 package com.basicfu.sip.eureka
 
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer
 
 @EnableEurekaServer
@@ -9,5 +9,5 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer
 class SipEurekaApplication
 
 fun main(args: Array<String>) {
-    SpringApplication.run(SipEurekaApplication::class.java, *args)
+    runApplication<SipEurekaApplication>(*args)
 }

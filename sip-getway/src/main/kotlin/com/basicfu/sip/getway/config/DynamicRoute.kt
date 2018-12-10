@@ -1,7 +1,7 @@
 package com.basicfu.sip.getway.config
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.web.ServerProperties
+import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath
 import org.springframework.cloud.netflix.zuul.filters.ZuulProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,11 +15,11 @@ class DynamicRoute {
     @Autowired
     internal var zuulProperties: ZuulProperties? = null
     @Autowired
-    internal var server: ServerProperties? = null
+    internal var dispatcherServletPath: DispatcherServletPath? = null
 
     @Bean
     fun routeLocator(): CustomRouteLocator? {
-        return zuulProperties?.let { CustomRouteLocator(server!!.servletPrefix, it) }
+        return zuulProperties?.let { CustomRouteLocator(dispatcherServletPath?.prefix, it) }
     }
 
 }

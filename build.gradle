@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.13.RELEASE'
-        springCloudVersion = 'Edgware.SR4'
-        kotlinVersion = '1.2.51'
+        springBootVersion = '2.1.0.RELEASE'
+        springCloudVersion = 'Greenwich.M3'
+        kotlinVersion = '1.3.10'
         fastjsonVersion = '1.2.47'
     }
     dependencies {
@@ -11,8 +11,15 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
     }
     repositories {
+        mavenLocal()
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
-        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven {
+            url "https://repo.rdc.aliyun.com/repository/40986-release-fHIrRh/"
+            credentials {
+                username 'eGCEHS'
+                password 'Ry3GAbzmG5'
+            }
+        }
     }
 }
 subprojects {
@@ -39,8 +46,15 @@ subprojects {
         }
     }
     repositories {
+        mavenLocal()
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
-        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven {
+            url "https://repo.rdc.aliyun.com/repository/40986-release-fHIrRh/"
+            credentials {
+                username 'eGCEHS'
+                password 'Ry3GAbzmG5'
+            }
+        }
     }
     compileKotlin {
         kotlinOptions {
@@ -62,6 +76,7 @@ project(":sip-core") {
     dependencies {
         compile("com.alibaba:druid-spring-boot-starter:1.1.10")
         compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
+        compile("org.springframework.cloud:spring-cloud-starter-openfeign")
         compile("tk.mybatis:mapper-spring-boot-starter:2.0.4")
         compile("com.github.pagehelper:pagehelper-spring-boot-starter:1.2.3")
         compile("org.apache.commons:commons-lang3:3.6")
@@ -72,6 +87,7 @@ project(":sip-core") {
         compile("org.testcontainers:testcontainers:1.8.3")
         compile("org.testcontainers:mysql:1.8.3")
         compile("mysql:mysql-connector-java:5.1.45")
+        compile("org.apache.commons:commons-pool2:2.6.0")
         mybatisGenerator 'org.mybatis.generator:mybatis-generator-core:1.3.7'
         mybatisGenerator 'mysql:mysql-connector-java:5.1.45'
         mybatisGenerator 'tk.mybatis:mapper:4.0.3'
@@ -134,7 +150,6 @@ project(":sip-getway") {
         compile project(':sip-common')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("org.springframework.cloud:spring-cloud-starter-netflix-zuul")
-        compile("org.springframework.cloud:spring-cloud-starter-openfeign")
         compile("mysql:mysql-connector-java:5.1.45")
         compile("org.springframework.retry:spring-retry")
         compile("com.sun.mail:javax.mail:1.5.6")
@@ -146,6 +161,7 @@ project(":sip-base") {
         compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
+        compile("org.springframework.boot:spring-boot-starter-websocket")
     }
 }
 project(":sip-dict") {
@@ -159,6 +175,7 @@ project(":sip-dict") {
 project(":sip-notify") {
     dependencies {
         compile project(':sip-common')
+        compile project(':sip-client')
         compile("org.springframework.boot:spring-boot-starter-mail")
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
@@ -187,6 +204,9 @@ project(":sip-client") {
         compile("org.springframework.boot:spring-boot-starter-data-redis")
         compile("io.protostuff:protostuff-core:1.5.9")
         compile("io.protostuff:protostuff-runtime:1.5.9")
+        compile("redis.clients:jedis:2.9.0")
+        compile("io.github.openfeign:feign-core:9.7.0")
+        compile("org.springframework.cloud:spring-cloud-openfeign-core")
     }
 }
 project(":sip-api") {

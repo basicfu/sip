@@ -41,7 +41,7 @@ object UserTemplateUtil {
                 if (startLength > endLength) {
                     throw CustomException("${prefix}结束值不能大于开始值")
                 }
-                if (!value.isNullOrBlank() && value!!.length !in startLength..endLength) {
+                if (!value.isNullOrBlank() && value.length !in startLength..endLength) {
                     throw CustomException("${default}长度需要[$startLength~$endLength]个字符")
                 }
             }
@@ -72,7 +72,7 @@ object UserTemplateUtil {
                     if (endLength > 10) {
                         throw CustomException("${prefix}小数位最大10位")
                     }
-                    val splitValue = value!!.split(".")
+                    val splitValue = value.split(".")
                     if (splitValue.contains(".") && (splitValue.size != 2 || splitValue[1].isEmpty())) {
                         throw CustomException("${default}不能只有点没有小数")
                     }
@@ -81,7 +81,7 @@ object UserTemplateUtil {
                         if (Math.abs(splitValue[0].toLong()).toString().length !in 1..startLength) {
                             throw CustomException("${default}整数位需要[1~$startLength]位")
                         }
-                        if (splitValue[0].toLong() !in startValue..endValue) {
+                        if (splitValue[0].toFloat() !in startValue..endValue) {
                             throw CustomException(
                                 "${default}值范围需要[${BigDecimal(startValue.toString()).setScale(
                                     endLength

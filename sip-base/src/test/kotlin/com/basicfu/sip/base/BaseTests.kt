@@ -7,7 +7,6 @@ import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.util.EnvironmentTestUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ContextConfiguration
@@ -33,11 +32,12 @@ abstract class BaseTests<M : CustomMapper<T>,T> {
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
         override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
             redis.start()
-            EnvironmentTestUtils.addEnvironment(
-                configurableApplicationContext.environment,
-                "spring.redis.host=${redis.containerIpAddress}",
-                "spring.redis.port=${redis.getMappedPort(6379)}"
-            )
+//            TestPropertyValues.empty().applyTo(configurableApplicationContext.environment)
+//            EnvironmentTestUtils.addEnvironment(
+//                configurableApplicationContext.environment,
+//                "spring.redis.host=${redis.containerIpAddress}",
+//                "spring.redis.port=${redis.getMappedPort(6379)}"
+//            )
         }
     }
 }

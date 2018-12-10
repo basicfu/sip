@@ -30,12 +30,6 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka
-sip:
-  logs:
-    redis:
-      host: redis-dev.dmka.cn
-      port: 4379
-      password: root
 logging:
   level:
     com.basicfu.sip: TRACE

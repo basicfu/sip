@@ -73,7 +73,7 @@ class SqlInterceptor : Interceptor {
             //过滤应用在实际修改的地方判断，在连库查询时数据库可能不一样
             if (invocation.method.name == "prepare") {
                 val metaData = (invocation.args[0] as Connection).metaData
-                val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")
+                val field = ReflectionUtils.findField(DatabaseMetaData::class.java, "database")!!
                 field.isAccessible = true
                 val databaseName = field.get(metaData).toString()
                 val statementHandler = invocation.target as StatementHandler
@@ -303,16 +303,7 @@ class SqlInterceptor : Interceptor {
     }
 
     private fun getAppId(): Long? {
-        val parameter = RequestUtil.getParameter("app")
-        if (parameter != null) {
-            return try {
-                val json = JSON.parseObject(parameter)
-                json.getLong("appId")
-            } catch (e: Exception) {
-                null
-            }
-        }
-        return null
+        return RequestUtil.getParameter("_appId")?.toLong()
     }
 
 }

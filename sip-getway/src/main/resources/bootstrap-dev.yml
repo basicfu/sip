@@ -19,14 +19,14 @@ spring:
       max-wait: 10000
       timeBetweenEvictionRunsMillis: 60000
       base:
-        url: jdbc:mysql://${ENV_MYSQL_HOST:mysql-dev.dmka.cn}:${ENV_MYSQL_PORT:4306}/sip-base?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+        url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-base?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
       permission:
-        url: jdbc:mysql://${ENV_MYSQL_HOST:mysql-dev.dmka.cn}:${ENV_MYSQL_PORT:4306}/sip-permission?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+        url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-permission?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
       dict:
-        url: jdbc:mysql://${ENV_MYSQL_HOST:mysql-dev.dmka.cn}:${ENV_MYSQL_PORT:4306}/sip-dict?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+        url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-dict?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
   redis:
-    host: ${ENV_REDIS_HOST:redis-dev.dmka.cn}
-    port: ${ENV_REDIS_PORT:4379}
+    host: ${ENV_REDIS_HOST:localhost}
+    port: ${ENV_REDIS_PORT:6379}
     password: ${ENV_REDIS_PASSWORD:root}
     pool:
       max-idle: 8

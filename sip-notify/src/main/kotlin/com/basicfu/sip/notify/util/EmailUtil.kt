@@ -32,15 +32,15 @@ object EmailUtil {
             //            messageHelper.setFrom(from)
             messageHelper.setFrom(InternetAddress(javax.mail.internet.MimeUtility.encodeText(vo.fromName) + " <" + vo.fromUname + ">"))
             // 设置收件人邮箱
-            messageHelper.setTo(vo.toUser)
+            messageHelper.setTo(vo.toUser!!)
             // 设置抄送人
-            vo.copyUser?.let { messageHelper.setCc(vo.copyUser) }
+            vo.copyUser?.let { messageHelper.setCc(vo.copyUser!!) }
             //设置暗送人
 //            messageHelper.setBcc(bcc)
             // 邮件主题
-            messageHelper.setSubject(vo.subject)
+            messageHelper.setSubject(vo.subject!!)
             // true 表示启动HTML格式的邮件
-            messageHelper.setText(vo.content, true)
+            messageHelper.setText(vo.content!!, true)
             // 设置附件
             vo.files?.let {
                 for (file in vo.files!!) {

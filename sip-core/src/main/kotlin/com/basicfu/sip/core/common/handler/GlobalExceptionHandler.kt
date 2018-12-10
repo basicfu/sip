@@ -90,30 +90,32 @@ class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException::class)
     private fun methodArgumentNotValidException(e: MethodArgumentNotValidException): Result<Any> {
-        val fieldErrorsMap = e.bindingResult.fieldErrors?.associateBy({ it.field }, { it })
-        if (fieldErrorsMap != null) {
+        val fieldErrorsMap = e.bindingResult.fieldErrors.associateBy({ it.field }, { it })
+        if (fieldErrorsMap.isNotEmpty()) {
             val linkedHashList = linkedSetOf<FieldError>()
             val bean = e.bindingResult.target
-            val declaredFields = bean::class.java.declaredFields
-            declaredFields.forEach {
-                val error = fieldErrorsMap[it.name]
-                if (error != null) {
-                    linkedHashList.add(error)
+            bean?.let {
+                val declaredFields = bean::class.java.declaredFields
+                declaredFields.forEach {
+                    val error = fieldErrorsMap[it.name]
+                    if (error != null) {
+                        linkedHashList.add(error)
+                    }
                 }
+                val first = linkedHashList.first()
+                val array = JSONArray()
+                linkedHashList.forEach {
+                    val data = JSONObject()
+                    data["field"] = it.field
+                    data["msg"] = it.defaultMessage
+                    array.add(data)
+                }
+                return Result.error(
+                    first.defaultMessage.toString(),
+                    Enum.INVALID_PARAMETER.value,
+                    array
+                )
             }
-            val first = linkedHashList.first()
-            val array = JSONArray()
-            linkedHashList.forEach {
-                val data = JSONObject()
-                data["field"] = it.field
-                data["msg"] = it.defaultMessage
-                array.add(data)
-            }
-            return Result.error(
-                first.defaultMessage,
-                Enum.INVALID_PARAMETER.value,
-                array
-            )
         }
         return Result.error(
             Enum.INVALID_PARAMETER.msg,

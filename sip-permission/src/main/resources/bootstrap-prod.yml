@@ -21,7 +21,7 @@ spring:
       timeBetweenEvictionRunsMillis: 60000
   redis:
     host: ${ENV_REDIS_HOST:localhost}
-    port: ${ENV_REDIS_PORT:4379}
+    port: ${ENV_REDIS_PORT:6379}
     password: ${ENV_REDIS_PASSWORD:root}
     pool:
       max-idle: 8

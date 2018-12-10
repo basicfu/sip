@@ -29,17 +29,17 @@ class SipRedisConfig {
         val jedisConnectionFactory = JedisConnectionFactory(poolConfig)
         jedisConnectionFactory.database = 0
         jedisConnectionFactory.port = port
-        jedisConnectionFactory.hostName = host
+        jedisConnectionFactory.hostName = host.toString()
         if (!password.isNullOrBlank()) {
-            jedisConnectionFactory.password = password
+            jedisConnectionFactory.password = password.toString()
         }
         return jedisConnectionFactory
     }
 
     @Bean(name = ["sipClientRedisTemplate"])
-    fun redisTemplate(sipRedisConnectionFactory:RedisConnectionFactory): RedisTemplate<*, *> {
+    fun redisTemplate(sipRedisConnectionFactory: RedisConnectionFactory): RedisTemplate<*, *> {
         val redisTemplate = RedisTemplate<Any, Any>()
-        redisTemplate.connectionFactory = sipRedisConnectionFactory
+        redisTemplate.setConnectionFactory(sipRedisConnectionFactory)
         val stringRedisSerializer = StringRedisSerializer()
         redisTemplate.keySerializer = stringRedisSerializer
         redisTemplate.hashKeySerializer = stringRedisSerializer

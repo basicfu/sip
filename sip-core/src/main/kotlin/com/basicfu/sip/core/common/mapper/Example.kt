@@ -613,11 +613,11 @@ class Example<T> constructor(
         val clazz = tk.mybatis.mapper.entity.Example.Criteria::class.java.superclass
         if (customCondition) {
             if (andOr) {
-                val method = ReflectionUtils.findMethod(clazz, "addCriterion", String::class.java)
+                val method = ReflectionUtils.findMethod(clazz, "addCriterion", String::class.java)!!
                 ReflectionUtils.makeAccessible(method)
                 method.invoke(exampleCriteria, column(property) + " " + condition)
             } else {
-                val method = ReflectionUtils.findMethod(clazz, "addOrCriterion", String::class.java)
+                val method = ReflectionUtils.findMethod(clazz, "addOrCriterion", String::class.java)!!
                 ReflectionUtils.makeAccessible(method)
                 method.invoke(exampleCriteria, column(property) + " " + condition)
             }
@@ -629,7 +629,7 @@ class Example<T> constructor(
                     String::class.java,
                     Any::class.java,
                     String::class.java
-                )
+                )!!
                 ReflectionUtils.makeAccessible(method)
                 method.invoke(exampleCriteria, column(property) + " " + condition, value, property(property))
             } else {
@@ -639,7 +639,7 @@ class Example<T> constructor(
                     String::class.java,
                     Any::class.java,
                     String::class.java
-                )
+                )!!
                 ReflectionUtils.makeAccessible(method)
                 method.invoke(exampleCriteria, column(property) + " " + condition, value, property(property))
             }

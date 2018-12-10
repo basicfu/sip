@@ -1,7 +1,5 @@
 package com.basicfu.sip.common.util
 
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.common.constant.Constant
 import com.basicfu.sip.common.model.dto.AppDto
 import com.basicfu.sip.core.common.wrapper.RequestWrapper
@@ -21,32 +19,14 @@ object AppUtil {
      * 经过网关后才有值
      */
     fun getAppId(): Long? {
-        val parameter = RequestUtil.getParameter(Constant.System.APP_CODE)
-        if (parameter != null) {
-            return try {
-                val json = JSON.parseObject(parameter)
-                json.getLong(Constant.System.APP_ID)
-            } catch (e: Exception) {
-                null
-            }
-        }
-        return null
+        return RequestUtil.getParameter(Constant.System.APP_ID)?.toLong()
     }
 
     /**
      * 经过网关后才有值
      */
     fun getAppCode(): String? {
-        val parameter = RequestUtil.getParameter(Constant.System.APP_CODE)
-        if (parameter != null) {
-            return try {
-                val json = JSON.parseObject(parameter)
-                json.getString(Constant.System.APP_CODE)
-            } catch (e: Exception) {
-                null
-            }
-        }
-        return null
+        return RequestUtil.getParameter(Constant.System.APP_CODE)
     }
 
     /**
@@ -77,9 +57,10 @@ object AppUtil {
     /**
      * 更新request中的app参数
      */
-    fun updateApp(app: JSONObject) {
+    fun updateApp(appId: Long?,appCode:String?) {
         val requestWrapper = RequestWrapper(RequestUtil.getRequest())
-        requestWrapper.addParameter(Constant.System.APP_CODE, app.toJSONString())
+        requestWrapper.addParameter(Constant.System.APP_ID, appId)
+        requestWrapper.addParameter(Constant.System.APP_CODE, appCode)
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(requestWrapper))
     }
 

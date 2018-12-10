@@ -375,10 +375,7 @@ class UserService : BaseService<UserMapper, User>() {
             RedisUtil.del(keys.map { it })
         }
         // 后续需要更改当前应用ID
-        val appInfo = JSONObject()
-        appInfo[Constant.System.APP_ID] = appId
-        appInfo[Constant.System.APP_CODE] = appCode
-        AppUtil.updateApp(appInfo)
+        AppUtil.updateApp(appId,appCode)
         val currentTime = (System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
             id = userAuth.id
@@ -662,7 +659,7 @@ class UserService : BaseService<UserMapper, User>() {
                                 if (Math.abs(splitValue[0].toLong()).toString().length !in 1..startLength) {
                                     throw CustomException("字段名[$name]整数位需要[1~$startLength]位")
                                 }
-                                if (splitValue[0].toLong() !in startValue..endValue) {
+                                if (splitValue[0].toFloat() !in startValue..endValue) {
                                     throw CustomException(
                                         "字段名[$name]值范围需要[${BigDecimal(startValue.toString()).setScale(
                                             endLength

@@ -28,7 +28,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
             return null
         }
         val clazz = R::class.java
-        val instance = clazz.newInstance()
+        val instance = clazz.newInstance()!!
         BeanUtils.copyProperties(obj, instance)
         return instance
     }
@@ -42,7 +42,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
         val clazz = R::class.java
         val result = arrayListOf<R>()
         list.forEach {
-            val instance = clazz.newInstance()
+            val instance = clazz.newInstance()!!
             BeanUtils.copyProperties(it, instance)
             result.add(instance)
         }

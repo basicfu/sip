@@ -8,17 +8,18 @@ package com.basicfu.sip.common.constant
  */
 object Constant {
     object System {
+        private const val PAGE_SIZE = 20
         const val GUEST = "GUEST"
         const val AUTHORIZATION = "Authorization"
         const val SESSION_TIMEOUT: Long = 24 * 60 * 60 * 1000
         const val LOGOUT = "注销成功"
-        const val PAGE_SIZE = 20
         const val PAGE_SIZE_STR = PAGE_SIZE.toString()
         const val APP_SYSTEM_CODE = "sip"
-        const val APP_ID = "appId"
-        const val APP_CODE = "app"
-        const val APP_CALL = "call"
-        const val APP_SECRET = "secret"
+        const val APP_ID = "_appId"
+        const val APP_CODE = "_appCode"
+        const val GETWAY_APP_CODE = "app"
+        const val GETWAY_APP_CALL = "call"
+        const val GETWAY_APP_SECRET = "secret"
         const val NOT_CHECK_APP = "notCheckApp"
         const val AES_TOKEN_KEY = "AES_TOKEN_KEY_AA"
     }

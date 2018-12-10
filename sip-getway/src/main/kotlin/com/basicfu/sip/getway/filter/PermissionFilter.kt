@@ -70,11 +70,11 @@ class PermissionFilter : Filter {
         }
         //2.get request header app code
         if (appCode == null) {
-            appCode = request.getHeader(Constant.System.APP_CODE)
+            appCode = request.getHeader(Constant.System.GETWAY_APP_CODE)
         }
         //3.get request parameter app code
         if (appCode == null) {
-            appCode = request.getParameter(Constant.System.APP_CODE)
+            appCode = request.getParameter(Constant.System.GETWAY_APP_CODE)
         }
         //4.get path code
         if (appCode == null && pathArray.size >= 3) {
@@ -94,11 +94,11 @@ class PermissionFilter : Filter {
         }
         //1.get request header app call
         if (appCall == null) {
-            appCall = request.getHeader(Constant.System.APP_CALL)
+            appCall = request.getHeader(Constant.System.GETWAY_APP_CALL)
         }
         //2.get request parameter app call
         if (appCall == null) {
-            appCall = request.getParameter(Constant.System.APP_CALL)
+            appCall = request.getParameter(Constant.System.GETWAY_APP_CALL)
         }
         if (appCall != null && apps[appCall] == null) {
             returnMsg(response, Enum.NOT_FOUND_CALL_CODE)
@@ -106,18 +106,16 @@ class PermissionFilter : Filter {
         }
         //1.get request header app secret
         if (appSecret == null) {
-            appSecret = request.getHeader(Constant.System.APP_SECRET)
+            appSecret = request.getHeader(Constant.System.GETWAY_APP_SECRET)
         }
         //2.get request parameter app secret
         if (appSecret == null) {
-            appSecret = request.getParameter(Constant.System.APP_SECRET)
+            appSecret = request.getParameter(Constant.System.GETWAY_APP_SECRET)
         }
         val appId = app.id!!
         //set current thread app info,overwrite app parameter
-        val appInfo = JSONObject()
-        appInfo[Constant.System.APP_ID] = appId
-        appInfo[Constant.System.APP_CODE] = appCode
-        request.addParameter(Constant.System.APP_CODE, appInfo.toJSONString())
+        request.addParameter(Constant.System.APP_ID, appId)
+        request.addParameter(Constant.System.APP_CODE, appCode)
         var allow = false
         //有限判断用户token信息
         val frontToken = request.getHeader(Constant.System.AUTHORIZATION)
@@ -139,7 +137,7 @@ class PermissionFilter : Filter {
             user?.roles?.let { roleCodes.addAll(it) }
             for (service in services) {
                 //多个service的path一致也不影响匹配
-                if (antPathMatcher.match(service.path, uri)) {
+                if (antPathMatcher.match(service.path!!, uri)) {
                     //secret
                     if (appSecret != null) {
                         if (app.secrets?.map { it.secret }?.contains(appSecret) == true) {
@@ -152,7 +150,7 @@ class PermissionFilter : Filter {
                         }
                     }
                     //token
-                    val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path, uri)}"
+                    val serviceUrl = "/${request.method}/${antPathMatcher.extractPathWithinPattern(service.path!!, uri)}"
                     if (frontToken == null) {
                         //未登录用户（排除访客接口）
                         if (allowRequest(false, roleCodes, appCode, service.id!!, serviceUrl)) {

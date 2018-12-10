@@ -1,6 +1,6 @@
 package com.basicfu.sip.client.common
 
-import org.springframework.cloud.netflix.feign.EnableFeignClients
+import org.springframework.cloud.openfeign.EnableFeignClients
 
 /**
  * @author basicfu

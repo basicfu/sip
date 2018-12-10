@@ -4,7 +4,7 @@ import com.basicfu.sip.common.constant.Constant
 import com.basicfu.sip.common.validator.Dict
 import com.basicfu.sip.core.annotation.Insert
 import com.basicfu.sip.core.annotation.Update
-import org.hibernate.validator.constraints.NotBlank
+import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 class UserTemplateVo {

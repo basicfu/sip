@@ -1,5 +1,7 @@
 package com.basicfu.sip.dict.service
 
+import com.basicfu.sip.common.model.vo.DictVo
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,13 +32,13 @@ class DictServiceTests {
 
     @Test
     fun insert() {
-//        val vo = DictVo()
-//        vo.pid=2
-//        vo.name="猫"
-//        vo.value="dog2"
-//        vo.description="(>^ω^<)喵"
-//        val result = dictService.insert(vo)
-//        Assert.assertEquals(result,1)
+        val vo = DictVo()
+        vo.pid=1
+        vo.name="用户模板字段类型"
+        vo.value="USER_TEMPLATE_FIELD_TYPE"
+        vo.description=""
+        val result = dictService.insert(vo)
+        Assert.assertEquals(result,1)
     }
 
     @Test

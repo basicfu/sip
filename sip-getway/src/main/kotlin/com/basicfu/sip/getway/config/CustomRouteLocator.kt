@@ -8,7 +8,7 @@ import org.springframework.cloud.netflix.zuul.filters.SimpleRouteLocator
 import org.springframework.cloud.netflix.zuul.filters.ZuulProperties
 import org.springframework.util.StringUtils
 
-class CustomRouteLocator(servletPath: String, private val properties: ZuulProperties) :
+class CustomRouteLocator(servletPath: String?, private val properties: ZuulProperties) :
     SimpleRouteLocator(servletPath, properties), RefreshableRouteLocator {
 
     override fun refresh() {
