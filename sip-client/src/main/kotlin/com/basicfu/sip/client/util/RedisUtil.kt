@@ -25,13 +25,15 @@ class RedisUtil {
 
         fun set(k: String, v: Any?) {
             val serialize = SerializationUtil.serialize(v)
-            redisTemplate.opsForValue().set(k, serialize)
+            serialize?.let { redisTemplate.opsForValue().set(k, it) }
         }
 
         fun set(k: String, v: Any?, expireMilliseconds: Long) {
             val serialize = SerializationUtil.serialize(v)
-            redisTemplate.opsForValue().set(k, serialize)
-            expire(k, expireMilliseconds)
+            if (serialize != null) {
+                redisTemplate.opsForValue().set(k, serialize)
+                expire(k, expireMilliseconds)
+            }
         }
 
         inline fun <reified T> get(k: Any): T? {
@@ -57,7 +59,7 @@ class RedisUtil {
 
         fun hSet(key: String, hk: Any, hv: Any?) {
             val serialize = SerializationUtil.serialize(hv)
-            redisTemplate.opsForHash<Any, Any>().put(key, hk, serialize)
+            serialize?.let { redisTemplate.opsForHash<Any, Any>().put(key, hk, it) }
         }
 
         inline fun <reified T> hGet(key: String, hk: Any): T? {
@@ -99,20 +101,20 @@ class RedisUtil {
         }
 
         fun increment(key: String, l: Long): Long {
-            return redisTemplate.opsForValue().increment(key, l)
+            return redisTemplate.opsForValue().increment(key, l)!!
         }
 
         fun sadd(key: String, vararg objs: Any): Long {
-            return redisTemplate.opsForSet().add(key, *objs)
+            return redisTemplate.opsForSet().add(key, *objs)!!
         }
 
         fun scard(key: String): Long {
-            return redisTemplate.boundSetOps(key).size()
+            return redisTemplate.boundSetOps(key).size()!!
         }
 
         fun rpush(k: String, v: Any?) {
             val serialize = SerializationUtil.serialize(v)
-            redisTemplate.opsForList().rightPush(k, serialize)
+            serialize?.let { redisTemplate.opsForList().rightPush(k, it) }
         }
     }
 }

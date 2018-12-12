@@ -7,6 +7,7 @@ eureka:
 logging:
   level:
     com: debug
+  file: ${LOG_FILE:logs/sip.log}
 spring:
   datasource:
     username: ${ENV_MYSQL_USERNAME:root}

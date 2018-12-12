@@ -7,6 +7,7 @@ eureka:
 logging:
   level:
     com: debug
+  file: ${LOG_FILE:logs/sip.log}
 spring:
   datasource:
     url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-dict?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false

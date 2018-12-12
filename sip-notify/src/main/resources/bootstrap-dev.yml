@@ -30,3 +30,5 @@ sip:
     host: ${ENV_REDIS_HOST:localhost}
     port: ${ENV_REDIS_PORT:6379}
     password: ${ENV_REDIS_PASSWORD:root}
+logging:
+  file: ${LOG_FILE:logs/sip.log}

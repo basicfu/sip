@@ -76,7 +76,7 @@ class FeignHystrixConcurrencyStrategyIntellif : HystrixConcurrencyStrategy() {
 
     internal class WrappedCallable<T>(
         private val target: Callable<T>,
-        private val requestAttributes: RequestAttributes
+        private val requestAttributes: RequestAttributes?
     ) : Callable<T> {
         @Throws(Exception::class)
         override fun call(): T {

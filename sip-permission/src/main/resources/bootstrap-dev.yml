@@ -8,6 +8,7 @@ logging:
   level:
     com.basicfu.sip: TRACE
     org.springframework.jdbc.datasource: TRACE
+  file: ${LOG_FILE:logs/sip.log}
 spring:
   datasource:
     url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-permission?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
