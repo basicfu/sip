@@ -30,6 +30,9 @@ subprojects {
     sourceCompatibility = 1.8
     group = 'com.basicfu.sip'
     version = '0.0.1'
+    //解决springboot2.+多模块打包依赖问题https://github.com/spring-projects/spring-boot/issues/9242
+    bootJar { enabled = false }
+    jar {enabled = true}
     dependencies {
         compile("org.springframework.boot:spring-boot-starter-web",
                 "com.fasterxml.jackson.module:jackson-module-kotlin",
@@ -201,7 +204,6 @@ project(":sip-tools") {
 project(":sip-client") {
     dependencies {
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("org.springframework.cloud:spring-cloud-starter-feign")
         compile("org.springframework.boot:spring-boot-starter-data-redis")
         compile("io.protostuff:protostuff-core:1.5.9")
         compile("io.protostuff:protostuff-runtime:1.5.9")
