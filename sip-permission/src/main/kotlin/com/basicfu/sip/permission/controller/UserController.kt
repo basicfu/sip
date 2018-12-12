@@ -1,6 +1,6 @@
 package com.basicfu.sip.permission.controller
 
-import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.permission.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*

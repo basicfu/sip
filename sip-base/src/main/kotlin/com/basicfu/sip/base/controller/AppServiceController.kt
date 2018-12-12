@@ -2,7 +2,7 @@ package com.basicfu.sip.base.controller
 
 import com.basicfu.sip.base.model.vo.AppServiceVo
 import com.basicfu.sip.base.service.AppServiceService
-import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.annotation.Insert
 import com.basicfu.sip.core.annotation.Update
 import org.springframework.beans.factory.annotation.Autowired

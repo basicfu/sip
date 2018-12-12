@@ -1,6 +1,6 @@
 package com.basicfu.sip.core.service
 
-import com.basicfu.sip.common.model.vo.BaseVo
+import com.basicfu.sip.core.model.vo.BaseVo
 import com.basicfu.sip.core.common.mapper.CustomMapper
 import com.github.pagehelper.Page
 import com.github.pagehelper.PageHelper

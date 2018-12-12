@@ -1,4 +1,4 @@
-package com.basicfu.sip.common.model.vo
+package com.basicfu.sip.core.model.vo
 
 import com.basicfu.sip.core.util.RequestUtil
 

@@ -1,6 +1,6 @@
 package com.basicfu.sip.dict.controller
 
-import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.common.model.vo.DictVo
 import com.basicfu.sip.dict.service.DictService
 import org.springframework.beans.factory.annotation.Autowired

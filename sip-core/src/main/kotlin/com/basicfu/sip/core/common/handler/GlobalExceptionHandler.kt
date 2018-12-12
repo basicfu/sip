@@ -2,7 +2,7 @@ package com.basicfu.sip.core.common.handler
 
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.common.constant.CoreConstant
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.exception.SqlInterceptorException

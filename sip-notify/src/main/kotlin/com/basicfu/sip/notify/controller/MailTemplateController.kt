@@ -1,7 +1,7 @@
 package com.basicfu.sip.notify.controller
 
 import com.alibaba.fastjson.JSON
-import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.notify.model.vo.SendMailVo
 import com.basicfu.sip.notify.service.MailTemplateService
 import org.springframework.beans.factory.annotation.Autowired

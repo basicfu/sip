@@ -1,4 +1,4 @@
-package com.basicfu.sip.common.model
+package com.basicfu.sip.core.model
 
 import com.alibaba.fastjson.JSONObject
 import com.github.pagehelper.PageInfo

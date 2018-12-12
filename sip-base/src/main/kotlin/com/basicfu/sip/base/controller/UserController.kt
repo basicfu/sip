@@ -3,7 +3,7 @@ package com.basicfu.sip.base.controller
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.service.UserService
 import com.basicfu.sip.common.constant.Constant
-import com.basicfu.sip.common.model.Result
+import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
