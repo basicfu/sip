@@ -1,5 +1,6 @@
 package com.basicfu.sip.core.common.wrapper
 
+import java.net.URLEncoder
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
@@ -20,12 +21,13 @@ class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(re
 
     /**
      * 由于zuul转发时使用getQueryString获取参数的方式转发，因此需要重写此方法而不是getParameter
+     * zuul转发时未处理编码，这里处理编码
      */
     override fun getQueryString(): String? {
         val sb=StringBuilder()
         params.forEach { k, v ->
             v.forEach {
-                sb.append("$k=$it&")
+                sb.append("$k=${URLEncoder.encode(it, "utf-8")}&")
             }
         }
         return sb.toString().substringBeforeLast("&")
