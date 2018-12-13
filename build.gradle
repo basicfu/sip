@@ -30,8 +30,8 @@ subprojects {
     sourceCompatibility = 1.8
     group = 'com.basicfu.sip'
     version = '0.0.1'
-    //解决springboot2.+多模块打包依赖问题https://github.com/spring-projects/spring-boot/issues/9242
-    bootJar { enabled = false }
+    //解决springboot2.+多模块打包依赖问题，打包命令由build改为bootJar
+    //需要加以下内容，在多模块下打包编译失败因为不会把依赖模块给打包
     jar {enabled = true}
     dependencies {
         compile("org.springframework.boot:spring-boot-starter-web",
