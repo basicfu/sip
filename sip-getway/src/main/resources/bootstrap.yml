@@ -22,7 +22,7 @@ ribbon:
   ReadTimeout: 15000
   ConnectTimeout: 500
   MaxAutoRetries: 1
-  MaxAutoRetriesNextServer: 3
+  MaxAutoRetriesNextServer: 1
   OkToRetryOnAllOperations: true
   #eureka客户端ribbon刷新时间
   ServerListRefreshInterval: 3000
