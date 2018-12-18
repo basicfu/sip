@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable
 
 @FeignClient(value = "sip-permission", url = "\${sip.permission.url:}")
 interface RoleFeign {
+    @GetMapping("/menu/all")
+    fun listMenuAll(): Result<List<MenuDto>>
+
     @GetMapping("/menu/list/{ids}")
-    fun listMenuByIds(@PathVariable("ids") ids:Array<Long>): Result<List<MenuDto>>
+    fun listMenuByIds(@PathVariable("ids") ids: Array<Long>): Result<List<MenuDto>>
 }

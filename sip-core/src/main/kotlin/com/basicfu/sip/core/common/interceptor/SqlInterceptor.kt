@@ -4,7 +4,6 @@ import com.alibaba.druid.sql.SQLUtils
 import com.alibaba.druid.sql.ast.SQLExpr
 import com.alibaba.druid.sql.ast.expr.*
 import com.alibaba.druid.sql.ast.statement.*
-import com.alibaba.fastjson.JSON
 import com.basicfu.sip.core.common.autoconfig.Config
 import com.basicfu.sip.core.common.constant.CoreConstant
 import com.basicfu.sip.core.common.exception.SqlInterceptorException

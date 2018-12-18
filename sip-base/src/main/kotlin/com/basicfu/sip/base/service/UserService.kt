@@ -57,18 +57,37 @@ class UserService : BaseService<UserMapper, User>() {
     fun getCurrentUser(): JSONObject? {
         var user = TokenUtil.getCurrentUser()
         val menuIds = arrayListOf<Long>()
-        if (user == null) {
-            user = generate<UserDto> {
-                roles = listOf(Constant.System.GUEST)
+        when {
+            user == null -> {
+                user = generate<UserDto> {
+                    roles = listOf(Constant.System.GUEST)
+                }
+                val redisRolePermission = "${Constant.Redis.ROLE_PERMISSION}${AppUtil.getAppCode()}"
+                menuIds.addAll(RedisUtil.hGet<RoleToken>(redisRolePermission, Constant.System.GUEST)!!.menus)
             }
-            val redisRolePermission = "${Constant.Redis.ROLE_PERMISSION}${AppUtil.getAppCode()}"
-            menuIds.addAll(RedisUtil.hGet<RoleToken>(redisRolePermission, Constant.System.GUEST)!!.menus)
-        } else {
-            val roleCodes = user.roles!!
-            val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}${user.appCode}")
-            menuIds.addAll(appRoleToken.filter { roleCodes.contains(it.key) }.values.map { it!!.menus }.flatMap { it })
+            user.type != Enum.UserType.NORMAL.name -> {
+                val currentAppId = AppUtil.getAppId()
+                val currentAppCode = AppUtil.getAppCode()
+                //切换到sip获取菜单
+                if (currentAppCode != Constant.System.APP_SYSTEM_CODE) {
+                    AppUtil.updateApp(
+                        AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE),
+                        Constant.System.APP_SYSTEM_CODE
+                    )
+                }
+                val allMenu = roleFeign.listMenuAll().data
+                if (currentAppCode != AppUtil.getAppCode()) {
+                    AppUtil.updateApp(currentAppId, currentAppCode)
+                }
+                user.menus = allMenu
+            }
+            else -> {
+                val roleCodes = user.roles!!
+                val appRoleToken = RedisUtil.hGetAll<RoleToken>("${Constant.Redis.ROLE_PERMISSION}${user.appCode}")
+                menuIds.addAll(appRoleToken.filter { roleCodes.contains(it.key) }.values.map { it!!.menus }.flatMap { it })
+            }
         }
-        if (menuIds.isNotEmpty()) {
+        if (user.type != Enum.UserType.SYSTEM_SUPER_ADMIN.name && menuIds.isNotEmpty()) {
             val allMenu = roleFeign.listMenuByIds(menuIds.toTypedArray()).data
             val menus = MenuUtil.recursive(null, allMenu).filter { menuIds.contains(it.id) }
             user.menus = menus
@@ -210,13 +229,13 @@ class UserService : BaseService<UserMapper, User>() {
             if (sql.startsWith("and")) {
                 sql = sql.substringAfter("and")
             }
-            sql+=" order by u.cdate desc"
+            sql += " order by u.cdate desc"
             startPage()
             val result = mapper.selectBySql(orignSql + sql)
             pageList = getPageInfo(result)
         }
         val users = pageList.list
-        if(users.isNotEmpty()){
+        if (users.isNotEmpty()) {
             dealUserList(users)
             val roleMap = com.basicfu.sip.client.util.UserUtil.listRoleByIds(users.map { it.id!! })
             users.forEach {
@@ -375,7 +394,7 @@ class UserService : BaseService<UserMapper, User>() {
             RedisUtil.del(keys.map { it })
         }
         // 后续需要更改当前应用ID
-        AppUtil.updateApp(appId,appCode)
+        AppUtil.updateApp(appId, appCode)
         val currentTime = (System.currentTimeMillis() / 1000).toInt()
         userAuthMapper.updateByPrimaryKeySelective(generate {
             id = userAuth.id
