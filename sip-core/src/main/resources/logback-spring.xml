@@ -14,14 +14,14 @@
                     <pattern>
                         {
                           "service": "${service}",
-                          "@timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+                          "timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
                           "level": "%p",
                           "thread": "%t",
                           "class": "%logger",
                           "file": "%F",
                           "method": "%M",
                           "line": "%L",
-                          "message": "%m%n%wEx"
+                          "message": "%m%wEx"
                         }
                     </pattern>
                 </pattern>
