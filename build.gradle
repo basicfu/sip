@@ -216,10 +216,3 @@ project(":sip-api") {
     dependencies {
     }
 }
-project(":sip-logs") {
-    dependencies {
-        compile project(':sip-common')
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("mysql:mysql-connector-java:5.1.45")
-    }
-}
