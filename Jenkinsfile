@@ -41,6 +41,7 @@ pipeline {
         sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict:${IMAGE_VERSION} sip-dict'
         sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission:${IMAGE_VERSION} sip-permission'
         sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify:${IMAGE_VERSION} sip-notify'
+        sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-api:${IMAGE_VERSION} sip-api'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-docs:${IMAGE_VERSION}'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka:${IMAGE_VERSION}'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway:${IMAGE_VERSION}'
@@ -48,7 +49,8 @@ pipeline {
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-dict:${IMAGE_VERSION}'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-permission:${IMAGE_VERSION}'
         sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-notify:${IMAGE_VERSION}'
-	      sh 'curl -d "name=sip-dev&set=docs.tag=${IMAGE_VERSION}&set=eureka.tag=${IMAGE_VERSION}&set=getway.tag=${IMAGE_VERSION}&set=base.tag=${IMAGE_VERSION}&set=dict.tag=${IMAGE_VERSION}&set=permission.tag=${IMAGE_VERSION}&set=notify.tag=${IMAGE_VERSION}" ${KUBE_TRIGGER_URL}'
+        sh 'docker push registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-api:${IMAGE_VERSION}'
+	      sh 'curl -d "name=sip-dev&set=docs.tag=${IMAGE_VERSION}&set=eureka.tag=${IMAGE_VERSION}&set=getway.tag=${IMAGE_VERSION}&set=base.tag=${IMAGE_VERSION}&set=dict.tag=${IMAGE_VERSION}&set=permission.tag=${IMAGE_VERSION}&set=notify.tag=${IMAGE_VERSION}&set=api.tag=${IMAGE_VERSION}" ${KUBE_TRIGGER_URL}'
       }
     }
     stage('test') {
