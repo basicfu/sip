@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: sip-api
+  profiles:
+    active: ${ENV:dev}
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}

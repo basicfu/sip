@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.basicfu.sip.api.mapper.ProjectUserMapper">
+  <resultMap id="BaseResultMap" type="com.basicfu.sip.api.model.po.ProjectUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="uid" jdbcType="BIGINT" property="uid" />
+    <result column="project_id" jdbcType="BIGINT" property="projectId" />
+    <result column="cdate" jdbcType="INTEGER" property="cdate" />
+    <result column="cuid" jdbcType="BIGINT" property="cuid" />
+  </resultMap>
+</mapper>

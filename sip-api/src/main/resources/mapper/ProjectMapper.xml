@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.basicfu.sip.api.mapper.ProjectMapper">
+  <resultMap id="BaseResultMap" type="com.basicfu.sip.api.model.po.Project">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="base_path" jdbcType="VARCHAR" property="basePath" />
+    <result column="project_type" jdbcType="VARCHAR" property="projectType" />
+    <result column="members" jdbcType="VARCHAR" property="members" />
+    <result column="env" jdbcType="VARCHAR" property="env" />
+    <result column="cdate" jdbcType="INTEGER" property="cdate" />
+    <result column="udate" jdbcType="INTEGER" property="udate" />
+    <result column="cuid" jdbcType="BIGINT" property="cuid" />
+  </resultMap>
+</mapper>
