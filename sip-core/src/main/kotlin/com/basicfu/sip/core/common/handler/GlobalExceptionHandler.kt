@@ -2,14 +2,14 @@ package com.basicfu.sip.core.common.handler
 
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.core.model.Result
-import com.basicfu.sip.core.common.constant.CoreConstant
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.common.exception.SqlInterceptorException
-import com.basicfu.sip.core.util.ThreadLocalUtil
+import com.basicfu.sip.core.model.Result
+import org.mybatis.spring.MyBatisSystemException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.validation.BindException
+import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
@@ -73,54 +73,36 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * 针对不检查app过滤时抛出的错误单独释放标识
+     * SQL异常
      */
     @ResponseBody
-    @ExceptionHandler(SqlInterceptorException::class)
-    private fun sqlInterceptorException(response: HttpServletResponse): Result<Any> {
-        ThreadLocalUtil.remove(CoreConstant.NOT_CHECK_APP)
+    @ExceptionHandler(MyBatisSystemException::class)
+    private fun sqlInterceptorException(e: MyBatisSystemException, response: HttpServletResponse): Result<Any> {
         response.status = 500
+        log.error("SQL异常-", e)
         return Result.error(Enum.SERVER_ERROR.msg, -1)
     }
 
     /**
+     * 发生在json
      * 前台传递参数限制异常
      * 参数验证异常
      */
     @ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException::class)
     private fun methodArgumentNotValidException(e: MethodArgumentNotValidException): Result<Any> {
-        val fieldErrorsMap = e.bindingResult.fieldErrors.associateBy({ it.field }, { it })
-        if (fieldErrorsMap.isNotEmpty()) {
-            val linkedHashList = linkedSetOf<FieldError>()
-            val bean = e.bindingResult.target
-            bean?.let {
-                val declaredFields = bean::class.java.declaredFields
-                declaredFields.forEach {
-                    val error = fieldErrorsMap[it.name]
-                    if (error != null) {
-                        linkedHashList.add(error)
-                    }
-                }
-                val first = linkedHashList.first()
-                val array = JSONArray()
-                linkedHashList.forEach {
-                    val data = JSONObject()
-                    data["field"] = it.field
-                    data["msg"] = it.defaultMessage
-                    array.add(data)
-                }
-                return Result.error(
-                    first.defaultMessage.toString(),
-                    Enum.INVALID_PARAMETER.value,
-                    array
-                )
-            }
-        }
-        return Result.error(
-            Enum.INVALID_PARAMETER.msg,
-            Enum.INVALID_PARAMETER.value
-        )
+        return parameterError(e.bindingResult)
+    }
+
+    /**
+     * 发生在form
+     * 前台传递参数限制异常
+     * 参数验证异常
+     */
+    @ResponseBody
+    @ExceptionHandler(BindException::class)
+    private fun methodArgumentNotValidException(e: BindException): Result<Any> {
+        return parameterError(e.bindingResult)
     }
 
     /**
@@ -160,5 +142,39 @@ class GlobalExceptionHandler {
         response.status = 200
         log.error(e.message)
         return Result.error(e.message.toString(), 500)
+    }
+
+    private fun parameterError(bindingResult: BindingResult): Result<Any> {
+        val fieldErrorsMap = bindingResult.fieldErrors.associateBy({ it.field }, { it })
+        if (fieldErrorsMap.isNotEmpty()) {
+            val linkedHashList = linkedSetOf<FieldError>()
+            val bean = bindingResult.target
+            bean?.let {
+                val declaredFields = bean::class.java.declaredFields
+                declaredFields.forEach {
+                    val error = fieldErrorsMap[it.name]
+                    if (error != null) {
+                        linkedHashList.add(error)
+                    }
+                }
+                val first = linkedHashList.first()
+                val array = JSONArray()
+                linkedHashList.forEach {
+                    val data = JSONObject()
+                    data["field"] = it.field
+                    data["msg"] = it.defaultMessage
+                    array.add(data)
+                }
+                return Result.error(
+                    first.defaultMessage.toString(),
+                    Enum.INVALID_PARAMETER.value,
+                    array
+                )
+            }
+        }
+        return Result.error(
+            Enum.INVALID_PARAMETER.msg,
+            Enum.INVALID_PARAMETER.value
+        )
     }
 }

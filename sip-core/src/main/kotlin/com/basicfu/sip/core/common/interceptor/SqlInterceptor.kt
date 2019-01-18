@@ -6,7 +6,6 @@ import com.alibaba.druid.sql.ast.expr.*
 import com.alibaba.druid.sql.ast.statement.*
 import com.basicfu.sip.core.common.autoconfig.Config
 import com.basicfu.sip.core.common.constant.CoreConstant
-import com.basicfu.sip.core.common.exception.SqlInterceptorException
 import com.basicfu.sip.core.util.RequestUtil
 import com.basicfu.sip.core.util.ThreadLocalUtil
 import com.google.common.base.CaseFormat
@@ -121,9 +120,10 @@ class SqlInterceptor : Interceptor {
         } catch (e: Exception) {
             //出错一定释放
             throwError = true
-            throw SqlInterceptorException()
+            ThreadLocalUtil.remove(CoreConstant.NOT_CHECK_APP)
+            throw e
         } finally {
-            //如果出错就不在处理此处，因为sqlInterceptor已经删除标识
+            //如果出错就不在处理此处，因为上面已经处理删除标识
             if (!throwError && count != null) {
                 //如果非>=1不处理，需要主动释放
                 if (count == 1) {
