@@ -1,13 +1,7 @@
-package com.basicfu.sip.api.model.po
+package com.basicfu.sip.api.model.vo
 
-import javax.persistence.*
-
-@Table(name = "project_category")
-class ProjectCategory {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+class ProjectCategoryVo {
     var id: Long? = null
-    @Column(name = "project_id")
     var projectId: Long? = null
     var pid: Long? = null
     var name: String? = null

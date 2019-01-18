@@ -1,14 +1,15 @@
 package com.basicfu.sip.api.model.po
 
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
-class Interface {
+@Table(name = "interface_history")
+class InterfaceHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+    @Column(name = "interface_id")
+    var interfaceId: Long? = null
+    var type: String? = null
     var name: String? = null
     var description: String? = null
     var status: String? = null
@@ -17,7 +18,6 @@ class Interface {
     @Column(name = "category_id")
     var categoryId: Long? = null
     var method: String? = null
-    var host: String? = null
     var path: String? = null
     @Column(name = "path_params")
     var pathParams: String? = null
@@ -34,6 +34,5 @@ class Interface {
     @Column(name = "res_body")
     var resBody: String? = null
     var cdate: Int? = null
-    var udate: Int? = null
     var cuid: Long? = null
 }

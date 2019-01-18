@@ -19,6 +19,7 @@ enum class Enum(val value: Int, val msg: String) {
     NOT_FOUND_CALL_CODE(5, "没有找到被调应用CODE"),
     NOT_FOUND_APP_CODE(6, "没有找到应用CODE"),
     REPEAT_REQUEST(7, "重复请求"),
+    NOT_FOUND_DATA(8, "要操作的数据不存在"),
 
     EXIST_APP_NAME(1000, "应用名已存在"),
     EXIST_APP_CODE(1001, "应用CODE已存在"),
@@ -61,7 +62,12 @@ enum class Enum(val value: Int, val msg: String) {
     NOT_FOUND_MENU_ID(3010, "找不到菜单ID"),
     DRAG_SORT_NEED_SAME_LEVEL(3011, "只能在同一层级拖动"),
     EXIST_ROLE_CODE(3012, "角色CODE已存在"),
-    EXIST_ADD_DATA(3013, "要添加的数据已存在");
+    EXIST_ADD_DATA(3013, "要添加的数据已存在"),
+
+    EXIST_PROJECT_NAME(4000, "项目名已存在"),
+    EXIST_PROJECT_CATEGORY_NAME(4001, "项目分类名已存在"),
+    EXIST_INTERFACE_NAME(4002, "接口名已存在");
+
 
     enum class UserType constructor(val system: Boolean) {
         SYSTEM_SUPER_ADMIN(true),
@@ -101,5 +107,32 @@ enum class Enum(val value: Int, val msg: String) {
         NOT_BETWEEN,
         LIKE,
         NOT_LIKE,
+    }
+
+    enum class ProjectCategoryType {
+        DIRECTORY,
+        INTERFACE
+    }
+
+    enum class RequestMethod {
+        GET,
+        POST,
+        PUT,
+        PATCH,
+        DELETE,
+        HEAD,
+        OPTIONS,
+    }
+
+    enum class ReqBodyType {
+        FORM,
+        JSON,
+        FILE,
+        RAW,
+    }
+
+    enum class InterfaceHistoryType {
+        SAVE,
+        REQUEST,
     }
 }
