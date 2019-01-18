@@ -33,7 +33,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        sh './gradlew -x test :sip-eureka:bootJar :sip-getway:bootJar :sip-base:bootJar :sip-dict:bootJar :sip-permission:bootJar :sip-notify:bootJar'
+        sh './gradlew -x test :sip-eureka:bootJar :sip-getway:bootJar :sip-base:bootJar :sip-dict:bootJar :sip-permission:bootJar :sip-notify:bootJar :sip-api:bootJar'
         sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-docs:${IMAGE_VERSION} sip-docs/docs'
         sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-eureka:${IMAGE_VERSION} sip-eureka'
         sh 'docker build -t registry-vpc.cn-beijing.aliyuncs.com/basicfu/sip-getway:${IMAGE_VERSION} sip-getway'
