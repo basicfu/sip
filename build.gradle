@@ -101,7 +101,7 @@ project(":sip-core") {
     //noinspection GroovyAssignabilityCheck
     task mybatisGenerator << {
         def properties = new Properties()
-        file("../generator/config.properties").withInputStream { inputStream ->
+        file("../tool/generator/config.properties").withInputStream { inputStream ->
             properties.load(inputStream)
         }
         ant.properties['targetProject'] = projectDir.path
@@ -122,7 +122,7 @@ project(":sip-core") {
                 classname: 'org.mybatis.generator.ant.GeneratorAntTask',
                 classpath: configurations.mybatisGenerator.asPath
         )
-        ant.mbgenerator(overwrite: true, configfile: 'generator/generatorConfig.xml', verbose: true) {
+        ant.mbgenerator(overwrite: true, configfile: 'tool/generator/generatorConfig.xml', verbose: true) {
             propertyset {
                 propertyref(name: 'targetProject')
                 propertyref(name: 'userId')

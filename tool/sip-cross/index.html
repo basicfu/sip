@@ -1,0 +1,84 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>CrossRequest</h1>
+<input id="file" type="file" name="file"/>
+<div id="result"></div>
+<button onclick="a()">发起普通json</button>
+<button onclick="b()">发起表单+文件</button>
+<button onclick="c()">发起二进制</button>
+<div id="sip-cross"/>
+<script>
+    var index = 0
+
+    function a() {
+        var zz = setInterval(function () {
+            index = index + 1;
+            window.crossRequest({
+                url: 'http://127.0.0.1:7600/project-category/insert',
+                method: 'POst',
+                headers:{
+                  'Content-Type':'application/json'
+                },
+                query: {
+                    a: 1
+                },
+                data:{
+                    "projectId":1,
+                    "name":"第一个下的子分类8",
+                    "pid":0
+                },
+                success: function (res,) {
+                    document.getElementById("result").innerText=JSON.stringify(res);
+                },
+                error: function (res,) {
+                    document.getElementById("result").innerText=JSON.stringify(res);
+                },
+            });
+            if (index >= 1) {
+                clearInterval(zz);
+            }
+        }, 1)
+    }
+    function b(){
+        window.crossRequest({
+            url: 'http://127.0.0.1:7600/project-category/insert',
+            method: 'POST',
+            headers:{
+                'Content-Type':'multipart/form-data'
+            },
+            data: {
+                name: 'hello',
+                id: '19'
+            },
+            files: {
+                file: 'file'
+            },
+            success: function (res) {
+                document.getElementById("result").innerText=JSON.stringify(res);
+            }
+        })
+    }
+    function c() {
+        var type = document.getElementById("file").files[0].type;
+        window.crossRequest({
+            url: 'http://yapi.demo.qunar.com/mock/37828/api/%7Bid%7D/case/%7Bhi%7D',
+            method: 'POST',
+            headers:{
+                'Content-Type':type
+            },
+            file: 'file',
+            success: function (res) {
+                document.getElementById("result").innerText=JSON.stringify(res);
+            }
+        })
+    }
+</script>
+
+
+</body>
+
+</html>

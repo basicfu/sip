@@ -1,0 +1,35 @@
+{
+  "name": "sip-cross",
+  "version": "1.0",
+  "description": "sip-api跨域请求插件",
+  "permissions": [
+    "tabs",
+    "storage",
+    "webRequest",
+    "*://*/*",
+    "webRequestBlocking"
+  ],
+  "icons": {
+    "16": "dm.png",
+    "48": "dm.png",
+    "128": "dm.png"
+  },
+  "browser_action": {
+    "default_icon": "dm.png"
+  },
+  "manifest_version": 2,
+  "web_accessible_resources": [
+    "index.js"
+  ],
+  "content_scripts": [
+    {
+      "js": [
+        "request.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}
