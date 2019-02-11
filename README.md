@@ -27,21 +27,20 @@ SIP服务集成平台描述
 ├── sip-dict               // 字典服务
 ├── sip-permission         // 权限管理
 ├── sip-notify             // 通知服务
-├── sip-logs               // Logs服务
-├── sip-tools              // 常用工具服务(IP查询、Kubernetes Webhook)
 ├── sip-schedule           // 调度服务
-├── sip-api                // API服务
 ├── sip-approval           // 审批流
-
+├── sip-tools              // 常用工具服务(IP查询、Kubernetes Webhook)
 
 ├── sip-eureka             // 注册中心  
 ├── sip-getway             // 网关
 ├── sip-base               // SIP基础(应用、服务、用户、字典、权限)
 ├── sip-notify             // 通知服务
-├── sip-logs               // Logs服务
+
 ├── sip-schedule           // 调度服务
-├── sip-api                // API服务
 ├── sip-approval           // 审批流
+
+├── sip-api                // API服务(应用)
+├── sip-api                // CI服务(应用)
 
 
 
@@ -178,3 +177,19 @@ other 4  普通用户      无限个                          （应用下唯一
 
 系统状态信息
 
+
+自定义路由
+https://juejin.im/entry/5aa4ebfdf265da23884cae6a
+@Configuration
+class AdditionalRoutes {
+	@Bean
+	fun additionalRouteLocator(builder: RouteLocatorBuilder): RouteLocator = builder.routes {
+		route(id = "test-kotlin") {
+			path("/image/png")
+			filters {
+				addResponseHeader("X-TestHeader", "foobar")
+			}
+			uri("http://httpbin.org:80")
+		}
+	}
+}

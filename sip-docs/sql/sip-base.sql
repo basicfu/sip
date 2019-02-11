@@ -90,6 +90,25 @@ CREATE TABLE user_template (
   unique key (app_id,name)
 )comment '用户模板' engine=InnoDB;
 
+drop table if exists dict;
+create table dict (
+  id bigint auto_increment comment '主键' primary key,
+  app_id bigint not null default 0 comment '应用ID',
+  name varchar(64) NOT NULL DEFAULT '' COMMENT '字典名',
+  value varchar(64) NOT NULL DEFAULT '' COMMENT '字典值',
+  description varchar(255) default '' COMMENT '字典描述',
+  lft bigint NOT NULL DEFAULT 0 COMMENT '左节点',
+  rgt bigint NOT NULL DEFAULT 0 COMMENT '右节点',
+  lvl int NOT NULL DEFAULT 0 COMMENT '节点层级',
+  sort int NOT NULL DEFAULT 0 COMMENT '排序',
+  fixed tinyint NOT NULL DEFAULT 0 COMMENT '能否固定 0否,1是',
+  isdel tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除 0否,1是',
+  KEY key_value (value),
+  KEY key_lft (lft),
+  KEY key_rgt (rgt),
+  KEY key_isdel (isdel)
+)comment '字典表' engine=InnoDB;
+
 INSERT INTO user (id,app_id, username, nickname, content, cdate, udate, cuid, type, status) VALUES (1,1, 'test', 'test', '{}', unix_timestamp(), unix_timestamp(), 0, 'SYSTEM_SUPER_ADMIN', 0);
 INSERT INTO user_auth (id,app_id,uid, type, username, password, cdate, udate, ldate) VALUES (1,1,1, 0, 'test', '$2a$10$3d7ykD7OxOTglE6DcLdhWerSpViDhIAyz6CylkBg.QkRlTgtduQCa', unix_timestamp(), unix_timestamp(), unix_timestamp());
 INSERT INTO app (id,name, code, cdate, udate) VALUES (1,'SIP', 'sip', unix_timestamp(), unix_timestamp());
@@ -98,3 +117,5 @@ INSERT INTO app_service (id,app_id, name, path, server_id, url, strip_prefix, re
 INSERT INTO app_service (id,app_id, name, path, server_id, url, strip_prefix, retryable, sensitive_headers, cdate, udate) VALUES (3,1, 'sip-permission', '/permission/**', 'sip-permission', '', 1, 1, null, unix_timestamp(), unix_timestamp());
 INSERT INTO app_service (id,app_id, name, path, server_id, url, strip_prefix, retryable, sensitive_headers, cdate, udate) VALUES (4,1, 'sip-notify', '/notify/**', 'sip-notify', '', 1, 1, null, unix_timestamp(), unix_timestamp());
 INSERT INTO app_service (id,app_id, name, path, server_id, url, strip_prefix, retryable, sensitive_headers, cdate, udate) VALUES (5,1, 'sip-tools', '/tools/**', 'sip-tools', '', 1, 1, null, unix_timestamp(), unix_timestamp());
+
+INSERT INTO dict (id,name, value, description, lft, rgt, lvl, fixed, isdel) VALUES (1,'根', 'root', '根', 1, 2, 0, 0, 0);
