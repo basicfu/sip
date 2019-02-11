@@ -59,6 +59,8 @@ class UserService : BaseService<UserMapper, User>() {
     lateinit var urMapper: UserRoleMapper
     @Autowired
     lateinit var roleMapper: RoleMapper
+    @Autowired
+    lateinit var roleService: RoleService
 
     fun getCurrentUser(): JSONObject? {
         var user = TokenUtil.getCurrentUser()
@@ -243,7 +245,9 @@ class UserService : BaseService<UserMapper, User>() {
         val users = pageList.list
         if (users.isNotEmpty()) {
             dealUserList(users)
-            val roleMap = com.basicfu.sip.client.util.UserUtil.listRoleByIds(users.map { it.id!! })
+            val roleMap = listRoleByIds(users.map { it.id!! }).associateBy(
+                { it.id!! },
+                { it.roles!! })
             users.forEach {
                 it.roles = roleMap[it.id]
             }
@@ -477,7 +481,7 @@ class UserService : BaseService<UserMapper, User>() {
         mapper.insertSelective(user)
         //处理用户角色
         if (vo.roleIds != null) {
-            com.basicfu.sip.client.util.UserUtil.updateRole(user.id!!, vo.roleIds!!)
+            updateRole(user.id!!, vo.roleIds!!)
         }
         //添加用户授权
         val userAuth = dealInsert(generate<UserAuth> {
@@ -532,7 +536,7 @@ class UserService : BaseService<UserMapper, User>() {
         }))
         //处理用户角色
         if (vo.roleIds != null) {
-            com.basicfu.sip.client.util.UserUtil.updateRole(vo.id!!, vo.roleIds!!)
+            updateRole(vo.id!!, vo.roleIds!!)
         }
         //更新用户授权
         //判断用户密码和上次是否一致，不一致进行更新
@@ -659,7 +663,7 @@ class UserService : BaseService<UserMapper, User>() {
 
     fun dealUser(user: UserDto) {
         val createUser = mapper.selectByPrimaryKey(user.id)
-        user.roles = com.basicfu.sip.client.util.UserUtil.listRoleCodeByUid(user.id!!)
+        user.roles = roleService.listRoleByUid(user.id!!)
         user.cuname = createUser?.nickname ?: "系统"
         user.appCode = AppUtil.getAppCodeByAppId(user.appId!!)
         user.ldate = userAuthMapper.selectByExample(example<UserAuth> {

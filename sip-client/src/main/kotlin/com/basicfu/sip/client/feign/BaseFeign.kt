@@ -1,14 +1,16 @@
 package com.basicfu.sip.client.feign
 
 import com.alibaba.fastjson.JSONObject
+import com.basicfu.sip.client.model.DictDto
 import com.basicfu.sip.client.model.Result
+import com.basicfu.sip.client.model.UserDto
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 
 @FeignClient(value = "sip-base", url = "\${sip.base.url:}")
-interface UserFeign {
+interface BaseFeign {
 
     @GetMapping("/user")
     fun getCurrentUser(): Result<JSONObject>
@@ -31,5 +33,16 @@ interface UserFeign {
         @RequestParam(value = "roleCode", required = false) roleCode: String?,
         @RequestParam(value = "limit", required = false) limit: Int
     ): Result<List<JSONObject>>
+
+
+    @GetMapping("/dict/get/{value}")
+    fun get(@PathVariable("value") value: String): Result<List<DictDto>>
+
+
+    @GetMapping("/role/list/{uid}/role")
+    fun listRoleByUid(@PathVariable("uid") uid: Long): Result<List<String>>
+
+    @GetMapping("/user/list/role/{ids}")
+    fun listRoleByIds(@PathVariable("ids") ids: Array<Long>): Result<List<UserDto>>
 
 }

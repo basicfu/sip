@@ -2,8 +2,7 @@ package com.basicfu.sip.client.util
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.client.feign.RoleFeign
-import com.basicfu.sip.client.feign.UserFeign
+import com.basicfu.sip.client.feign.BaseFeign
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
@@ -12,39 +11,31 @@ import javax.annotation.PostConstruct
 @Component
 class UserUtil {
     @Autowired
-    private lateinit var userFeignTmp: UserFeign
-    @Autowired
-    private lateinit var roleFeignTmp: RoleFeign
+    private lateinit var baseFeignTmp: BaseFeign
 
     @PostConstruct
     fun init() {
-        UserUtil.userFeign = userFeignTmp
-        UserUtil.roleFeign = roleFeignTmp
+        UserUtil.baseFeign = baseFeignTmp
 
     }
 
     companion object {
         @PublishedApi
         internal
-        lateinit var userFeign: UserFeign
-
-        @PublishedApi
-        internal
-        lateinit var roleFeign: RoleFeign
-
+        lateinit var baseFeign: BaseFeign
 
         /**
          * 获取当前登录用户信息
          */
         inline fun <reified T> getCurrentUser(): T? {
-            return dealUser(userFeign.getCurrentUser().data)
+            return dealUser(baseFeign.getCurrentUser().data)
         }
 
         /**
          * 根据用户Id获取用户信息
          */
         inline fun <reified T> get(id: Long): T? {
-            val user = userFeign.get(id).data
+            val user = baseFeign.get(id).data
             return dealUser(user)
         }
 
@@ -52,7 +43,7 @@ class UserUtil {
          * 根据用户Id获取用户信息
          */
         inline fun <reified T> listByIds(ids: List<Long>): List<T> {
-            val user = userFeign.listByIds(ids.toTypedArray()).data
+            val user = baseFeign.listByIds(ids.toTypedArray()).data
             return dealUser(user)
         }
 
@@ -60,7 +51,7 @@ class UserUtil {
          * 根据用户Ids获取用户名(返回Map<Id,Username>)
          */
         fun listUsernameByIds(ids: List<Long>): Map<Long, String> {
-            return userFeign.listUsernameByIds(ids.toTypedArray()).data?.associateBy(
+            return baseFeign.listUsernameByIds(ids.toTypedArray()).data?.associateBy(
                 { it.getLong("id") },
                 { it.getString("username") }) ?: HashMap()
         }
@@ -69,41 +60,34 @@ class UserUtil {
          * 用户suggest
          */
         inline fun <reified T> suggest(name: String, limit: Int): List<T> {
-            return dealUser(userFeign.suggest(name, null, limit).data)
+            return dealUser(baseFeign.suggest(name, null, limit).data)
         }
 
         /**
          * 用户suggest并根据roleCode
          */
         inline fun <reified T> suggestByRoleCode(name: String, roleCode: String, limit: Int): List<T> {
-            return dealUser(userFeign.suggest(name, roleCode, limit).data)
+            return dealUser(baseFeign.suggest(name, roleCode, limit).data)
         }
 
         /**
          * 根据用户id获取用户拥有的roleCode
          */
         fun listRoleCodeByUid(uid: Long): List<String> {
-            return roleFeign.listRoleByUid(uid).data!!
+            return baseFeign.listRoleByUid(uid).data!!
         }
 
         /**
          * 根据用户ID查询用户角色
          */
         fun listRoleByIds(userIds: List<Long>): Map<Long, List<String>> {
-            if(userIds.isEmpty()){
+            if (userIds.isEmpty()) {
                 return hashMapOf()
             }
-            val listRoleByIds = roleFeign.listRoleByIds(userIds.toTypedArray()).data
+            val listRoleByIds = baseFeign.listRoleByIds(userIds.toTypedArray()).data
             return listRoleByIds?.associateBy(
                 { it.id!! },
                 { it.roles!! }) ?: HashMap()
-        }
-
-        /**
-         * 用户批量更新角色,如果没有会添加,如果有将删除
-         */
-        fun updateRole(userId: Long, roleIds: List<Long>) {
-            roleFeign.updateRole(userId, roleIds.toTypedArray())
         }
 
         /**
