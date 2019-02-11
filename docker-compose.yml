@@ -6,13 +6,13 @@ services:
       - 6379
     command: ["redis-server","--requirepass","root"]
   sip-eureka:
-    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-eureka:master-156
+    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-eureka
     environment:
       - ENV=prod
     ports:
       - "7000:80"
   sip-getway:
-    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-getway:master-156
+    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-getway
     depends_on:
       - sip-eureka
     environment:
@@ -29,7 +29,7 @@ services:
     ports:
       - "7100:80"
   sip-base:
-    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-base:master-156
+    image: registry.cn-beijing.aliyuncs.com/basicfu/sip-base
     depends_on:
       - sip-eureka
     environment:

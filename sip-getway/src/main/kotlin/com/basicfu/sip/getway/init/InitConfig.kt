@@ -49,7 +49,7 @@ class InitConfig : CommandLineRunner {
      * 权限、菜单区分应用，虽然资源同样区分应用，但是其他应用能拥有SIP服务资源
      */
     fun initRolePermission(apps: List<AppDto>) {
-        DataSourceContextHolder.permission()
+        DataSourceContextHolder.base()
         val roles = mapper.selectRole()
         val resources = mapper.selectResource()
         val roleMenus = mapper.selectRoleMenu()

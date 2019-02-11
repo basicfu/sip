@@ -23,19 +23,11 @@ class DataSourceConfig {
     }
 
     @Bean
-    @ConfigurationProperties("spring.datasource.druid.permission")
-    fun permissionDataSource(): DataSource {
-        return DruidDataSourceBuilder.create().build()
-    }
-
-    @Bean
     fun dataSource(
-        @Qualifier("baseDataSource") baseDataSource: DataSource,
-        @Qualifier("permissionDataSource") permissionDataSource: DataSource
+        @Qualifier("baseDataSource") baseDataSource: DataSource
     ): DataSource {
         val targetDataSources = HashMap<Any, Any>()
         targetDataSources[DataSourceContextHolder.DataSourceType.BASE.name] = baseDataSource
-        targetDataSources[DataSourceContextHolder.DataSourceType.PERMISSION.name] = permissionDataSource
         val dataSource = DynamicDataSource()
         dataSource.setTargetDataSources(targetDataSources)
         dataSource.setDefaultTargetDataSource(baseDataSource)

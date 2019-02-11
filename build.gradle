@@ -179,14 +179,6 @@ project(":sip-notify") {
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
-project(":sip-permission") {
-    dependencies {
-        compile project(':sip-common')
-        compile project(':sip-client')
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("mysql:mysql-connector-java:5.1.45")
-    }
-}
 project(":sip-tools") {
     dependencies {
         compile project(':sip-common')

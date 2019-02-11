@@ -21,10 +21,6 @@ spring:
       timeBetweenEvictionRunsMillis: 60000
       base:
         url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-base?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
-      permission:
-        url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-permission?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
-      dict:
-        url: jdbc:mysql://${ENV_MYSQL_HOST:localhost}:${ENV_MYSQL_PORT:3306}/sip-dict?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
   redis:
     host: ${ENV_REDIS_HOST:localhost}
     port: ${ENV_REDIS_PORT:6379}

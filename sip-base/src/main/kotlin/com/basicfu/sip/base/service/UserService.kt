@@ -3,11 +3,13 @@ package com.basicfu.sip.base.service
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.base.feign.RoleFeign
+import com.basicfu.sip.base.mapper.RoleMapper
 import com.basicfu.sip.base.mapper.UserAuthMapper
 import com.basicfu.sip.base.mapper.UserMapper
+import com.basicfu.sip.base.mapper.UserRoleMapper
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.po.UserAuth
+import com.basicfu.sip.base.model.po.UserRole
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.PasswordUtil
 import com.basicfu.sip.client.util.DictUtil
@@ -52,7 +54,11 @@ class UserService : BaseService<UserMapper, User>() {
     @Autowired
     lateinit var userTemplateService: UserTemplateService
     @Autowired
-    lateinit var roleFeign: RoleFeign
+    lateinit var menuService: MenuService
+    @Autowired
+    lateinit var urMapper: UserRoleMapper
+    @Autowired
+    lateinit var roleMapper: RoleMapper
 
     fun getCurrentUser(): JSONObject? {
         var user = TokenUtil.getCurrentUser()
@@ -75,7 +81,7 @@ class UserService : BaseService<UserMapper, User>() {
                         Constant.System.APP_SYSTEM_CODE
                     )
                 }
-                val allMenu = roleFeign.listMenuAll().data
+                val allMenu = menuService.all()
                 if (currentAppCode != AppUtil.getAppCode()) {
                     AppUtil.updateApp(currentAppId, currentAppCode)
                 }
@@ -88,7 +94,7 @@ class UserService : BaseService<UserMapper, User>() {
             }
         }
         if (user.type != Enum.UserType.SYSTEM_SUPER_ADMIN.name && menuIds.isNotEmpty()) {
-            val allMenu = roleFeign.listMenuByIds(menuIds.toTypedArray()).data
+            val allMenu = menuService.listByIds(menuIds)
             val menus = MenuUtil.recursive(null, allMenu).filter { menuIds.contains(it.id) }
             user.menus = menus
         }
@@ -598,6 +604,57 @@ class UserService : BaseService<UserMapper, User>() {
             })
         }
         return deleteByIds(ids)
+    }
+
+
+    fun listRoleByIds(ids: List<Long>): List<UserDto> {
+        val userRoles = urMapper.selectByExample(example<UserRole> {
+            andIn(UserRole::userId, ids)
+        })
+        val userRoleMap = userRoles.groupBy({ it.userId }, { it.roleId })
+        val roleIds = userRoles.map { it.roleId }
+        val result = arrayListOf<UserDto>()
+        if (roleIds.isNotEmpty()) {
+            val roles = roleMapper.selectByIds(org.apache.commons.lang.StringUtils.join(roleIds, ","))
+            val roleMap = roles.associateBy { it.id }
+            userRoleMap.forEach { k, v ->
+                result.add(generate {
+                    id = k
+                    this.roles = roleMap.filter { v.contains(it.key) }.values.map { it.code!! }
+                })
+            }
+        }
+        return result
+    }
+
+    fun updateRole(id: Long, roleIds: List<Long>): Int {
+        /**
+         * 此处未做用户是否存在校验，当添加用户和角色时用户数据未提交所以查不到用户,实现方式:
+         * 1.针对此方法设置事物隔离级别为isolation=Isolation.READ_UNCOMMITTED，但目前会出现2个事物bean name暂时未研究解决方案
+         * 2.添加方法和更新方法区分开，不太想分开2个方法实现
+         */
+//        if (UserUtil.listUsernameByIds(listOf(id)).isEmpty()) {
+//            throw CustomException(Enum.User.USER_NOT_FOUND)
+//        }
+        val userRoles = urMapper.selectByExample(example<UserRole> {
+            andEqualTo(UserRole::userId, id)
+        })
+        val existsRoleIds = userRoles.map { it.roleId }
+        val insertIds = roleIds.filter { !existsRoleIds.contains(it) }
+        val deleteIds = userRoles.filter { !roleIds.contains(it.roleId) }.map { it.id }
+        if (insertIds.isNotEmpty()) {
+            urMapper.insertList(insertIds.map {
+                generate<UserRole> {
+                    roleId = it
+                    userId = id
+                    cdate = (System.currentTimeMillis() / 1000).toInt()
+                }
+            })
+        }
+        if (deleteIds.isNotEmpty()) {
+            urMapper.deleteByIds(org.apache.commons.lang.StringUtils.join(deleteIds, ","))
+        }
+        return roleIds.size
     }
 
     fun dealUser(user: UserDto) {

@@ -38,9 +38,8 @@ SIP服务集成平台描述
 
 ├── sip-schedule           // 调度服务
 ├── sip-approval           // 审批流
-
 ├── sip-api                // API服务(应用)
-├── sip-api                // CI服务(应用)
+├── sip-ci                // CI服务(应用)
 
 
 
