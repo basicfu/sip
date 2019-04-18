@@ -1,5 +1,6 @@
 package com.basicfu.sip.core.model
 
+import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.github.pagehelper.PageInfo
 import java.util.*
@@ -20,7 +21,7 @@ class Result<T> {
                 is List<*> -> result.data = data
                 is PageInfo<*> -> {
                     val obj = JSONObject()
-                    obj["list"] = data.list
+                    obj["list"] = data.list?: JSONArray()
                     val page = JSONObject()
                     page["total"] = data.total
                     page["pageSize"] = data.pageSize
