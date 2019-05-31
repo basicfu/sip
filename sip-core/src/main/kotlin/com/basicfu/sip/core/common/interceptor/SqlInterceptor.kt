@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package com.basicfu.sip.core.common.interceptor
 
 import com.alibaba.druid.sql.SQLUtils
@@ -60,6 +62,7 @@ class SqlInterceptor : Interceptor {
     @Autowired
     lateinit var config: Config
 
+    //已经改为如果一个服务中连接多个库不区分数据库
     override fun intercept(invocation: Invocation): Any {
         val proceed: Any
         var throwError = false
@@ -91,11 +94,7 @@ class SqlInterceptor : Interceptor {
                     val statementList =
                         SQLUtils.parseStatements(mappedStatement.getBoundSql(invocation.args[1]).sql, dialect)
                     val tableName = (statementList[0] as SQLInsertStatement).tableName.simpleName
-                    val allTable = arrayListOf<String>()
-                    config.appExecuteTable.values.forEach {
-                        allTable.addAll(it)
-                    }
-                    if (!allTable.contains(tableName)) {
+                    if (!config.appExecuteTable.contains(tableName)) {
                         val bean = invocation.args[1]
                         val appField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, config.appField)
                         val appId: Long = getAppId()
@@ -262,8 +261,7 @@ class SqlInterceptor : Interceptor {
         fieldName: String,
         originCondition: SQLExpr?
     ): SQLExpr? {
-        val executeTable = config.appExecuteTable[databaseName]
-        return if (executeTable != null && executeTable.contains(tableName)) {
+        return if (config.appExecuteTable.contains(tableName)) {
             originCondition
         } else {
             val appId: Long = getAppId()

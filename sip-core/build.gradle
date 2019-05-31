@@ -1,5 +1,5 @@
 group 'com.basicfu.sip'
-version "0.0.1-1-SNAPSHOT"
+version "0.0.3-2-SNAPSHOT"
 def artifactId = "sip-core"
 apply plugin: 'java'
 apply plugin: 'maven'

@@ -30,8 +30,3 @@ spring:
       min-idle: 0
       max-active: 8
       max-wait: -1
-sip:
-  redis:
-    host: ${ENV_REDIS_HOST:localhost}
-    port: ${ENV_REDIS_PORT:6379}
-    password: ${ENV_REDIS_PASSWORD:root}

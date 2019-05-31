@@ -15,8 +15,11 @@ interface BaseFeign {
     @GetMapping("/user")
     fun getCurrentUser(): Result<JSONObject>
 
-    @GetMapping("/user/get/{id}")
-    fun get(@PathVariable("id") id: Long): Result<JSONObject>
+    @GetMapping("/user/get")
+    fun get(
+        @RequestParam(value = "id", required = false) id: Long?,
+        @RequestParam(value = "username", required = false) username: String?
+    ): Result<JSONObject>
 
     @GetMapping("/user/get/permission/{id}")
     fun getPermission(@PathVariable("id") id: Long): Result<JSONObject>

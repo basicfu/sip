@@ -7,3 +7,10 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
+sip:
+  multi-app:
+    enabled: true
+    field: app_id
+    exclude-table: user,user_auth,app
+  datasource:
+    expression: execution(* com.basicfu.sip.*.service.*Service.*(..))&&!execution(* com.basicfu.sip.core.service.BaseService.*(..))

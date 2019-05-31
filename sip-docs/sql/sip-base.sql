@@ -47,7 +47,6 @@ comment '应用secret表' engine=InnoDB;
 drop table if exists user;
 create table user(
   id bigint auto_increment primary key,
-  app_id bigint not null default 0 comment '租户ID',
   username varchar(32) not null default '' comment '用户名',
   nickname varchar(32) not null default '' comment '昵称',
   mobile varchar(11) not null default '' comment '手机号',
@@ -57,13 +56,13 @@ create table user(
   udate int not null default 0 comment '更新时间',
   cuid bigint not null default 0 comment '创建人ID',
   type varchar(64) not null default '' comment '用户类型字典',
-  status tinyint not null default 0 comment '0正常,1删除,2黑名单'
+  status tinyint not null default 0 comment '0正常,1删除,2黑名单',
+  unique (username)
 )comment '用户表' engine=InnoDB;
 
 drop table if exists user_auth;
 CREATE TABLE user_auth (
   id bigint auto_increment primary key,
-  app_id bigint not null default 0 comment '应用ID',
   uid bigint not null comment '用户ID',
   type varchar(64) not null default '' comment 'auth类型字典',
   username varchar(100) not null default '' comment '登录标识',
@@ -71,7 +70,7 @@ CREATE TABLE user_auth (
   cdate int not null default 0 comment '创建时间',
   udate int not null default 0 comment '更新时间',
   ldate int not null default 0 comment '最后一次登录时间',
-  unique key (uid,type)
+  unique key (uid,type,username)
 )comment '用户授权表' engine=InnoDB;
 
 drop table if exists user_template;

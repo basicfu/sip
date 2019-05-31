@@ -192,6 +192,12 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
                 if (permissionArray.size == 2) {
                     val permission = permissionMap[it]
                     if (permission == null) {
+                        val po=generate<Permission> {
+                            this.name=""
+                        }
+                        po.name=""
+                        po.name=""
+                        po.name=""
                         insertPermissions.add(dealInsert(generate {
                             name = permissionArray[0]
                             code = permissionArray[1]
