@@ -8,7 +8,7 @@ import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.common.model.dto.AppServiceDto
 import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
@@ -46,7 +46,7 @@ class AppServiceService : BaseService<AppServiceMapper, AppService>() {
             }
             AppUtil.notCheckApp()
             to(mapper.selectByExample(example<AppService> {
-                andIn(AppService::appId,appIds)
+                andIn(AppService::appId, appIds)
             }))
         }
     }

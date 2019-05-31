@@ -6,7 +6,7 @@ import com.basicfu.sip.base.model.vo.AppVo
 import com.basicfu.sip.common.enum.Enum
 import com.basicfu.sip.common.model.dto.AppDto
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo

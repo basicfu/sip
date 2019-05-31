@@ -1,6 +1,6 @@
 @file:Suppress("MemberVisibilityCanBePrivate", "unused")
 
-package com.basicfu.sip.core.common.mapper
+package com.basicfu.sip.core.common
 
 import com.basicfu.sip.core.util.SqlUtil.dealLikeValue
 import org.springframework.util.ReflectionUtils
@@ -8,13 +8,6 @@ import tk.mybatis.mapper.MapperException
 import tk.mybatis.mapper.mapperhelper.EntityHelper
 import tk.mybatis.mapper.util.StringUtil
 import kotlin.reflect.KMutableProperty1
-
-
-inline fun <reified T> generate(op: T.() -> Unit = {}): T {
-    val instance = T::class.java.newInstance()
-    op(instance)
-    return instance
-}
 
 inline fun <reified T> example(op: Example<T>.() -> Unit = {}): tk.mybatis.mapper.entity.Example {
     val clazz = T::class.java
@@ -204,7 +197,15 @@ open class Sqls<T> {
     //between转换为自定义拼接条件
     @PublishedApi
     internal fun andBetween(k: String, v1: Any, v2: Any) {
-        this.criteria.criterions.add(Criterion(k, null, "between $v1 and $v2", true, true))
+        this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "between $v1 and $v2",
+                true,
+                true
+            )
+        )
 
     }
 
@@ -214,7 +215,15 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun andNotBetween(k: String, v1: Any, v2: Any) {
-        this.criteria.criterions.add(Criterion(k, null, "not between $v1 and $v2", true, true))
+        this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "not between $v1 and $v2",
+                true,
+                true
+            )
+        )
     }
 
     fun Sqls<T>.andLike(k: KMutableProperty1<T, *>, v: String?) {
@@ -231,7 +240,15 @@ open class Sqls<T> {
     //此处的v是condition可以sql注入,like中强制忽略为null的
     @PublishedApi
     internal fun andLike(k: String, v: Any?) {
-        v?.let { this.criteria.criterions.add(Criterion(k, null, "like $v", true, true)) }
+        v?.let { this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "like $v",
+                true,
+                true
+            )
+        ) }
     }
 
     fun Sqls<T>.andNotLike(k: KMutableProperty1<T, *>, v: String) {
@@ -240,7 +257,15 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun andNotLike(k: String, v: Any?) {
-        v?.let { this.criteria.criterions.add(Criterion(k, null, "not like $v", true, true)) }
+        v?.let { this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "not like $v",
+                true,
+                true
+            )
+        ) }
     }
 
     fun Sqls<T>.orIsNull(vararg k: KMutableProperty1<T, String?>) {
@@ -390,7 +415,15 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orBetween(k: String, v1: Any, v2: Any) {
-        this.criteria.criterions.add(Criterion(k, null, "between $v1 and $v2", false, true))
+        this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "between $v1 and $v2",
+                false,
+                true
+            )
+        )
     }
 
     fun Sqls<T>.orNotBetween(k: KMutableProperty1<T, *>, v1: Any, v2: Any) {
@@ -399,7 +432,15 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orNotBetween(k: String, v1: Any, v2: Any) {
-        this.criteria.criterions.add(Criterion(k, null, "not between $v1 and $v2", false, true))
+        this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "not between $v1 and $v2",
+                false,
+                true
+            )
+        )
     }
 
     fun Sqls<T>.orLike(k: KMutableProperty1<T, *>, v: String?) {
@@ -414,7 +455,15 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orLike(k: String, v: Any?) {
-        v?.let { this.criteria.criterions.add(Criterion(k, null, "like $v", false, true)) }
+        v?.let { this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "like $v",
+                false,
+                true
+            )
+        ) }
     }
 
     fun Sqls<T>.orNotLike(k: KMutableProperty1<T, *>, v: String) {
@@ -423,7 +472,15 @@ open class Sqls<T> {
 
     @PublishedApi
     internal fun orNotLike(k: String, v: Any?) {
-        v?.let { this.criteria.criterions.add(Criterion(k, null, "not like $v", false, true)) }
+        v?.let { this.criteria.criterions.add(
+            Criterion(
+                k,
+                null,
+                "not like $v",
+                false,
+                true
+            )
+        ) }
     }
 
     class Criteria {

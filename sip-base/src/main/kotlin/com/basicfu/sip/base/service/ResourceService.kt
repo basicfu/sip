@@ -17,7 +17,7 @@ import com.basicfu.sip.common.model.po.MenuResource
 import com.basicfu.sip.common.model.po.PermissionResource
 import com.basicfu.sip.common.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.service.BaseService

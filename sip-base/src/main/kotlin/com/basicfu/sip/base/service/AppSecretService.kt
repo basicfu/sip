@@ -4,7 +4,7 @@ import com.basicfu.sip.base.mapper.AppSecretMapper
 import com.basicfu.sip.base.model.po.AppSecret
 import com.basicfu.sip.base.model.vo.AppSecretVo
 import com.basicfu.sip.common.model.dto.AppSecretDto
-import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo

@@ -25,7 +25,7 @@ import com.basicfu.sip.common.util.MenuUtil
 import com.basicfu.sip.common.util.TokenUtil
 import com.basicfu.sip.common.util.UserUtil
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
@@ -138,7 +138,7 @@ class UserService : BaseService<UserMapper, User>() {
                     }
                     //判断是否是系统字段
                     val parameterObj = JSON.parseObject(v.toString())
-                    val condition = Enum.Condition.valueOf(parameterObj.getString("condition"))
+                    val condition = Condition.valueOf(parameterObj.getString("condition"))
                     val value = parameterObj["value"]
                     when (condition) {
                         Condition.IS_NULL -> andCondition(key, "is null")
@@ -628,7 +628,7 @@ class UserService : BaseService<UserMapper, User>() {
                 userAuthMapper.insertSelective(userAuth)
                 val role=roleMapper.selectOneByExample(example<Role> {
                     andEqualTo {
-                        code="NORMAL"
+                        code = "NORMAL"
                     }
                 })
                 urMapper.insertSelective(generate<UserRole> {
@@ -644,7 +644,7 @@ class UserService : BaseService<UserMapper, User>() {
                 //修改用户名
                 val user=mapper.selectOneByExample(example<User> {
                     andEqualTo {
-                        username=vo.originalUsername
+                        username = vo.originalUsername
                     }
                 })?:throw CustomException(Enum.NOT_FOUND_USER_ID)
                 if(mapper.selectCount(generate {
@@ -659,7 +659,7 @@ class UserService : BaseService<UserMapper, User>() {
                 })
                 userAuthMapper.updateByExampleSelective(userAuth, example<UserAuth> {
                     andEqualTo {
-                        uid=user.id
+                        uid = user.id
                     }
                 })
             }
@@ -673,7 +673,7 @@ class UserService : BaseService<UserMapper, User>() {
                 })
                 userAuthMapper.updateByExampleSelective(userAuth, example<UserAuth> {
                     andEqualTo {
-                        username=vo.username
+                        username = vo.username
                     }
                 })
                 val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(vo.username!!) + "*")

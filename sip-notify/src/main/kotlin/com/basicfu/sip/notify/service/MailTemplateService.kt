@@ -2,7 +2,7 @@ package com.basicfu.sip.notify.service
 
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.core.common.exception.CustomException
-import com.basicfu.sip.core.common.mapper.example
+import com.basicfu.sip.core.common.example
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.notify.common.Enum
 import com.basicfu.sip.notify.mapper.MailSenderMapper

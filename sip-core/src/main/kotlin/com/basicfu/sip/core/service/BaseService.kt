@@ -1,7 +1,7 @@
 package com.basicfu.sip.core.service
 
-import com.basicfu.sip.core.model.vo.BaseVo
 import com.basicfu.sip.core.common.mapper.CustomMapper
+import com.basicfu.sip.core.model.vo.BaseVo
 import com.github.pagehelper.Page
 import com.github.pagehelper.PageHelper
 import com.github.pagehelper.PageInfo
@@ -56,16 +56,16 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      */
     inline fun <reified R> dealInsert(obj: R): R {
         val clazz = R::class.java
-        val time = (System.currentTimeMillis() / 1000).toInt()
+        val time = System.currentTimeMillis()
         val id = ReflectionUtils.findField(clazz, "id")
         if (id != null) {
             ReflectionUtils.makeAccessible(id)
             id.set(obj, null)
         }
-        val cdate = ReflectionUtils.findField(clazz, "cdate")
-        if (cdate != null) {
-            ReflectionUtils.makeAccessible(cdate)
-            cdate.set(obj, time)
+        val createTime = ReflectionUtils.findField(clazz, "createTime")
+        if (createTime != null) {
+            ReflectionUtils.makeAccessible(createTime)
+            createTime.set(obj, time)
         }
         return dealUpdate(obj, time)
     }
@@ -74,12 +74,12 @@ abstract class BaseService<M : CustomMapper<T>, T> {
      * 为更新对象处理udate值
      * 如果没有udate则不处理
      */
-    inline fun <reified R> dealUpdate(obj: R, time: Int? = null): R {
+    inline fun <reified R> dealUpdate(obj: R, time: Long? = System.currentTimeMillis()): R {
         val clazz = R::class.java
-        val udate = ReflectionUtils.findField(clazz, "udate")
-        if (udate != null) {
-            ReflectionUtils.makeAccessible(udate)
-            udate.set(obj, time ?: (System.currentTimeMillis() / 1000).toInt())
+        val updateTime = ReflectionUtils.findField(clazz, "updateTime")
+        if (updateTime != null) {
+            ReflectionUtils.makeAccessible(updateTime)
+            updateTime.set(obj, time)
         }
         return obj
     }
