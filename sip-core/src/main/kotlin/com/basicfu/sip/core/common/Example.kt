@@ -3,6 +3,7 @@
 package com.basicfu.sip.core.common
 
 import com.basicfu.sip.core.util.SqlUtil.dealLikeValue
+import org.apache.commons.lang3.StringUtils
 import org.springframework.util.ReflectionUtils
 import tk.mybatis.mapper.MapperException
 import tk.mybatis.mapper.mapperhelper.EntityHelper
@@ -586,8 +587,29 @@ class Example<T> constructor(
         contactOrderByClause(" Asc", *k)
     }
 
+    fun Example<T>.orderByAsc(k: String) {
+        orderByClause.append(",$k Asc")
+    }
+
+    fun Example<T>.orderByAsc(k: List<String>) {
+        if(k.isNotEmpty()){
+            orderByClause.append(",${StringUtils.join(k,",")} Asc")
+        }
+    }
+
     fun Example<T>.orderByDesc(vararg k: KMutableProperty1<T, *>) {
         contactOrderByClause(" Desc", *k)
+    }
+
+
+    fun Example<T>.orderByDesc(k: String) {
+        orderByClause.append(",$k Desc")
+    }
+
+    fun Example<T>.orderByDesc(k: List<String>) {
+        if(k.isNotEmpty()){
+            orderByClause.append(",${StringUtils.join(k,",")} Desc")
+        }
     }
 
     private fun contactOrderByClause(order: String, vararg k: KMutableProperty1<T, *>) {
