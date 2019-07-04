@@ -133,7 +133,7 @@ class PermissionFilter : Filter {
                 services.addAll(apps[appCode]?.services ?: arrayListOf())
             }
             val roleCodes = arrayListOf(Constant.System.GUEST)
-            user?.roles?.let { roleCodes.addAll(it) }
+            user?.roles?.get(appCode)?.let { roleCodes.addAll(it) }
             for (service in services) {
                 //多个service的path一致也不影响匹配
                 if (antPathMatcher.match(service.path!!, uri)) {

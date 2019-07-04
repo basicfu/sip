@@ -23,11 +23,15 @@
                 id: newIndex,
                 success: function (res) {
                     if (typeof data.success === 'function') {
+                        div.removeAttribute(sendIndex);
+                        div.removeAttribute(dataKey + newIndex);
                         data.success(res);
                     }
                 },
                 error: function (res) {
                     if (typeof data.error === 'function') {
+                        div.removeAttribute(sendIndex);
+                        div.removeAttribute(dataKey + newIndex);
                         data.error(res)
                     }
                 }

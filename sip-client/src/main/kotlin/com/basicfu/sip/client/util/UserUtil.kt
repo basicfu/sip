@@ -34,8 +34,16 @@ class UserUtil {
         /**
          * 根据用户Id获取用户信息
          */
-        inline fun <reified T> get(id: Long): T? {
-            val user = baseFeign.get(id).data
+        inline fun <reified T> getUserById(id: Long): T? {
+            val user = baseFeign.get(id,null).data
+            return dealUser(user)
+        }
+
+        /**
+         * 根据用户名获取用户信息
+         */
+        inline fun <reified T> getUserByUsername(username: String): T? {
+            val user = baseFeign.get(null,username).data
             return dealUser(user)
         }
 
@@ -134,7 +142,10 @@ class UserUtil {
                 user.remove("resources")
                 val u = user.toJavaObject(clazz)
                 fields.forEach { it ->
-                    if (it.name == "roles" || it.name == "menus" || it.name == "permissions") {
+                    if (it.name == "roles"||it.name == "menus" ) {
+                        it.isAccessible = true
+                        it.set(u, tmpUser.getJSONObject(it.name))
+                    }else if (it.name == "permissions") {
                         it.isAccessible = true
                         it.set(u, tmpUser.getJSONArray(it.name))
                     } else if (it.name == "resources") {

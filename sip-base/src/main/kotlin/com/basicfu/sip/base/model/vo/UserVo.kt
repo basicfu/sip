@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject
 
 class UserVo {
     var id: Long? = null
-    var appId: Long? = null
     //提供用户名(默认)、手机号(需验证)、邮箱注册(需验证)
     var username: String? = null
     var nickname: String? = null
@@ -24,6 +23,15 @@ class UserVo {
      * 源密码
      */
     var orignPassword: String? = null
+    /**
+     * 原用户名
+     */
+    var originalUsername:String?=null
 
     var condition:String?=null
+
+    /**
+     * 密码是否加密
+     */
+    var encry:Boolean=true
 }

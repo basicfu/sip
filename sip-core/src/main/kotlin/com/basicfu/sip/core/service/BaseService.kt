@@ -52,6 +52,7 @@ abstract class BaseService<M : CustomMapper<T>, T> {
     /**
      * 为添加对象处理cdate和udate值,并且移除主键
      * 如果没有cdate和udate则不处理
+     * TODO动态配置添加时要配置的字段列表，和是否要移除主键、时间类型
      */
     inline fun <reified R> dealInsert(obj: R): R {
         val clazz = R::class.java

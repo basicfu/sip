@@ -19,6 +19,6 @@ class UserDto {
     var appCode: String? = null
     var token: String? = null
 
-    var roles: List<String>? = null
-    var menus: List<MenuDto>? = null
+    var roles: Map<String, List<String>> = emptyMap()
+    var menus: Map<String, List<MenuDto>> = emptyMap()
 }

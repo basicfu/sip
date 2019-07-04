@@ -23,6 +23,7 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
 import com.basicfu.sip.core.util.RedisUtil
 import com.github.pagehelper.PageInfo
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -50,6 +51,8 @@ class RoleService : BaseService<RoleMapper, Role>() {
     lateinit var menuResourceMapper: MenuResourceMapper
     @Autowired
     lateinit var permissionResourceMapper: PermissionResourceMapper
+    @Autowired
+    lateinit var appMapper: AppMapper
 
     fun listRoleByUid(uid: Long): List<String> {
         val roleIds = urMapper.selectByExample(example<UserRole> {
@@ -63,6 +66,22 @@ class RoleService : BaseService<RoleMapper, Role>() {
         } else {
             arrayListOf()
         }.map { it.code!! }
+    }
+
+    fun listAppRoleByUid(uid: Long): Map<String,List<String>> {
+        val roleIds = urMapper.selectByExample(example<UserRole> {
+            select(UserRole::roleId)
+            andEqualTo(UserRole::userId, uid)
+        }).mapNotNull { it.roleId }.toMutableList()
+        return if (roleIds.isNotEmpty()) {
+            val list=to<RoleDto>(roleMapper.selectByExample(example<Role> {
+                andIn(Role::id, roleIds)
+            }))
+            val map=appMapper.selectByIds(StringUtils.join(list.map { it.appId!! },",")).associateBy({ it.id!! },{it.name!!})
+            list.groupBy({ map[it.appId]!! },{it.code!!})
+        } else {
+            emptyMap()
+        }
     }
 
     fun list(vo: RoleVo): PageInfo<RoleDto> {

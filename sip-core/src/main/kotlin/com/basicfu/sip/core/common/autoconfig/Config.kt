@@ -1,28 +1,17 @@
 package com.basicfu.sip.core.common.autoconfig
 
-import org.springframework.core.io.support.PropertiesLoaderUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import javax.annotation.PostConstruct
 
 @Component
 class Config {
+    @Value("\${sip.multi-app.enabled:false}")
+    var enabled = false
     /**需要排除app_id的表*/
-    var appField = "app_id"
-    var appExecuteTable = HashMap<String, List<String>>()
-
-    @Suppress("UNCHECKED_CAST")
-    @PostConstruct
-    fun init() {
-        val properties = PropertiesLoaderUtils.loadAllProperties("application.properties")
-        appField = properties.getProperty("sip.app-field")
-        properties.forEach { k, v ->
-            val key = k.toString()
-            if (key.startsWith("sip.app-exclude-table")) {
-                val array = key.split(".")
-                if (array.size == 3) {
-                    appExecuteTable[array[2]] = v.toString().split(",")
-                }
-            }
-        }
-    }
+    @Value("\${sip.multi-app.field:app_id}")
+    var appField = ""
+    @Value("\${sip.multi-app.exclude-table:}")
+    var appExecuteTable = ArrayList<String>()
+    @Value("\${sip.datasource.expression:}")
+    var expression = ""
 }

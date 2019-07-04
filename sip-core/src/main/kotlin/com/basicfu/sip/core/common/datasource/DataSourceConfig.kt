@@ -1,6 +1,7 @@
 package com.basicfu.sip.core.common.datasource
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder
+import com.basicfu.sip.core.common.autoconfig.Config
 import com.basicfu.sip.core.common.interceptor.SqlInterceptor
 import org.mybatis.spring.SqlSessionFactoryBean
 import org.springframework.aop.Advisor
@@ -22,7 +23,8 @@ import javax.sql.DataSource
 class DataSourceConfig {
     @Autowired
     lateinit var sqlStatsInterceptor: SqlInterceptor
-
+    @Autowired
+    lateinit var config: Config
     /**
      * @Component形式注入beanName不同会默认覆盖dataSource，而手动注入的beanName不会覆盖默认注入的dataSource所以导致出现2个数据库连接池
      */
@@ -48,10 +50,13 @@ class DataSourceConfig {
         val sqlSessionFactoryBean = SqlSessionFactoryBean()
         sqlSessionFactoryBean.setDataSource(dataSource)
         sqlSessionFactoryBean.setMapperLocations(PathMatchingResourcePatternResolver().getResources("classpath*:/mapper/*.xml"))
-        sqlSessionFactoryBean.setPlugins(arrayOf(sqlStatsInterceptor))
+        if(config.enabled){
+            sqlSessionFactoryBean.setPlugins(arrayOf(sqlStatsInterceptor))
+        }
         return sqlSessionFactoryBean
     }
 
+    @Primary
     @Bean
     internal fun transactionManager(dataSource: DataSource): DataSourceTransactionManager {
         return DataSourceTransactionManager(dataSource)
@@ -67,19 +72,12 @@ class DataSourceConfig {
         return TransactionInterceptor(transactionManager, properties)
     }
 
-    //    @Bean
-//    fun txProxy(): BeanNameAutoProxyCreator {
-//        val creator = BeanNameAutoProxyCreator()
-//        creator.setInterceptorNames("txAdvice")
-//        creator.setBeanNames("*Service")
-//        creator.isProxyTargetClass = true
-//        return creator
-//    }
     @Bean
     fun txAdviceAdvisor(txAdvice: TransactionInterceptor): Advisor {
         val pointcut = AspectJExpressionPointcut()
-        pointcut.expression =
-                "execution(* com.basicfu.sip.*.service.*Service.*(..))&&!execution(* com.basicfu.sip.core.service.BaseService.*(..))"
+        if(config.expression.isNotBlank()){
+            pointcut.expression = config.expression
+        }
         return DefaultPointcutAdvisor(pointcut, txAdvice)
     }
 }

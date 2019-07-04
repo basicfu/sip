@@ -9,6 +9,7 @@ import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.util.AESUtil
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.RequestUtil
+import com.google.gson.Gson
 import java.util.*
 
 object TokenUtil {
@@ -81,7 +82,8 @@ object TokenUtil {
     fun getCurrentUser(): UserDto? {
         return getCurrentToken()?.let {
             RedisUtil.get<String>(it)?.let {
-                JSON.parseObject(it).toJavaObject(UserDto::class.java)
+                Gson().fromJson(it,UserDto::class.java)
+//                JSON.parseObject(it).toJavaObject(UserDto::class.java)
             }
         }
     }

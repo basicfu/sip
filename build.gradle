@@ -73,78 +73,82 @@ subprojects {
         }
     }
 }
-//project(":sip-core") {
-//    configurations {
-//        mybatisGenerator
-//    }
-//    dependencies {
-//        compile("com.alibaba:druid-spring-boot-starter:1.1.10")
-//        compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
-//        compile("org.springframework.cloud:spring-cloud-starter-openfeign")
-//        compile("tk.mybatis:mapper-spring-boot-starter:2.0.4")
-//        compile("com.github.pagehelper:pagehelper-spring-boot-starter:1.2.3")
-//        compile("org.apache.commons:commons-lang3:3.6")
-//        compile("org.springframework.boot:spring-boot-starter-data-redis")
-//        compile("org.apache.httpcomponents:httpcore:4.4.10")
-//        compile("org.apache.httpcomponents:httpclient:4.5.6")
-//        compile("org.apache.httpcomponents:httpmime:4.5.6")
-//        compile("io.protostuff:protostuff-core:1.5.9")
-//        compile("io.protostuff:protostuff-runtime:1.5.9")
-//        compile("org.testcontainers:testcontainers:1.8.3")
-//        compile("org.testcontainers:mysql:1.8.3")
-//        compile("mysql:mysql-connector-java:5.1.45")
-//        compile("org.apache.commons:commons-pool2:2.6.0")
-//        compile("net.logstash.logback:logstash-logback-encoder:5.2")
-//        mybatisGenerator 'org.mybatis.generator:mybatis-generator-core:1.3.7'
-//        mybatisGenerator 'mysql:mysql-connector-java:5.1.45'
-//        mybatisGenerator 'tk.mybatis:mapper:4.0.3'
-//    }
-//    //noinspection GroovyAssignabilityCheck
-//    task mybatisGenerator << {
-//        def properties = new Properties()
-//        file("../tool/generator/config.properties").withInputStream { inputStream ->
-//            properties.load(inputStream)
-//        }
-//        ant.properties['targetProject'] = projectDir.path
-//        ant.properties['driverClass'] = properties.getProperty("jdbc.driverClassName")
-//        ant.properties['connectionURL'] = properties.getProperty("jdbc.url")
-//        ant.properties['userId'] = properties.getProperty("jdbc.user")
-//        ant.properties['password'] = properties.getProperty("jdbc.password")
-//        ant.properties['src_main_kotlin'] = properties.getProperty("project")
-//        ant.properties['src_main_resources'] = properties.getProperty("resource")
-//        ant.properties['modelPackage'] = properties.getProperty("package.model")
-//        ant.properties['mapperPackage'] = properties.getProperty("package.mapper")
-//        ant.properties['xmlPackage'] = properties.getProperty("package.xml")
-//        ant.properties['mapperPlugin'] = properties.getProperty("mapper.plugin")
-//        ant.properties['mapperMapper'] = properties.getProperty("mapper.mapper")
-//        ant.properties['tableName'] = properties.getProperty("tableName")
-//        ant.taskdef(
-//                name: 'mbgenerator',
-//                classname: 'org.mybatis.generator.ant.GeneratorAntTask',
-//                classpath: configurations.mybatisGenerator.asPath
-//        )
-//        ant.mbgenerator(overwrite: true, configfile: 'tool/generator/generatorConfig.xml', verbose: true) {
-//            propertyset {
-//                propertyref(name: 'targetProject')
-//                propertyref(name: 'userId')
-//                propertyref(name: 'driverClass')
-//                propertyref(name: 'connectionURL')
-//                propertyref(name: 'password')
-//                propertyref(name: 'src_main_kotlin')
-//                propertyref(name: 'src_main_resources')
-//                propertyref(name: 'modelPackage')
-//                propertyref(name: 'mapperPackage')
-//                propertyref(name: 'xmlPackage')
-//                propertyref(name: 'mapperPlugin')
-//                propertyref(name: 'mapperMapper')
-//                propertyref(name: 'tableName')
-//            }
-//        }
-//    }
-//}
+project(":sip-core") {
+    configurations {
+        mybatisGenerator
+    }
+    dependencies {
+        compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+        compile("com.alibaba:druid-spring-boot-starter:1.1.10")
+        compile("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
+        compile("org.springframework.cloud:spring-cloud-starter-openfeign")
+        compile("org.springframework.cloud:spring-cloud-openfeign-core")
+        compile("tk.mybatis:mapper-spring-boot-starter:2.0.4")
+        compile("com.github.pagehelper:pagehelper-spring-boot-starter:1.2.3")
+        compile("org.apache.commons:commons-lang3:3.6")
+        compile("org.springframework.boot:spring-boot-starter-data-redis")
+        compile("org.apache.httpcomponents:httpcore:4.4.10")
+        compile("org.apache.httpcomponents:httpclient:4.5.6")
+        compile("org.apache.httpcomponents:httpmime:4.5.6")
+        compile("io.protostuff:protostuff-core:1.5.9")
+        compile("io.protostuff:protostuff-runtime:1.5.9")
+        compile("org.testcontainers:testcontainers:1.8.3")
+        compile("org.testcontainers:mysql:1.8.3")
+        compile("mysql:mysql-connector-java:5.1.45")
+        compile("org.apache.commons:commons-pool2:2.6.0")
+        compile("net.logstash.logback:logstash-logback-encoder:5.2")
+        mybatisGenerator 'org.mybatis.generator:mybatis-generator-core:1.3.7'
+        mybatisGenerator 'mysql:mysql-connector-java:5.1.45'
+        mybatisGenerator 'tk.mybatis:mapper:4.0.3'
+    }
+    //noinspection GroovyAssignabilityCheck
+    task mybatisGenerator << {
+        def properties = new Properties()
+        file("../tool/generator/config.properties").withInputStream { inputStream ->
+            properties.load(inputStream)
+        }
+        ant.properties['targetProject'] = projectDir.path
+        ant.properties['driverClass'] = properties.getProperty("jdbc.driverClassName")
+        ant.properties['connectionURL'] = properties.getProperty("jdbc.url")
+        ant.properties['userId'] = properties.getProperty("jdbc.user")
+        ant.properties['password'] = properties.getProperty("jdbc.password")
+        ant.properties['src_main_kotlin'] = properties.getProperty("project")
+        ant.properties['src_main_resources'] = properties.getProperty("resource")
+        ant.properties['modelPackage'] = properties.getProperty("package.model")
+        ant.properties['mapperPackage'] = properties.getProperty("package.mapper")
+        ant.properties['xmlPackage'] = properties.getProperty("package.xml")
+        ant.properties['mapperPlugin'] = properties.getProperty("mapper.plugin")
+        ant.properties['mapperMapper'] = properties.getProperty("mapper.mapper")
+        ant.properties['tableName'] = properties.getProperty("tableName")
+        ant.taskdef(
+                name: 'mbgenerator',
+                classname: 'org.mybatis.generator.ant.GeneratorAntTask',
+                classpath: configurations.mybatisGenerator.asPath
+        )
+        ant.mbgenerator(overwrite: true, configfile: 'tool/generator/generatorConfig.xml', verbose: true) {
+            propertyset {
+                propertyref(name: 'targetProject')
+                propertyref(name: 'userId')
+                propertyref(name: 'driverClass')
+                propertyref(name: 'connectionURL')
+                propertyref(name: 'password')
+                propertyref(name: 'src_main_kotlin')
+                propertyref(name: 'src_main_resources')
+                propertyref(name: 'modelPackage')
+                propertyref(name: 'mapperPackage')
+                propertyref(name: 'xmlPackage')
+                propertyref(name: 'mapperPlugin')
+                propertyref(name: 'mapperMapper')
+                propertyref(name: 'tableName')
+            }
+        }
+    }
+}
 project(":sip-common") {
     dependencies {
-        compile('com.basicfu.sip:sip-core:0.0.1-1-SNAPSHOT')
+        //compile('com.basicfu.sip:sip-core:0.0.2-4-SNAPSHOT')
+        compile project(':sip-core')
+
     }
 }
 project(":sip-eureka") {
@@ -180,30 +184,15 @@ project(":sip-notify") {
         compile("mysql:mysql-connector-java:5.1.45")
     }
 }
-project(":sip-tools") {
-    dependencies {
-        compile project(':sip-common')
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("mysql:mysql-connector-java:5.1.45")
-        compile("ch.ethz.ganymed:ganymed-ssh2:262")
-    }
-}
 project(":sip-client") {
     dependencies {
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("org.springframework.boot:spring-boot-starter-data-redis")
         compile("io.protostuff:protostuff-core:1.5.9")
         compile("io.protostuff:protostuff-runtime:1.5.9")
-        compile("redis.clients:jedis:2.9.0")
         compile("io.github.openfeign:feign-core:9.7.0")
         compile("org.springframework.cloud:spring-cloud-openfeign-core")
     }
-}
-project(":sip-api") {
-    dependencies {
-        compile project(':sip-common')
-        compile project(':sip-client')
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("mysql:mysql-connector-java:5.1.45")
-    }
+    //configurations.all {
+    //   exclude group: 'org.springframework.boot', module: 'spring-boot-dependencies'
+    //}
 }

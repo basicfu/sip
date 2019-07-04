@@ -22,9 +22,9 @@ class UserController {
         return Result.success(userService.getCurrentUser())
     }
 
-    @GetMapping("/get/{id}")
-    fun get(@PathVariable id: Long): Result<Any> {
-        return Result.success(userService.get(id))
+    @GetMapping("/get")
+    fun get(vo:UserVo): Result<Any> {
+        return Result.success(userService.get(vo))
     }
 
     @GetMapping("/list")
@@ -79,6 +79,12 @@ class UserController {
     @PostMapping("/update/password")
     fun update(@RequestBody vo: UserVo): Result<Any> {
         userService.updatePassword(vo)
+        return Result.success("修改成功")
+    }
+
+    @PostMapping("/update/user")
+    fun updateUser(@RequestBody vo: UserVo): Result<Any> {
+        userService.updateUserAgent(vo)
         return Result.success("修改成功")
     }
 

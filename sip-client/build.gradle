@@ -1,12 +1,12 @@
 group 'com.basicfu.sip'
-version "0.0.1-24-SNAPSHOT"
+version "0.0.2-4-SNAPSHOT"
 def artifactId = "sip-client"
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
 def siteUrl = 'https://github.com/basicfu/sip'
-def gitUrl = 'https://github.com/daliyan/sip.git'
+def gitUrl = 'https://github.com/basicfu/sip.git'
 //上传到nexus
 uploadArchives {
     repositories {
