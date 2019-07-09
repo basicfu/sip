@@ -179,8 +179,8 @@ class UserService : BaseService<UserMapper, User>() {
             })
         } else {
             val orignSql = "SELECT DISTINCT u.* FROM `sip-base`.user u " +
-                    "LEFT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
-                    "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
+                    "LEFT JOIN user_role ur on u.id=ur.user_id " +
+                    "LEFT JOIN role r on ur.role_id=r.id " +
                     "WHERE "
             var sql = ""
             //必有role
@@ -304,8 +304,8 @@ class UserService : BaseService<UserMapper, User>() {
             val likeValue = SqlUtil.dealLikeValue(q)
             val users = mapper.selectBySql(
                 "SELECT u.id as id FROM `sip-base`.user u " +
-                        "RIGHT JOIN `sip-permission`.user_role ur on u.id=ur.user_id " +
-                        "LEFT JOIN `sip-permission`.role r on ur.role_id=r.id " +
+                        "RIGHT JOIN user_role ur on u.id=ur.user_id " +
+                        "LEFT JOIN role r on ur.role_id=r.id " +
                         "WHERE (u.username LIKE $likeValue or u.nickname LIKE $likeValue or u.mobile LIKE $likeValue or u.email LIKE $likeValue)" +
                         " AND r.code='$roleCode' LIMIT 0,$size"
             )
