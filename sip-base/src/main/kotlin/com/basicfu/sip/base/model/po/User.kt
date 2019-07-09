@@ -1,21 +1,24 @@
 package com.basicfu.sip.base.model.po
 
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-
 class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
     var username: String? = null
     var nickname: String? = null
     var mobile: String? = null
     var email: String? = null
-    var content: String? = null
-    var cdate: Int? = null
-    var udate: Int? = null
-    var cuid: Long? = null
-    var type: String? = null
-    var status: Int? = null
+    var password: String? = null
+    var mobileVerified: Boolean? = null
+    var emailVerified: Boolean? = null
+    var avatar: String? = null
+    var createTime: Long? = null
+    var updateTime: Long? = null
+    var registerMethod: String? = null
+    var blocked: Boolean? = null
+    var isdel: Boolean? = null
+
+//    "registerInClient": "5cd296203ed9f929a2fe6968",
+//    "registerMethod": "default:username-password",
+//    "loginsCount": 0,
+//    "lastLogin": "Wed May 08 2019 16:41:27 GMT+0800 (CST)",
+//    "lastIP": null,
 }

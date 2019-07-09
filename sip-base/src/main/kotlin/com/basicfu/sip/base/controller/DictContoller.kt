@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.controller
 
 import com.basicfu.sip.base.service.DictService
-import com.basicfu.sip.common.model.vo.DictVo
+import com.basicfu.sip.base.model.vo.DictVo
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*

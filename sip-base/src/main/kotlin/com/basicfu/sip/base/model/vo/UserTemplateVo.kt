@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.model.vo
 
-import com.basicfu.sip.common.constant.Constant
-import com.basicfu.sip.common.validator.Dict
+import com.basicfu.sip.base.common.constant.Constant
+import com.basicfu.sip.base.common.validator.Dict
 import com.basicfu.sip.core.annotation.Insert
 import com.basicfu.sip.core.annotation.Update
 import javax.validation.constraints.NotBlank

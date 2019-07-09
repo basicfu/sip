@@ -1,7 +1,6 @@
 package com.basicfu.sip.base.util
 
-import com.basicfu.sip.client.util.DictUtil
-import com.basicfu.sip.common.enum.Enum
+import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.core.common.exception.CustomException
 import org.apache.commons.lang3.StringUtils
 import java.math.BigDecimal
@@ -110,15 +109,15 @@ object UserTemplateUtil {
             }
             Enum.FieldType.CHECK, Enum.FieldType.RADIO, Enum.FieldType.SELECT -> {
                 //TODO 待修改为缓存格式
-                val dict = DictUtil.get(extra)
-                if (dict == null || dict.isEmpty()) {
-                    throw CustomException("${prefix}字典${extra}不存在")
-                }
-                if (!value.isNullOrBlank()) {
-                    if (!dict.associateBy { it.value }.containsKey(value)) {
-                        throw CustomException("${default}不在字典${extra}中")
-                    }
-                }
+//                val dict = DictUtil.get(extra)
+//                if (dict == null || dict.isEmpty()) {
+//                    throw CustomException("${prefix}字典${extra}不存在")
+//                }
+//                if (!value.isNullOrBlank()) {
+//                    if (!dict.associateBy { it.value }.containsKey(value)) {
+//                        throw CustomException("${default}不在字典${extra}中")
+//                    }
+//                }
             }
             Enum.FieldType.DATE -> {
                 val sdf: SimpleDateFormat

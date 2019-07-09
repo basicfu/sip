@@ -1,18 +1,18 @@
 package com.basicfu.sip.base.service
 
+import com.basicfu.sip.base.common.constant.Constant
+import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.MenuMapper
 import com.basicfu.sip.base.mapper.MenuResourceMapper
 import com.basicfu.sip.base.mapper.ResourceMapper
+import com.basicfu.sip.base.model.dto.MenuDto
+import com.basicfu.sip.base.model.dto.ResourceDto
 import com.basicfu.sip.base.model.po.Menu
+import com.basicfu.sip.base.model.po.MenuResource
 import com.basicfu.sip.base.model.po.Resource
 import com.basicfu.sip.base.model.vo.MenuVo
-import com.basicfu.sip.common.constant.Constant
-import com.basicfu.sip.common.enum.Enum
-import com.basicfu.sip.common.model.dto.MenuDto
-import com.basicfu.sip.common.model.dto.ResourceDto
-import com.basicfu.sip.common.model.po.MenuResource
-import com.basicfu.sip.common.util.AppUtil
-import com.basicfu.sip.common.util.MenuUtil
+import com.basicfu.sip.base.util.AppUtil
+import com.basicfu.sip.base.util.MenuUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate

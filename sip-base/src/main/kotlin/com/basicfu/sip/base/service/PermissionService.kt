@@ -1,17 +1,17 @@
 package com.basicfu.sip.base.service
 
+import com.basicfu.sip.base.common.constant.Constant
+import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.PermissionMapper
 import com.basicfu.sip.base.mapper.PermissionResourceMapper
 import com.basicfu.sip.base.mapper.ResourceMapper
+import com.basicfu.sip.base.model.dto.PermissionDto
+import com.basicfu.sip.base.model.dto.ResourceDto
 import com.basicfu.sip.base.model.po.Permission
+import com.basicfu.sip.base.model.po.PermissionResource
 import com.basicfu.sip.base.model.po.Resource
 import com.basicfu.sip.base.model.vo.PermissionVo
-import com.basicfu.sip.common.constant.Constant
-import com.basicfu.sip.common.enum.Enum
-import com.basicfu.sip.common.model.dto.PermissionDto
-import com.basicfu.sip.common.model.dto.ResourceDto
-import com.basicfu.sip.common.model.po.PermissionResource
-import com.basicfu.sip.common.util.AppUtil
+import com.basicfu.sip.base.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate

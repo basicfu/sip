@@ -1,6 +1,6 @@
 package com.basicfu.sip.base.service
 
-import com.basicfu.sip.common.model.vo.DictVo
+import com.basicfu.sip.base.model.vo.DictVo
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

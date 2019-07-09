@@ -2,7 +2,7 @@ package com.basicfu.sip.base.controller
 
 import com.basicfu.sip.base.model.vo.ResourceVo
 import com.basicfu.sip.base.service.ResourceService
-import com.basicfu.sip.common.constant.Constant
+import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*

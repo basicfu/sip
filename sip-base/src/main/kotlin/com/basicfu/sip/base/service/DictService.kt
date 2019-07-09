@@ -1,10 +1,10 @@
 package com.basicfu.sip.base.service
 
 import com.basicfu.sip.base.mapper.DictMapper
-import com.basicfu.sip.common.enum.Enum
-import com.basicfu.sip.common.model.dto.DictDto
-import com.basicfu.sip.common.model.po.Dict
-import com.basicfu.sip.common.model.vo.DictVo
+import com.basicfu.sip.base.common.enum.Enum
+import com.basicfu.sip.base.model.dto.DictDto
+import com.basicfu.sip.base.model.po.Dict
+import com.basicfu.sip.base.model.vo.DictVo
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate

@@ -1,22 +1,17 @@
 package com.basicfu.sip.base.service
 
+import com.basicfu.sip.base.common.constant.Constant
+import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.*
-import com.basicfu.sip.base.model.po.Menu
-import com.basicfu.sip.base.model.po.Permission
-import com.basicfu.sip.base.model.po.Role
-import com.basicfu.sip.base.model.po.UserRole
+import com.basicfu.sip.base.model.dto.AppDto
+import com.basicfu.sip.base.model.dto.ResourceDto
+import com.basicfu.sip.base.model.dto.RoleDto
+import com.basicfu.sip.base.model.dto.UserDto
+import com.basicfu.sip.base.model.po.*
 import com.basicfu.sip.base.model.vo.RoleVo
-import com.basicfu.sip.client.util.UserUtil
-import com.basicfu.sip.common.constant.Constant
-import com.basicfu.sip.common.enum.Enum
-import com.basicfu.sip.common.model.dto.AppDto
-import com.basicfu.sip.common.model.dto.ResourceDto
-import com.basicfu.sip.common.model.dto.RoleDto
-import com.basicfu.sip.common.model.dto.UserDto
-import com.basicfu.sip.common.model.po.RoleMenu
-import com.basicfu.sip.common.model.po.RolePermission
-import com.basicfu.sip.common.util.AppUtil
-import com.basicfu.sip.common.util.PermissionUtil
+import com.basicfu.sip.base.util.AppUtil
+import com.basicfu.sip.base.util.PermissionUtil
+import com.basicfu.sip.base.util.UserUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -107,8 +102,8 @@ class RoleService : BaseService<RoleMapper, Role>() {
         pageInfo.pageSize = userRolePageInfo.pageSize
         val userIds = result.map { it.userId!! }
         if (userIds.isNotEmpty()) {
-            val users = UserUtil.listByIds<UserDto>(userIds)
-            pageInfo.list = users
+//            val users = UserUtil.listByIds<UserDto>(userIds)
+//            pageInfo.list = users
         } else {
             pageInfo.list = emptyList()
         }
@@ -144,9 +139,9 @@ class RoleService : BaseService<RoleMapper, Role>() {
 
     fun insertUser(vo: RoleVo): Int {
         var userIds = vo.userIds!!
-        if (UserUtil.listUsernameByIds(userIds).isEmpty()) {
-            throw CustomException(Enum.NOT_FOUND_USER_ID)
-        }
+//        if (UserUtil.listUsernameByIds(userIds).isEmpty()) {
+//            throw CustomException(Enum.NOT_FOUND_USER_ID)
+//        }
         val existsUserIds = urMapper.selectByExample(example<UserRole> {
             andEqualTo(UserRole::roleId, vo.id)
             andIn(UserRole::userId, userIds)
