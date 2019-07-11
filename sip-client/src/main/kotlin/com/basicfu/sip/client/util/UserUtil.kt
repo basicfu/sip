@@ -115,9 +115,9 @@ class UserUtil {
             user.remove("resources")
             val result = user.toJavaObject(clazz)
             fields.forEach { it ->
-                if (it.name == "roles" || it.name == "menus" || it.name == "permissions") {
+                if (it.name == "roles" || it.name == "menus") {
                     it.isAccessible = true
-                    it.set(result, tmpUser.getJSONArray(it.name))
+                    it.set(result, tmpUser.getJSONObject(it.name))
                 } else if (it.name == "resources") {
                     it.isAccessible = true
                     it.set(result, tmpUser.getJSONObject(it.name) as Map<String, List<String>>)
@@ -145,9 +145,6 @@ class UserUtil {
                     if (it.name == "roles"||it.name == "menus" ) {
                         it.isAccessible = true
                         it.set(u, tmpUser.getJSONObject(it.name))
-                    }else if (it.name == "permissions") {
-                        it.isAccessible = true
-                        it.set(u, tmpUser.getJSONArray(it.name))
                     } else if (it.name == "resources") {
                         it.isAccessible = true
                         val obj = tmpUser.getJSONObject(it.name)
