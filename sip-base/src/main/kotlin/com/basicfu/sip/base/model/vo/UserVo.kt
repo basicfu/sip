@@ -3,7 +3,7 @@ package com.basicfu.sip.base.model.vo
 import com.alibaba.fastjson.JSONObject
 
 class UserVo {
-    var id: Long? = null
+    var id: String? = null
     //提供用户名(默认)、手机号(需验证)、邮箱注册(需验证)
     var username: String? = null
     var nickname: String? = null

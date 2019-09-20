@@ -1,27 +1,21 @@
 package com.basicfu.sip.base.service
 
-import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.PermissionMapper
 import com.basicfu.sip.base.mapper.PermissionResourceMapper
 import com.basicfu.sip.base.mapper.ResourceMapper
 import com.basicfu.sip.base.model.dto.PermissionDto
-import com.basicfu.sip.base.model.dto.ResourceDto
 import com.basicfu.sip.base.model.po.Permission
 import com.basicfu.sip.base.model.po.PermissionResource
 import com.basicfu.sip.base.model.po.Resource
 import com.basicfu.sip.base.model.vo.PermissionVo
-import com.basicfu.sip.base.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.core.util.SqlUtil
 import com.github.pagehelper.PageInfo
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.yaml.snakeyaml.Yaml
 
 /**
  * @author basicfu
@@ -35,8 +29,6 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
     lateinit var resourceMapper: ResourceMapper
     @Autowired
     lateinit var roleService: RoleService
-    @Autowired
-    lateinit var appServiceService: AppServiceService
 
     fun list(vo: PermissionVo): PageInfo<PermissionDto> {
         val pageInfo = selectPage<PermissionDto>(example<Permission> {
@@ -59,30 +51,30 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         return pageInfo
     }
 
-    /**
-     * 查询permissionResource,resource自己的appId和sip的，appNotCheck目前无法满足，分页时有count语句
-     */
-    fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {
-        val likeValue = SqlUtil.dealLikeValue(q)
-        startPage()
-        val appIds = arrayListOf(AppUtil.getAppId())
-        val appCode = AppUtil.getAppCode()
-        if (Constant.System.APP_SYSTEM_CODE != appCode) {
-            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
-        }
-        var sql =
-            "select r.id as id,service_id as serviceId,url,method,name,pr.cdate as cdate from permission_resource pr " +
-                    "LEFT JOIN resource r on pr.resource_id=r.id WHERE pr.permission_id=$id " +
-                    "and pr.app_id in (${StringUtils.join(appIds, ",")}) and r.app_id in (${StringUtils.join(
-                        appIds,
-                        ","
-                    )})"
-        likeValue?.let { sql += " and (r.url like $likeValue or r.name like $likeValue)" }
-        sql += " ORDER BY pr.cdate DESC"
-        AppUtil.notCheckApp(2)
-        val result = resourceMapper.selectBySql(sql)
-        return getPageInfo(result)
-    }
+//    /**
+//     * 查询permissionResource,resource自己的appId和sip的，appNotCheck目前无法满足，分页时有count语句
+//     */
+//    fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {
+//        val likeValue = SqlUtil.dealLikeValue(q)
+//        startPage()
+//        val appIds = arrayListOf(AppUtil.getAppId())
+//        val appCode = AppUtil.getAppCode()
+//        if (Constant.System.APP_SYSTEM_CODE != appCode) {
+//            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
+//        }
+//        var sql =
+//            "select r.id as id,service_id as serviceId,url,method,name,pr.cdate as cdate from permission_resource pr " +
+//                    "LEFT JOIN resource r on pr.resource_id=r.id WHERE pr.permission_id=$id " +
+//                    "and pr.app_id in (${StringUtils.join(appIds, ",")}) and r.app_id in (${StringUtils.join(
+//                        appIds,
+//                        ","
+//                    )})"
+//        likeValue?.let { sql += " and (r.url like $likeValue or r.name like $likeValue)" }
+//        sql += " ORDER BY pr.cdate DESC"
+//        AppUtil.notCheckApp(2)
+//        val result = resourceMapper.selectBySql(sql)
+//        return getPageInfo(result)
+//    }
 
     fun all(): List<PermissionDto> = to(mapper.selectAll())
     fun insert(vo: PermissionVo): Int {
@@ -101,14 +93,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
      */
     fun insertResource(vo: PermissionVo): Int {
         var ids = vo.resourceIds!!
-        AppUtil.notCheckApp()
-        val appIds = arrayListOf(AppUtil.getAppId())
-        val appCode = AppUtil.getAppCode()
-        if (Constant.System.APP_SYSTEM_CODE != appCode) {
-            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
-        }
         if (resourceMapper.selectCountByExample(example<Resource> {
-                andIn(Resource::appId, appIds)
                 andIn(Resource::id, ids)
             }) != ids.size) throw CustomException(Enum.NOT_FOUND_RESOURCE)
         val existsResourceIds = permissionResourceMapper.selectByExample(example<PermissionResource> {
@@ -120,7 +105,7 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
             throw CustomException(Enum.EXIST_ADD_DATA)
         }
         val permissionResources = arrayListOf<PermissionResource>()
-        ids.forEach { it ->
+        ids.forEach {
             val pr = PermissionResource()
             pr.permissionId = vo.id
             pr.resourceId = it
@@ -168,127 +153,128 @@ class PermissionService : BaseService<PermissionMapper, Permission>() {
         return count
     }
 
-    /**
-     * 如果已经存在permission不在此添加，判断下的资源是否有新增，只处理新增
-     */
-    @Suppress("UNCHECKED_CAST")
-    fun import(vo: PermissionVo) {
-        val yaml = Yaml().load(vo.value) as LinkedHashMap<String, Any>
-        val permissionsStr = yaml["permission"] as ArrayList<Any>
-        val permissionMap = mapper.selectAll().associateBy { "${it.name}|${it.code}" }
-        val appServiceMap = appServiceService.all(1).associateBy({ it.id }, { it.name })
-        AppUtil.notCheckApp()
-        val resourceList = resourceMapper.selectByExample(example<Resource> {
-            andIn(Resource::appId, AppUtil.getAppIdAndSipId())
-        })
-        val resourceMap = resourceList.associateBy { it.id!! }
-        val resourceUrlMap = resourceList.associateBy { "${it?.url}|${it?.method}|${appServiceMap[it?.serviceId]}" }
-        val permissions = arrayListOf<Permission>()
-        val insertPermissions = arrayListOf<Permission>()
-        val insertPermissionResources = arrayListOf<PermissionResource>()
-        permissionsStr.forEach {
-            if (it is String) {
-                val permissionArray = it.split("|")
-                if (permissionArray.size == 2) {
-                    val permission = permissionMap[it]
-                    if (permission == null) {
-                        val po=generate<Permission> {
-                            this.name=""
-                        }
-                        po.name=""
-                        po.name=""
-                        po.name=""
-                        insertPermissions.add(dealInsert(generate {
-                            name = permissionArray[0]
-                            code = permissionArray[1]
-                        }))
-                    } else {
-                        permissions.add(permission)
-                    }
-                }
-            } else {
-                val resources = it as LinkedHashMap<String, ArrayList<String>>
-                resources.forEach { k, _ ->
-                    val permissionArray = k.split("|")
-                    if (permissionArray.size == 2) {
-                        val permission = permissionMap[k]
-                        if (permission == null) {
-                            insertPermissions.add(dealInsert(generate {
-                                name = permissionArray[0]
-                                code = permissionArray[1]
-                            }))
-                        } else {
-                            permissions.add(permission)
-                        }
-                    }
-                }
-            }
-        }
-        if (insertPermissions.isNotEmpty()) {
-            mapper.insertList(insertPermissions)
-            permissions.addAll(insertPermissions)
-        }
-        val ids = permissions.map { it.id!! }
-        val permissionResources = permissionResourceMapper.selectByExample(example<PermissionResource> {
-            andIn(PermissionResource::permissionId, ids)
-        }).groupBy({ it.permissionId }, { resourceMap[it.resourceId] })
-        val permissionFullMap = permissions.associateBy { "${it.name}|${it.code}" }
-        permissionsStr.forEach {
-            if (it !is String) {
-                val resources = it as LinkedHashMap<String, ArrayList<String>>
-                resources.forEach { k, v ->
-                    val permissionArray = k.split("|")
-                    if (permissionArray.size == 2) {
-                        val permission = permissionFullMap[k]!!
-                        val permissionResourceMap =
-                            permissionResources[permission.id]?.associateBy({ "${it?.url}|${it?.method}|${appServiceMap[it?.serviceId]}" },
-                                { it }) ?: hashMapOf()
-                        v.forEach {
-                            val resource = permissionResourceMap[it]
-                            if (resource == null) {
-                                resourceUrlMap[it]?.let {
-                                    insertPermissionResources.add(dealInsert(generate {
-                                        permissionId = permission.id
-                                        resourceId = it.id
-                                    }))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (insertPermissionResources.isNotEmpty()) {
-            permissionResourceMapper.insertList(insertPermissionResources)
-        }
-    }
-
-    fun export(): String {
-        val permissions = mapper.selectAll()
-        val ids = permissions.map { it.id!! }
-        val permissionResources = permissionResourceMapper.selectByExample(example<PermissionResource> {
-            andIn(PermissionResource::permissionId, ids)
-        })
-        val resourceIds = permissionResources.map { it.resourceId }
-        val permissionResourceMap = permissionResources.groupBy { it.permissionId!! }
-        AppUtil.notCheckApp()
-        val resourceMap = resourceMapper.selectByExample(example<Resource> {
-            andIn(Resource::id, resourceIds)
-            andIn(Resource::appId, AppUtil.getAppIdAndSipId())
-        }).associateBy { it.id!! }
-        val appServiceMap = appServiceService.all(1).associateBy({ it.id }, { it.name })
-        val prefix = "permission:\r\n"
-        val listStr = permissions.map { permission ->
-            var sb = "  - ${permission.name}|${permission.code}"
-            val list = permissionResourceMap[permission.id]
-            if (list != null) {
-                sb += ":\r\n" + StringUtils.join(
-                    list.map { it -> resourceMap[it.resourceId]?.let { "    - ${it.url}|${it.method}|${appServiceMap[it.serviceId]}" } }.filter { it != null },
-                    "\r\n"
-                )
-            }
-            sb
-        }
-        return prefix + StringUtils.join(listStr, "\r\n")
-    }
+//    /**
+//     * 如果已经存在permission不在此添加，判断下的资源是否有新增，只处理新增
+//     */
+//    @Suppress("UNCHECKED_CAST")
+//    fun import(vo: PermissionVo) {
+//        val yaml = Yaml().load(vo.value) as LinkedHashMap<String, Any>
+//        val permissionsStr = yaml["permission"] as ArrayList<Any>
+//        val permissionMap = mapper.selectAll().associateBy { "${it.name}|${it.code}" }
+//        val appServiceMap = appServiceService.all(1).associateBy({ it.id }, { it.name })
+//        AppUtil.notCheckApp()
+//        val resourceList = resourceMapper.selectByExample(example<Resource> {
+//            andIn(Resource::appId, AppUtil.getAppIdAndSipId())
+//        })
+//        val resourceMap = resourceList.associateBy { it.id!! }
+////        val resourceUrlMap = resourceList.associateBy { "${it?.url}|${it?.method}|${appServiceMap[it?.serviceId]}" }
+//        val resourceUrlMap = resourceList.associateBy { "${it?.url}|${it?.method}|${appServiceMap[it?.appId]}" }
+//        val permissions = arrayListOf<Permission>()
+//        val insertPermissions = arrayListOf<Permission>()
+//        val insertPermissionResources = arrayListOf<PermissionResource>()
+//        permissionsStr.forEach {
+//            if (it is String) {
+//                val permissionArray = it.split("|")
+//                if (permissionArray.size == 2) {
+//                    val permission = permissionMap[it]
+//                    if (permission == null) {
+//                        val po=generate<Permission> {
+//                            this.name=""
+//                        }
+//                        po.name=""
+//                        po.name=""
+//                        po.name=""
+//                        insertPermissions.add(dealInsert(generate {
+//                            name = permissionArray[0]
+//                            code = permissionArray[1]
+//                        }))
+//                    } else {
+//                        permissions.add(permission)
+//                    }
+//                }
+//            } else {
+//                val resources = it as LinkedHashMap<String, ArrayList<String>>
+//                resources.forEach { k, _ ->
+//                    val permissionArray = k.split("|")
+//                    if (permissionArray.size == 2) {
+//                        val permission = permissionMap[k]
+//                        if (permission == null) {
+//                            insertPermissions.add(dealInsert(generate {
+//                                name = permissionArray[0]
+//                                code = permissionArray[1]
+//                            }))
+//                        } else {
+//                            permissions.add(permission)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if (insertPermissions.isNotEmpty()) {
+//            mapper.insertList(insertPermissions)
+//            permissions.addAll(insertPermissions)
+//        }
+//        val ids = permissions.map { it.id!! }
+//        val permissionResources = permissionResourceMapper.selectByExample(example<PermissionResource> {
+//            andIn(PermissionResource::permissionId, ids)
+//        }).groupBy({ it.permissionId }, { resourceMap[it.resourceId] })
+//        val permissionFullMap = permissions.associateBy { "${it.name}|${it.code}" }
+//        permissionsStr.forEach {
+//            if (it !is String) {
+//                val resources = it as LinkedHashMap<String, ArrayList<String>>
+//                resources.forEach { k, v ->
+//                    val permissionArray = k.split("|")
+//                    if (permissionArray.size == 2) {
+//                        val permission = permissionFullMap[k]!!
+//                        val permissionResourceMap =
+//                            permissionResources[permission.id]?.associateBy({ "${it?.url}|${it?.method}|${appServiceMap[it?.appId]}" },
+//                                { it }) ?: hashMapOf()
+//                        v.forEach {
+//                            val resource = permissionResourceMap[it]
+//                            if (resource == null) {
+//                                resourceUrlMap[it]?.let {
+//                                    insertPermissionResources.add(dealInsert(generate {
+//                                        permissionId = permission.id
+//                                        resourceId = it.id
+//                                    }))
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if (insertPermissionResources.isNotEmpty()) {
+//            permissionResourceMapper.insertList(insertPermissionResources)
+//        }
+//    }
+//
+//    fun export(): String {
+//        val permissions = mapper.selectAll()
+//        val ids = permissions.map { it.id!! }
+//        val permissionResources = permissionResourceMapper.selectByExample(example<PermissionResource> {
+//            andIn(PermissionResource::permissionId, ids)
+//        })
+//        val resourceIds = permissionResources.map { it.resourceId }
+//        val permissionResourceMap = permissionResources.groupBy { it.permissionId!! }
+//        AppUtil.notCheckApp()
+//        val resourceMap = resourceMapper.selectByExample(example<Resource> {
+//            andIn(Resource::id, resourceIds)
+//            andIn(Resource::appId, AppUtil.getAppIdAndSipId())
+//        }).associateBy { it.id!! }
+//        val appServiceMap = appServiceService.all(1).associateBy({ it.id }, { it.name })
+//        val prefix = "permission:\r\n"
+//        val listStr = permissions.map { permission ->
+//            var sb = "  - ${permission.name}|${permission.code}"
+//            val list = permissionResourceMap[permission.id]
+//            if (list != null) {
+//                sb += ":\r\n" + StringUtils.join(
+//                    list.map { it -> resourceMap[it.resourceId]?.let { "    - ${it.url}|${it.method}|${appServiceMap[it.appId]}" } }.filter { it != null },
+//                    "\r\n"
+//                )
+//            }
+//            sb
+//        }
+//        return prefix + StringUtils.join(listStr, "\r\n")
+//    }
 }

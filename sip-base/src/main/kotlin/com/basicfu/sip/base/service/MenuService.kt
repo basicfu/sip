@@ -1,25 +1,19 @@
 package com.basicfu.sip.base.service
 
-import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.MenuMapper
 import com.basicfu.sip.base.mapper.MenuResourceMapper
 import com.basicfu.sip.base.mapper.ResourceMapper
 import com.basicfu.sip.base.model.dto.MenuDto
-import com.basicfu.sip.base.model.dto.ResourceDto
 import com.basicfu.sip.base.model.po.Menu
 import com.basicfu.sip.base.model.po.MenuResource
 import com.basicfu.sip.base.model.po.Resource
 import com.basicfu.sip.base.model.vo.MenuVo
-import com.basicfu.sip.base.util.AppUtil
 import com.basicfu.sip.base.util.MenuUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
-import com.basicfu.sip.core.util.SqlUtil
-import com.github.pagehelper.PageInfo
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -38,8 +32,12 @@ class MenuService : BaseService<MenuMapper, Menu>() {
     @Autowired
     lateinit var roleService: RoleService
 
-    fun all(): List<MenuDto> {
-        val menus = to<MenuDto>(mapper.selectAll())
+    fun all(appId: Long?): List<MenuDto> {
+        val menus = to<MenuDto>(mapper.selectByExample(example<Menu> {
+            andEqualTo {
+                this.appId = appId
+            }
+        }))
         val ids = menus.map { it.id }
         if (ids.isNotEmpty()) {
             val menuResourceMap = menuResourceMapper.selectByExample(example<MenuResource> {
@@ -53,34 +51,26 @@ class MenuService : BaseService<MenuMapper, Menu>() {
         return MenuUtil.recursive(null, menus)
     }
 
-    /**
-     * 不检查应用，临时解决方案
-     */
-    fun listByIds(ids: List<Long>): List<MenuDto> {
-        AppUtil.notCheckApp()
-        return to(selectByIds(ids))
-    }
-
-    fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {
-        val likeValue = SqlUtil.dealLikeValue(q)
-        startPage()
-        val appIds = arrayListOf(AppUtil.getAppId())
-        val appCode = AppUtil.getAppCode()
-        if (Constant.System.APP_SYSTEM_CODE != appCode) {
-            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
-        }
-        var sql =
-            "select r.id as id,service_id as serviceId,url,method,name,mr.cdate as cdate from menu_resource mr LEFT JOIN resource r on mr.resource_id=r.id WHERE mr.menu_id=$id" +
-                    " and mr.app_id in (${StringUtils.join(appIds, ",")}) and r.app_id in (${StringUtils.join(
-                        appIds,
-                        ","
-                    )})"
-        likeValue?.let { sql += " and (r.url like $likeValue or r.name like $likeValue)" }
-        sql += " ORDER BY mr.cdate DESC"
-        AppUtil.notCheckApp(2)
-        val result = resourceMapper.selectBySql(sql)
-        return getPageInfo(result)
-    }
+//    fun listResourceById(id: Long, q: String?): PageInfo<ResourceDto> {
+//        val likeValue = SqlUtil.dealLikeValue(q)
+//        startPage()
+//        val appIds = arrayListOf(AppUtil.getAppId())
+//        val appCode = AppUtil.getAppCode()
+//        if (Constant.System.APP_SYSTEM_CODE != appCode) {
+//            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
+//        }
+//        var sql =
+//            "select r.id as id,service_id as serviceId,url,method,name,mr.cdate as cdate from menu_resource mr LEFT JOIN resource r on mr.resource_id=r.id WHERE mr.menu_id=$id" +
+//                    " and mr.app_id in (${StringUtils.join(appIds, ",")}) and r.app_id in (${StringUtils.join(
+//                        appIds,
+//                        ","
+//                    )})"
+//        likeValue?.let { sql += " and (r.url like $likeValue or r.name like $likeValue)" }
+//        sql += " ORDER BY mr.cdate DESC"
+//        AppUtil.notCheckApp(2)
+//        val result = resourceMapper.selectBySql(sql)
+//        return getPageInfo(result)
+//    }
 
     /**
      * 内部使用,根据菜单ids获取resourceIds
@@ -102,14 +92,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
 
     fun insertResource(vo: MenuVo): Int {
         var ids = vo.resourceIds!!
-        AppUtil.notCheckApp()
-        val appIds = arrayListOf(AppUtil.getAppId())
-        val appCode = AppUtil.getAppCode()
-        if (Constant.System.APP_SYSTEM_CODE != appCode) {
-            appIds.add(AppUtil.getAppIdByAppCode(Constant.System.APP_SYSTEM_CODE))
-        }
         if (resourceMapper.selectCountByExample(example<Resource> {
-                andIn(Resource::appId, appIds)
                 andIn(Resource::id, ids)
             }) != ids.size) throw CustomException(Enum.NOT_FOUND_RESOURCE)
         val existsResourceIds = menuResourceMapper.selectByExample(example<MenuResource> {
@@ -121,7 +104,7 @@ class MenuService : BaseService<MenuMapper, Menu>() {
             throw CustomException(Enum.EXIST_ADD_DATA)
         }
         val menuResources = arrayListOf<MenuResource>()
-        ids.forEach { it ->
+        ids.forEach {
             val mr = MenuResource()
             mr.menuId = vo.id
             mr.resourceId = it

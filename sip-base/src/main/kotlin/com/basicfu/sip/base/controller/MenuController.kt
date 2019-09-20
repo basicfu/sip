@@ -17,19 +17,14 @@ class MenuController {
     lateinit var menuService: MenuService
 
     @GetMapping("/all")
-    fun all(): Result<Any> {
-        return Result.success(menuService.all())
+    fun all(appId: Long?): Result<Any> {
+        return Result.success(menuService.all(appId))
     }
 
-    @GetMapping("/list/{ids}")
-    fun listByIds(@PathVariable @RequestBody ids:List<Long>): Result<Any> {
-        return Result.success(menuService.listByIds(ids))
-    }
-
-    @GetMapping("/list/{id}/resource")
-    fun listResourceById(@PathVariable id: Long, @RequestParam(required = false) q: String?): Result<Any> {
-        return Result.success(menuService.listResourceById(id, q))
-    }
+//    @GetMapping("/list/{id}/resource")
+//    fun listResourceById(@PathVariable id: Long, @RequestParam(required = false) q: String?): Result<Any> {
+//        return Result.success(menuService.listResourceById(id, q))
+//    }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: MenuVo): Result<Any> {
@@ -37,7 +32,7 @@ class MenuController {
     }
 
     @PostMapping("/insert/resource")
-    fun insertMenu(@RequestBody vo: MenuVo): Result<Any> {
+    fun insertResource(@RequestBody vo: MenuVo): Result<Any> {
         return Result.success(menuService.insertResource(vo))
     }
 

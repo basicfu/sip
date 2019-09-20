@@ -9,8 +9,10 @@ eureka:
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
 sip:
   multi-app:
-    enabled: true
+    enabled: false
     field: app_id
     exclude-table: user,user_auth,app
   datasource:
     expression: execution(* com.basicfu.sip.*.service.*Service.*(..))&&!execution(* com.basicfu.sip.core.service.BaseService.*(..))
+  app: sip
+  host: http://localhost:5000

@@ -4,13 +4,24 @@
 // 重置密码resetPassword
 
 // 获取当前用户信息getUserByToken
+
+
 // 根据用户ID后去用户信息getUserById
 // 根据用户名获取用户信息getUserByUsername
+
+
 // 根据用户名获取用户信息listByIds
 // 根据用户名获取用户信息listUsernameByIds
 // 根据用户名获取用户信息suggest
 // 更新用户信息updateUser
 
+
+一套角色，一套应用
+- 角色
+ - 权限
+ - 菜单
+ - 资源
+ 
 
 
 

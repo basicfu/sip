@@ -40,9 +40,9 @@ object TokenUtil {
     /**
      * 获取从前台传来的token并转为redis token
      */
-    fun getCurrentRedisToken(): String? {
-        return RequestUtil.getHeader(Constant.System.AUTHORIZATION)?.let {frontToken->
-            AESUtil.decrypt(frontToken, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
+    fun getCurrentRedisToken(frontToken:String?=null): String? {
+        return frontToken?:RequestUtil.getHeader(Constant.System.AUTHORIZATION)?.let {
+            AESUtil.decrypt(it, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
         }
     }
 
@@ -57,10 +57,19 @@ object TokenUtil {
      * 获取当前用户
      */
     fun getCurrentUser(): UserDto? {
-        return getCurrentRedisToken()?.let {
-            RedisUtil.get<String>(it)?.let {
-                Gson().fromJson(it,UserDto::class.java)
-//                JSON.parseObject(it).toJavaObject(UserDto::class.java)
+        return getCurrentRedisToken()?.let {token->
+            RedisUtil.get<String>(token)?.let {u->
+                Gson().fromJson(u,UserDto::class.java)
+            }
+        }
+    }
+    /**
+     * 获取当前用户
+     */
+    fun getCurrentUser(frontToken:String): UserDto? {
+        return getCurrentRedisToken(frontToken)?.let {token->
+            RedisUtil.get<String>(token)?.let {u->
+                Gson().fromJson(u,UserDto::class.java)
             }
         }
     }

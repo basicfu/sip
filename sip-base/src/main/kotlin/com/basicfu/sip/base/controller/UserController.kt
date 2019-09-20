@@ -20,7 +20,8 @@ class UserController {
     fun status(): Result<Any> {
         return Result.success(userService.status())
     }
-//
+
+    //
 //    @GetMapping("/get")
 //    fun get(vo:UserVo): Result<Any> {
 //        return Result.success(userService.get(vo))
@@ -54,12 +55,14 @@ class UserController {
     fun login(@RequestBody vo: UserVo): Result<Any> {
         return Result.success(userService.login(vo))
     }
-//
+
+    //
     @GetMapping("/logout")
     fun logout(): Result<Any> {
         return Result.success(userService.logout())
     }
-//
+
+    //
 //    @PostMapping("/insert")
 //    fun insert(@RequestBody map: Map<String, Any>): Result<Any> {
 //        return Result.success(userService.insert(map))
@@ -69,7 +72,8 @@ class UserController {
     fun register(@RequestBody map: Map<String, Any>): Result<Any> {
         return Result.success(userService.insert(map))
     }
-//
+
+    //
 //    @PostMapping("/update")
 //    fun update(@RequestBody map: Map<String, Any>): Result<Any> {
 //        return Result.success(userService.update(map))
@@ -79,11 +83,19 @@ class UserController {
     fun update(@RequestBody vo: UserVo): Result<Any> {
         return Result.success(userService.updatePassword(vo))
     }
-//
-//    @DeleteMapping("/delete")
-//    fun delete(@RequestBody ids: List<Long>): Result<Any> {
-//        return Result.success(userService.delete(ids))
-//    }
+
+    @DeleteMapping("/delete")
+    fun delete(@RequestBody ids: List<String>): Result<Any> {
+        return Result.success(userService.delete(ids, 0))
+    }
+
+    /***
+     * 物理删除
+     */
+    @DeleteMapping("/delete/phy")
+    fun phyDelete(@RequestBody ids: List<String>): Result<Any> {
+        return Result.success(userService.delete(ids, 1))
+    }
 //
 //    @GetMapping("/list/role/{ids}")
 //    fun listRoleByIds(@PathVariable ids: List<Long>): Result<Any> {

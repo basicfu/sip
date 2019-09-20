@@ -35,7 +35,7 @@ object MongoUtil {
             fromProviders(PojoCodecProvider.builder().automatic(true).build())
         )
         val settings = MongoClientSettings.builder()
-            .applyConnectionString(ConnectionString(""))
+            .applyConnectionString(ConnectionString("mongodb://root:Czkj1234Root@dds-wz9cbf32df43d1f4-pub.mongodb.rds.aliyuncs.com:3717/admin"))
             .codecRegistry(pojoCodecRegistry)
             .build()
         val mongoClient = MongoClients.create(settings)

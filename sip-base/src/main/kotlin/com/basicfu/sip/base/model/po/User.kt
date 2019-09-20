@@ -1,7 +1,7 @@
 package com.basicfu.sip.base.model.po
 
 class User {
-    var id: Long? = null
+    var id: String? = null
     var username: String? = null
     var nickname: String? = null
     var mobile: String? = null
@@ -12,7 +12,7 @@ class User {
     var avatar: String? = null
     var createTime: Long? = null
     var updateTime: Long? = null
-    var registerMethod: String? = null
+    var registerType: Int? = null
     var blocked: Boolean? = null
     var isdel: Boolean? = null
 

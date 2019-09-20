@@ -8,6 +8,8 @@ package com.basicfu.sip.base.common.constant
  */
 object Constant {
     object System {
+        const val APP = "app"
+        const val NORMAL = "NORMAL"
         private const val PAGE_SIZE = 20
         const val GUEST = "GUEST"
         const val AUTHORIZATION = "Authorization"
@@ -28,7 +30,8 @@ object Constant {
         const val TOKEN_PREFIX = "TOKEN_"
         const val TOKEN_GUEST = TOKEN_PREFIX + System.GUEST + "_"
         const val APP = "APP"
-        const val ROLE_PERMISSION = "ROLE_PERMISSION_"
+        const val ROLE_PERMISSION = "ROLE_PERMISSION"
+        const val SMS_CHECK = "SMS_"
     }
 
     object Dict {

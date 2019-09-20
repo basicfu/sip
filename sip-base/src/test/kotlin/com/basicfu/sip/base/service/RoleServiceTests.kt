@@ -31,7 +31,6 @@ class RoleServiceTests {
     fun insertUser() {
         val vo=generate<RoleVo> {
             id=1
-            userIds= arrayListOf(12)
         }
         Assert.assertEquals(roleService.insertUser(vo),1)
     }
@@ -55,7 +54,6 @@ class RoleServiceTests {
     fun deleteUser() {
         val vo=generate<RoleVo> {
             id=1
-            userIds= arrayListOf(12)
         }
         Assert.assertEquals(roleService.deleteUser(vo),1)
     }

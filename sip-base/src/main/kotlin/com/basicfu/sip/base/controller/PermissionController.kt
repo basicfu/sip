@@ -21,11 +21,6 @@ class PermissionController {
         return Result.success(permissionService.list(vo))
     }
 
-    @GetMapping("/list/{id}/resource")
-    fun listResourceById(@PathVariable id: Long, @RequestParam(required = false) q: String?): Result<Any> {
-        return Result.success(permissionService.listResourceById(id, q))
-    }
-
     @GetMapping("/all")
     fun all(): Result<Any> {
         return Result.success(permissionService.all())
@@ -37,7 +32,7 @@ class PermissionController {
     }
 
     @PostMapping("/insert/resource")
-    fun insertPermission(@RequestBody vo: PermissionVo): Result<Any> {
+    fun insertResource(@RequestBody vo: PermissionVo): Result<Any> {
         return Result.success(permissionService.insertResource(vo))
     }
 
@@ -56,14 +51,14 @@ class PermissionController {
         return Result.success(permissionService.deleteResource(vo))
     }
 
-    @PostMapping("/import")
-    fun import(@RequestBody vo: PermissionVo): Result<Any> {
-        permissionService.import(vo)
-        return Result.success(null,"导入成功")
-    }
-
-    @GetMapping("/export")
-    fun export(): Result<Any> {
-        return Result.success(permissionService.export())
-    }
+//    @PostMapping("/import")
+//    fun import(@RequestBody vo: PermissionVo): Result<Any> {
+//        permissionService.import(vo)
+//        return Result.success(null,"导入成功")
+//    }
+//
+//    @GetMapping("/export")
+//    fun export(): Result<Any> {
+//        return Result.success(permissionService.export())
+//    }
 }

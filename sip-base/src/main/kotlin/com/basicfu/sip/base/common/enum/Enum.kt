@@ -55,7 +55,7 @@ enum class Enum(val value: Int, val msg: String) {
     EXIST_ROLE_NAME(3003, "角色名已存在"),
     NOT_FOUND_MENU(3004, "部分要添加菜单没有找到,请刷新数据后重试"),
     NOT_FOUND_PERMISSION(3005, "部分要添加权限没有找到,请刷新数据后重试"),
-    SERVICE_URL_METHOD_UNIQUE(3006, "一个服务下的资源URL和请求方法需要唯一"),
+    SERVICE_URL_METHOD_UNIQUE(3006, "一个应用下的资源URL和请求方法需要唯一"),
     EXIST_PERMISSION_NAME(3007, "权限名已存在"),
     EXIST_TEMPLATE_NAME(3008, "模板名已存在"),
     EXIST_PERMISSION_CODE(3009, "权限名CODE已存在"),
@@ -83,6 +83,13 @@ enum class Enum(val value: Int, val msg: String) {
         EMAIL(2),
     }
 
+    enum class RegisterType constructor(val value: Int) {
+        USERNAME(0),
+        USERNAME_MOBILE(1),
+        USERNAME_EMAIL(2),
+        SYSTEM(3),
+    }
+
     enum class FieldType {
         TEXT,
         NUMBER,
@@ -107,32 +114,5 @@ enum class Enum(val value: Int, val msg: String) {
         NOT_BETWEEN,
         LIKE,
         NOT_LIKE,
-    }
-
-    enum class ProjectCategoryType {
-        DIRECTORY,
-        INTERFACE
-    }
-
-    enum class RequestMethod {
-        GET,
-        POST,
-        PUT,
-        PATCH,
-        DELETE,
-        HEAD,
-        OPTIONS,
-    }
-
-    enum class ReqBodyType {
-        FORM,
-        JSON,
-        FILE,
-        RAW,
-    }
-
-    enum class InterfaceHistoryType {
-        SAVE,
-        REQUEST,
     }
 }

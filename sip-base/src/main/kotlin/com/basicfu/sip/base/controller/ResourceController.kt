@@ -1,8 +1,8 @@
 package com.basicfu.sip.base.controller
 
+import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.model.vo.ResourceVo
 import com.basicfu.sip.base.service.ResourceService
-import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.core.model.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -32,10 +32,10 @@ class ResourceController {
         return Result.success(resourceService.suggest(q, limit))
     }
 
-    @PostMapping("/sync")
-    fun sync(@RequestBody vo: ResourceVo): Result<Any> {
-        return resourceService.sync(vo)
-    }
+//    @PostMapping("/sync")
+//    fun sync(@RequestBody vo: ResourceVo): Result<Any> {
+//        return resourceService.sync(vo)
+//    }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: ResourceVo): Result<Any> {

@@ -67,10 +67,12 @@ subprojects {
 }
 project(":sip-base") {
     dependencies {
+        compile project(':sip-client')
         compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
         compile "com.basicfu.sip:sip-core:0.0.3-2-SNAPSHOT"
         compile 'org.mongodb:mongo-java-driver:3.10.2'
+        compile 'com.aliyun:aliyun-java-sdk-core:4.4.5'
     }
 }
 project(":sip-client") {

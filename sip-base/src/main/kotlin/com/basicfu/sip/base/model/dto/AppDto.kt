@@ -6,7 +6,4 @@ class AppDto {
     var code: String? = null
     var cdate: Int? = null
     var udate: Int? = null
-
-    var services: List<AppServiceDto>? = null
-    var secrets: List<AppSecretDto>? = null
 }

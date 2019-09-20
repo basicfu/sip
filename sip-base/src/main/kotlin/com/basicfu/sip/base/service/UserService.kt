@@ -1,8 +1,10 @@
 package com.basicfu.sip.base.service
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.common.enum.Enum
+import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.MongoUtil
@@ -12,11 +14,13 @@ import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.log
-import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates.combine
 import com.mongodb.client.model.Updates.set
 import org.bson.Document
+import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -26,8 +30,12 @@ import org.springframework.stereotype.Service
  */
 @Service
 class UserService {
-    fun status() {
-        var user = TokenUtil.getCurrentUser()
+    @Autowired
+    lateinit var roleService: RoleService
+
+    fun status(): UserDto {
+        val user = TokenUtil.getCurrentUser()
+        return user ?: UserDto()
     }
 
     /**
@@ -42,10 +50,10 @@ class UserService {
      * 子账号使用@形式待确定
      *
      */
-    fun login(vo: UserVo): Map<String, Any> {
+    fun login(vo: UserVo): JSONObject {
         val username = vo.username!!
         val collection = MongoUtil.collection
-        val userDocument = collection.find(eq("username", username)).first()
+        val userDocument = collection.find(and(eq("username", username), eq("isdel", false))).first()
         if (userDocument == null) {
             log.warn("用户名不存在username:$username")
             throw CustomException("用户名或密码错误")
@@ -69,11 +77,14 @@ class UserService {
         //TODO 记录用户登录记录
         //TODO 系统设置登录过期时间
         val token = TokenUtil.generateToken(username)
-        RedisUtil.set(TokenUtil.generateRedisToken(token), userDocument.toJson(), Constant.System.SESSION_TIMEOUT)
-        userDocument["_id"] = userDocument.getObjectId("_id").toHexString()
-        userDocument["token"] = TokenUtil.generateFrontToken(token) ?: throw CustomException(Enum.LOGIN_ERROR)
-        userDocument.remove("password")
-        return userDocument
+        val json = JSON.parseObject(JSON.toJSONString(userDocument))
+        json["id"] = userDocument.getObjectId("_id").toHexString()
+        json["token"] = TokenUtil.generateFrontToken(token) ?: throw CustomException(Enum.LOGIN_ERROR)
+        json.remove("_id")
+        json.remove("password")
+        json["roles"]=roleService.listRoleByUsername(username)
+        RedisUtil.set(TokenUtil.generateRedisToken(token), json.toJSONString(), Constant.System.SESSION_TIMEOUT)
+        return json
     }
 
     /**
@@ -87,18 +98,19 @@ class UserService {
     }
 
     /**
-     * 注册方式
-     * 用户名密码
-     * 用户名密码+手机号验证
-     * 用户名密码+邮箱验证
-     * 后台创建
+     * 注册方式、检查系统启用哪些注册方式
+     * 用户名密码 0
+     * 用户名密码+手机号验证 1
+     * 用户名密码+邮箱验证 2
+     * 后台创建 3
      */
     fun insert(map: Map<String, Any>): Int {
+        val type = map["type"].toString().toInt()
         val user = generate<User> {
             username = map["username"].toString()
             nickname = map["nickname"].toString()
-            mobile = map["mobile"].toString()
             email = map["email"].toString()
+            mobile = map["mobile"]?.toString()
             password = BCryptPasswordEncoder().encode(map["password"].toString())
             mobileVerified = false
             emailVerified = false
@@ -106,10 +118,35 @@ class UserService {
             updateTime = createTime
             blocked = false
             isdel = false
+            registerType = type
         }
-        if (MongoUtil.collection.countDocuments(Filters.eq("username", user.username)) > 0) {
+        if (MongoUtil.collection.countDocuments(and(eq("username", user.username), eq("isdel", false))) > 0) {
             log.warn("用户名已存在")
             throw CustomException("用户名已存在")
+        }
+        when (type) {
+            Enum.RegisterType.USERNAME.value -> {
+
+            }
+            Enum.RegisterType.USERNAME_MOBILE.value -> {
+                val code = map["code"]?.toString()
+                if (user.mobile == null) throw CustomException("手机号不能为空")
+                if (code == null) throw CustomException("验证码不能为空")
+                val smsKey = "${Constant.Redis.SMS_CHECK}${user.mobile}"
+                val redisCode = RedisUtil.get<String>(smsKey)
+                if (redisCode == null || redisCode != code) throw CustomException("验证码错误")
+                user.mobileVerified = true
+                RedisUtil.del(smsKey)
+            }
+            Enum.RegisterType.USERNAME_EMAIL.value -> {
+
+            }
+            Enum.RegisterType.SYSTEM.value -> {
+
+            }
+            else -> {
+                throw CustomException("不支持的注册方式")
+            }
         }
         MongoUtil.collection.insertOne(Document.parse(JSON.toJSONString(user)))
         return 1
@@ -120,8 +157,15 @@ class UserService {
 //        }
     }
 
+    fun checkMobile(mobile: String) {
+        if (MongoUtil.collection.countDocuments(and(eq("mobile", mobile), eq("isdel", false))) > 0) {
+            log.warn("手机号已存在")
+            throw CustomException("手机号已存在")
+        }
+    }
+
     fun updatePassword(vo: UserVo) {
-        if (MongoUtil.collection.countDocuments(Filters.eq("username", vo.username)) == 0L) {
+        if (MongoUtil.collection.countDocuments(and(eq("username", vo.username), eq("isdel", false))) == 0L) {
             log.warn("用户名不存在")
             throw CustomException("用户名不存在")
         }
@@ -132,5 +176,16 @@ class UserService {
                 set("updateTime", System.currentTimeMillis())
             )
         )
+    }
+
+    /***
+     * 删除用户ids,type0逻辑删除,1物理删除
+     */
+    fun delete(ids: List<String>, type: Int) {
+        if (type == 0) {
+            MongoUtil.collection.updateMany(and(ids.map { eq("_id", ObjectId(it)) }), set("isdel", true))
+        } else if (type == 1) {
+            MongoUtil.collection.deleteMany(and(ids.map { eq("_id", ObjectId(it)) }))
+        }
     }
 }

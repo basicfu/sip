@@ -17,7 +17,7 @@ class RoleToken {
      */
     var permissions: Set<Long> = linkedSetOf()
     /**
-     * 资源
+     * 资源(appCode,resourceIds)
      */
-    var resources: Map<Long, List<String>> = linkedMapOf()
+    var resources: Map<String, List<String>> = linkedMapOf()
 }

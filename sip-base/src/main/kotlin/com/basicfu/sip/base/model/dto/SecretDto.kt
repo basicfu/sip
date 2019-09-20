@@ -1,10 +1,9 @@
 package com.basicfu.sip.base.model.dto
 
-class AppSecretDto {
+class SecretDto {
     var id: Long? = null
-    var appId: Long? = null
+    var key: String? = null
     var secret: String? = null
-    var description: String? = null
     var cdate: Int? = null
     var udate: Int? = null
 }

@@ -5,15 +5,13 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 
-class Resource {
+class Secret {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
-    @Column(name = "app_id")
-    var appId: Long? = null
-    var url: String? = null
-    var method: String? = null
-    var name: String? = null
+    @Column(name="`key`")
+    var key: String? = null
+    var secret: String? = null
     var cdate: Int? = null
     var udate: Int? = null
 }
