@@ -3,36 +3,38 @@ package com.basicfu.sip.client.controller
 import com.alibaba.fastjson.JSONArray
 import com.basicfu.sip.client.model.Result
 import com.basicfu.sip.client.util.ApiUtil
-import org.bouncycastle.cms.RecipientId.password
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import java.util.*
 
-/**
- * @author basicfu
- * @date 2018/7/8
- */
 @RestController("sipClientController")
+@RequestMapping("/sip")
 class SipController {
     @Autowired
     lateinit var requestMappingHandlerMapping: RequestMappingHandlerMapping
 
+    @GetMapping("/user")
+    fun user(): Any {
+        return ApiUtil.user()
+    }
+
     @PostMapping("/login")
-    fun login(@RequestParam username: String, @RequestParam password: String): Result<Any> {
-        return Result(ApiUtil.login(username, password))
+    fun login(@RequestBody map: Map<String, Any>): Any {
+        return ApiUtil.login(map)
     }
 
     @PostMapping("/register")
-    fun register(@RequestBody map: Map<String, Any>): Result<Any> {
-        return Result(ApiUtil.register(map))
+    fun register(@RequestBody map: Map<String, Any>): Any {
+        return ApiUtil.register(map)
     }
 
     @GetMapping("/logout")
-    fun logout(): Result<Any> {
-        return Result(ApiUtil.logout())
+    fun logout(): Any {
+        return ApiUtil.logout()
     }
+
 
     @GetMapping("/sip/client/url")
     fun getServiceAllUrl(): Result<Any> {

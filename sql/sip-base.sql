@@ -45,10 +45,10 @@ drop table if exists user_role;
 create table user_role
 (
     id      bigint auto_increment primary key,
-    username varchar(32) not null default '' comment '用户名',
+    user_id varchar(32) not null default '' comment '用户id',
     role_id bigint not null default 0 comment '角色Id',
     cdate   int    not null default 0 comment '创建时间',
-    unique key (username, role_id)
+    unique key (user_id, role_id)
 )
     comment '用户角色表' engine = InnoDB;
 

@@ -21,9 +21,9 @@ class RoleController {
         return Result.success(roleService.list(vo))
     }
 
-    @GetMapping("/list/{username}/role")
-    fun listRoleByUsername(@PathVariable username: String): Result<Any> {
-        return Result.success(roleService.listRoleByUsername(username))
+    @GetMapping("/list/{uid}/role")
+    fun listRoleByUid(@PathVariable uid: String): Result<Any> {
+        return Result.success(roleService.listRoleByUid(uid))
     }
 
     @GetMapping("/list/{id}/user")

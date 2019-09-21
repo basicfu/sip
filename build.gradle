@@ -31,7 +31,8 @@ subprojects {
                 "com.fasterxml.jackson.module:jackson-module-kotlin",
                 "org.springframework.boot:spring-boot-starter-actuator",
                 "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
-                "org.jetbrains.kotlin:kotlin-reflect"
+                "org.jetbrains.kotlin:kotlin-reflect",
+                "com.alibaba:fastjson:1.2.47"
         )
         testCompile('org.springframework.boot:spring-boot-starter-test')
     }
@@ -67,8 +68,6 @@ subprojects {
 }
 project(":sip-base") {
     dependencies {
-        compile project(':sip-client')
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         compile("mysql:mysql-connector-java:5.1.45")
         compile "com.basicfu.sip:sip-core:0.0.3-2-SNAPSHOT"
         compile 'org.mongodb:mongo-java-driver:3.10.2'
@@ -76,15 +75,4 @@ project(":sip-base") {
     }
 }
 project(":sip-client") {
-    dependencies {
-        compile("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-        compile("io.protostuff:protostuff-core:1.5.9")
-        compile("io.protostuff:protostuff-runtime:1.5.9")
-        compile("io.github.openfeign:feign-core:9.7.0")
-        compile("org.springframework.cloud:spring-cloud-openfeign-core")
-        compile("com.alibaba:fastjson:1.2.47")
-    }
-    //configurations.all {
-    //   exclude group: 'org.springframework.boot', module: 'spring-boot-dependencies'
-    //}
 }

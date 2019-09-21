@@ -1,6 +1,5 @@
 package com.basicfu.sip.base.service
 
-import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.MenuResourceMapper
 import com.basicfu.sip.base.mapper.PermissionResourceMapper
@@ -10,7 +9,6 @@ import com.basicfu.sip.base.model.po.MenuResource
 import com.basicfu.sip.base.model.po.PermissionResource
 import com.basicfu.sip.base.model.po.Resource
 import com.basicfu.sip.base.model.vo.ResourceVo
-import com.basicfu.sip.base.util.AppUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -19,7 +17,6 @@ import com.basicfu.sip.core.service.BaseService
 import com.github.pagehelper.PageInfo
 import org.apache.ibatis.session.RowBounds
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cloud.netflix.ribbon.SpringClientFactory
 import org.springframework.stereotype.Service
 
 /**
@@ -28,8 +25,6 @@ import org.springframework.stereotype.Service
  */
 @Service
 class ResourceService : BaseService<ResourceMapper, Resource>() {
-    @Autowired
-    lateinit var springClientFactory: SpringClientFactory
     @Autowired
     lateinit var permissionResourceMapper: PermissionResourceMapper
     @Autowired

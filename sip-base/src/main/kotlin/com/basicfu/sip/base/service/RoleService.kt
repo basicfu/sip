@@ -3,6 +3,7 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.*
+import com.basicfu.sip.base.model.biz.RoleToken
 import com.basicfu.sip.base.model.dto.AppDto
 import com.basicfu.sip.base.model.dto.ResourceDto
 import com.basicfu.sip.base.model.dto.RoleDto
@@ -10,11 +11,11 @@ import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.*
 import com.basicfu.sip.base.model.vo.RoleVo
 import com.basicfu.sip.base.util.AppUtil
-import com.basicfu.sip.base.util.PermissionUtil
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.service.BaseService
+import com.basicfu.sip.core.util.RedisUtil
 import com.github.pagehelper.PageInfo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -50,10 +51,10 @@ class RoleService : BaseService<RoleMapper, Role>() {
      * 未登录的用户都有GUEST访客权限
      * 登录过的用户都有NORMAL普通用户的权限
      */
-    fun listRoleByUsername(username: String): List<String> {
+    fun listRoleByUid(uid: String): List<String> {
         val roleIds = urMapper.selectByExample(example<UserRole> {
             select(UserRole::roleId)
-            andEqualTo(UserRole::username, username)
+            andEqualTo(UserRole::userId, uid)
         }).mapNotNull { it.roleId }.toMutableList()
         return if (roleIds.isNotEmpty()) {
             to<RoleDto>(roleMapper.selectByExample(example<Role> {
@@ -85,7 +86,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
         pageInfo.total = userRolePageInfo.total
         pageInfo.pageNum = userRolePageInfo.pageNum
         pageInfo.pageSize = userRolePageInfo.pageSize
-        val usernames = result.map { it.username!! }
+        val usernames = result.map { it.userId!! }
         if (usernames.isNotEmpty()) {
 //            val users = UserUtil.listByIds<UserDto>(userIds)
 //            pageInfo.list = users
@@ -123,23 +124,23 @@ class RoleService : BaseService<RoleMapper, Role>() {
     }
 
     fun insertUser(vo: RoleVo): Int {
-        var usernames = vo.usernames!!
+        var userIds = vo.userIds!!
 //        if (UserUtil.listUsernameByIds(userIds).isEmpty()) {
 //            throw CustomException(Enum.NOT_FOUND_USER_ID)
 //        }
         val existsUserIds = urMapper.selectByExample(example<UserRole> {
             andEqualTo(UserRole::roleId, vo.id)
-            andIn(UserRole::username, usernames)
-        }).map { it.username }
-        usernames = usernames.filter { !existsUserIds.contains(it) }
-        if (usernames.isEmpty()) {
+            andIn(UserRole::userId, userIds)
+        }).map { it.userId }
+        userIds = userIds.filter { !existsUserIds.contains(it) }
+        if (userIds.isEmpty()) {
             throw CustomException(Enum.EXIST_ADD_DATA)
         }
         val userRoles = arrayListOf<UserRole>()
-        usernames.forEach {
+        userIds.forEach {
             val ur = UserRole()
             ur.roleId = vo.id
-            ur.username = it
+            ur.userId = it
             userRoles.add(dealInsert(ur))
         }
         return urMapper.insertList(userRoles)
@@ -228,7 +229,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
     fun deleteUser(vo: RoleVo): Int {
         return urMapper.deleteByExample(example<UserRole> {
             andEqualTo(UserRole::roleId, vo.id)
-            andIn(UserRole::username, vo.usernames!!)
+            andIn(UserRole::userId, vo.userIds!!)
         })
     }
 
@@ -251,7 +252,7 @@ class RoleService : BaseService<RoleMapper, Role>() {
     }
 
     /**
-     * 刷新一个用户的权限
+     * 初始化/刷新一个角色权限
      */
     fun refreshRolePermission() {
         val apps = to<AppDto>(appMapper.selectAll())
@@ -262,14 +263,33 @@ class RoleService : BaseService<RoleMapper, Role>() {
         val rolePermissions = rpMapper.selectAll()
         val menuResources = menuResourceMapper.selectAll()
         val permissionResources = permissionResourceMapper.selectAll()
-        PermissionUtil.initRolePermission(
-            apps,
-            roles,
-            resources,
-            roleMenus,
-            rolePermissions,
-            menuResources,
-            permissionResources
-        )
+        val appsMap = apps.associateBy({ it.id }, { it.code })
+        val roleTokens = arrayListOf<RoleToken>()
+        val roleMenuMap = roleMenus.groupBy({ it.roleId!! }, { it.menuId!! })
+        val rolePermissionMap = rolePermissions.groupBy({ it.roleId!! }, { it.permissionId!! })
+        roles.forEach { role ->
+            val menus = roleMenuMap[role.id!!] ?: arrayListOf()
+            val permissions = rolePermissionMap[role.id!!] ?: arrayListOf()
+            val resourceIds = arrayListOf<Long>()
+            if (menus.isNotEmpty()) {
+                resourceIds.addAll(menuResources.filter { menus.contains(it.menuId) }.map { it.resourceId!! })
+            }
+            if (permissions.isNotEmpty()) {
+                resourceIds.addAll(permissionResources.filter { permissions.contains(it.permissionId) }.map { it.resourceId!! })
+            }
+            val resourcesMap = hashMapOf<String, List<String>>()
+            resources.filter { resourceIds.contains(it.id) }.groupBy({ it.appId!! }, { "/" + it.method + it.url })
+                .forEach { k, v ->
+                    appsMap[k]?.let { resourcesMap[it] = v }
+                }
+            roleTokens.add(generate {
+                this.roleCode = role.code
+                this.menus = menus.toSet()
+                this.permissions = permissions.toSet()
+                this.resources = resourcesMap
+            })
+        }
+        //需注意:初始化后必有一个访客角色一定不会为空，如果手动修改数据库后续获取时未判断是否为空
+        RedisUtil.hMSet(Constant.Redis.ROLE_PERMISSION, roleTokens.associateBy { it.roleCode!! })
     }
 }

@@ -6,13 +6,19 @@ import com.aliyuncs.exceptions.ClientException
 import com.aliyuncs.exceptions.ServerException
 import com.aliyuncs.http.MethodType
 import com.aliyuncs.profile.DefaultProfile
+import com.basicfu.sip.base.common.config.AliyunConfig
 import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.core.util.RedisUtil
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
+@Component
 object SmsUtil {
+
     fun send(mobile: String) {
         //根据配置文件取值，所以此处实时创建
-        val profile: DefaultProfile = DefaultProfile.getProfile("default", "<accessKeyId>", "<accessSecret>")
+        val profile: DefaultProfile =
+            DefaultProfile.getProfile("default", AliyunConfig.AccessId, AliyunConfig.AccessKey)
         val code = ((Math.random() * 9 + 1) * 100000).toInt().toString()//随机6位验证码
         println(code)
         val client = DefaultAcsClient(profile)
@@ -24,7 +30,7 @@ object SmsUtil {
         request.putQueryParameter("RegionId", "default")
         request.putQueryParameter("PhoneNumbers", mobile)
         request.putQueryParameter("SignName", "初妆")
-        request.putQueryParameter("TemplateCode", "id")
+        request.putQueryParameter("TemplateCode", "SMS_174270504")
         request.putQueryParameter("TemplateParam", "{'code':\"$code\"}")
         try {
             val response = client.getCommonResponse(request)
@@ -37,7 +43,7 @@ object SmsUtil {
         } catch (e: ClientException) {
             e.printStackTrace()
         }
-        RedisUtil.set("${Constant.Redis.SMS_CHECK}$mobile",code,5*60*1000)
+        RedisUtil.set("${Constant.Redis.SMS_CHECK}$mobile", code, 5 * 60 * 1000)
     }
 }
 

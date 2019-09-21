@@ -7,8 +7,8 @@ class UserRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
-    @Column(name = "username")
-    var username: String? = null
+    @Column(name = "user_id")
+    var userId: String? = null
     @Column(name = "role_id")
     var roleId: Long? = null
     var cdate: Int? = null

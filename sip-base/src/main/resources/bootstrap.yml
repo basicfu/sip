@@ -3,10 +3,6 @@ spring:
     name: sip-base
   profiles:
     active: ${ENV:dev}
-eureka:
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.cloud.client.ip-address}:${server.port}
 sip:
   multi-app:
     enabled: false
@@ -14,5 +10,6 @@ sip:
     exclude-table: user,user_auth,app
   datasource:
     expression: execution(* com.basicfu.sip.*.service.*Service.*(..))&&!execution(* com.basicfu.sip.core.service.BaseService.*(..))
-  app: sip
-  host: http://localhost:5000
+aliyun:
+  accessId: ${ALIYUN_ACCESS_ID:}
+  accessKey: ${ALIYUN_ACCESS_KEY:}

@@ -7,7 +7,7 @@ class RoleVo {
     var enable: Boolean? = null
 
     var q:String?=null
-    var usernames:List<String>?=null
+    var userIds:List<String>?=null
     var menuIds:List<Long>?=null
     var permissionIds:List<Long>?=null
 }

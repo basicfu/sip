@@ -17,4 +17,5 @@ class UserDto {
     var isdel: Boolean? = null
 
     var roles: List<String> = emptyList()
+    var menus: Map<String, List<MenuDto>> = emptyMap()
 }

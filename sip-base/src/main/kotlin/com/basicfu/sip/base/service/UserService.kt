@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.common.enum.Enum
+import com.basicfu.sip.base.mapper.AppMapper
+import com.basicfu.sip.base.mapper.MenuMapper
+import com.basicfu.sip.base.model.biz.RoleToken
+import com.basicfu.sip.base.model.dto.MenuDto
 import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.vo.UserVo
-import com.basicfu.sip.base.util.MongoUtil
-import com.basicfu.sip.base.util.PasswordUtil
-import com.basicfu.sip.base.util.TokenUtil
+import com.basicfu.sip.base.util.*
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.util.RedisUtil
@@ -18,6 +20,7 @@ import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates.combine
 import com.mongodb.client.model.Updates.set
+import org.apache.commons.lang3.StringUtils
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,10 +35,37 @@ import org.springframework.stereotype.Service
 class UserService {
     @Autowired
     lateinit var roleService: RoleService
+    @Autowired
+    lateinit var menuMapper: MenuMapper
+    @Autowired
+    lateinit var appMapper: AppMapper
 
     fun status(): UserDto {
-        val user = TokenUtil.getCurrentUser()
-        return user ?: UserDto()
+        var user = TokenUtil.getCurrentUser()
+        val menuIds = arrayListOf<Long>()
+        val appMap = appMapper.selectAll().associateBy({ it!!.id!! }, { it!!.code!! })
+        when (user) {
+            null -> {
+                user = generate<UserDto> {
+                    roles = listOf(Constant.System.GUEST)
+                }
+                menuIds.addAll(
+                    RedisUtil.hGet<RoleToken>(Constant.Redis.ROLE_PERMISSION, Constant.System.GUEST)?.menus
+                        ?: emptyList()
+                )
+            }
+            else -> {
+                val roles = user.roles.plus(Constant.System.GUEST)
+                val appRoleToken = RedisUtil.hGetAll<RoleToken>(Constant.Redis.ROLE_PERMISSION)
+                menuIds.addAll(appRoleToken.filter { roles.contains(it.key) }.values.map { it!!.menus }.flatten())
+            }
+        }
+        if (menuIds.isNotEmpty()) {
+            val allMenu = copy<MenuDto>(menuMapper.selectByIds(StringUtils.join(menuIds, ",")).toList())
+            val menus = MenuUtil.recursive(null, allMenu).groupBy({ appMap[it.appId]!! }, { it })
+            user.menus = menus
+        }
+        return user
     }
 
     /**
@@ -78,11 +108,12 @@ class UserService {
         //TODO 系统设置登录过期时间
         val token = TokenUtil.generateToken(username)
         val json = JSON.parseObject(JSON.toJSONString(userDocument))
-        json["id"] = userDocument.getObjectId("_id").toHexString()
+        val uid = userDocument.getObjectId("_id").toHexString()
+        json["id"] = uid
         json["token"] = TokenUtil.generateFrontToken(token) ?: throw CustomException(Enum.LOGIN_ERROR)
         json.remove("_id")
         json.remove("password")
-        json["roles"]=roleService.listRoleByUsername(username)
+        json["roles"] = roleService.listRoleByUid(uid)
         RedisUtil.set(TokenUtil.generateRedisToken(token), json.toJSONString(), Constant.System.SESSION_TIMEOUT)
         return json
     }

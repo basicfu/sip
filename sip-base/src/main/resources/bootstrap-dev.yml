@@ -1,9 +1,5 @@
 server:
   port: ${ENV_SERVER_PORT:5000}
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://${ENV_EUREKA_HOST:localhost}:${ENV_EUREKA_PORT:7000}/eureka
 logging:
   level:
     com.basicfu.sip: TRACE
@@ -25,8 +21,3 @@ spring:
     host: ${ENV_REDIS_HOST:localhost}
     port: ${ENV_REDIS_PORT:6379}
     password: ${ENV_REDIS_PASSWORD:root}
-    pool:
-      max-idle: 8
-      min-idle: 0
-      max-active: 8
-      max-wait: -1

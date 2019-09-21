@@ -40,7 +40,7 @@ class ApiUtil {
         /**
          * 获取当前登录信息
          */
-        fun getCurrentUser(): JSONObject {
+        fun user(): JSONObject {
             return JSON.parseObject(HttpUtil.get(userUrl, null, APP))
         }
 
@@ -57,11 +57,8 @@ class ApiUtil {
         /***
          * 登录
          */
-        fun login(username: String, password: String): JSONObject {
-            val json = JSONObject()
-            json["username"] = username
-            json["password"] = password
-            return JSON.parseObject(HttpUtil.post(loginUrl, json, APP))
+        fun login(map: Map<String, Any>): JSONObject {
+            return JSON.parseObject(HttpUtil.post(loginUrl, map, APP))
         }
 
         /**
