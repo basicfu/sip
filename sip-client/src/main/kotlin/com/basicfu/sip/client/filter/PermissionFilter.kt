@@ -1,8 +1,7 @@
 package com.basicfu.sip.client.filter
 
 import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONObject
-import com.basicfu.sip.client.util.ApiUtil
+import com.basicfu.sip.client.util.SipUtil
 import org.springframework.http.HttpStatus
 import javax.servlet.*
 import javax.servlet.annotation.WebFilter
@@ -22,14 +21,11 @@ class PermissionFilter : Filter {
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
         val request = servletRequest as HttpServletRequest
         val response = servletResponse as HttpServletResponse
-        val json = ApiUtil.checkPermission(request.method, request.requestURI)
-        if (json.getBoolean("success")) {
+        val permissionResult = SipUtil.checkPermission(request.method, request.requestURI)
+        if (permissionResult.success!!) {
             filterChain.doFilter(request, servletResponse)
         } else {
-            val result = JSONObject()
-            result["success"] = false
-            result["msg"] = json.getString("msg")
-            returnMsg(response, JSON.toJSONString(result))
+            returnMsg(response, JSON.toJSONString(permissionResult))
         }
     }
 

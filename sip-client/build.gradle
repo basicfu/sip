@@ -1,5 +1,5 @@
 group 'com.basicfu.sip'
-version "1.0.0-4-SNAPSHOT"
+version "1.0.0-8-SNAPSHOT"
 def artifactId = "sip-client"
 apply plugin: 'java'
 apply plugin: 'maven'

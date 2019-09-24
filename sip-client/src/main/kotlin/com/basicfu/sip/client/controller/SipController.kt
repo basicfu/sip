@@ -2,7 +2,7 @@ package com.basicfu.sip.client.controller
 
 import com.alibaba.fastjson.JSONArray
 import com.basicfu.sip.client.model.Result
-import com.basicfu.sip.client.util.ApiUtil
+import com.basicfu.sip.client.util.SipUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer
 import org.springframework.web.bind.annotation.*
@@ -17,22 +17,22 @@ class SipController {
 
     @GetMapping("/user")
     fun user(): Any {
-        return ApiUtil.user()
+        return SipUtil.userController()
     }
 
     @PostMapping("/login")
     fun login(@RequestBody map: Map<String, Any>): Any {
-        return ApiUtil.login(map)
+        return SipUtil.loginController(map)
     }
 
     @PostMapping("/register")
     fun register(@RequestBody map: Map<String, Any>): Any {
-        return ApiUtil.register(map)
+        return SipUtil.registerController(map)
     }
 
     @GetMapping("/logout")
     fun logout(): Any {
-        return ApiUtil.logout()
+        return SipUtil.logoutController()
     }
 
 

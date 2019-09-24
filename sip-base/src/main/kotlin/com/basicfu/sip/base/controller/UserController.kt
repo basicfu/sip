@@ -21,11 +21,11 @@ class UserController {
         return Result.success(userService.status())
     }
 
-    //
-//    @GetMapping("/get")
-//    fun get(vo:UserVo): Result<Any> {
-//        return Result.success(userService.get(vo))
-//    }
+
+    @GetMapping("/get")
+    fun get(vo:UserVo): Result<Any> {
+        return Result.success(userService.get(vo))
+    }
 //
 //    @GetMapping("/list")
 //    fun list(vo: UserVo): Result<Any> {

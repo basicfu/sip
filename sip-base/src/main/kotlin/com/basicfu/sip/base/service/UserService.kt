@@ -12,6 +12,7 @@ import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.vo.UserVo
 import com.basicfu.sip.base.util.*
+import com.basicfu.sip.base.util.MongoUtil.collection
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.util.RedisUtil
@@ -42,30 +43,30 @@ class UserService {
 
     fun status(): UserDto {
         var user = TokenUtil.getCurrentUser()
-        val menuIds = arrayListOf<Long>()
-        val appMap = appMapper.selectAll().associateBy({ it!!.id!! }, { it!!.code!! })
-        when (user) {
-            null -> {
-                user = generate<UserDto> {
-                    roles = listOf(Constant.System.GUEST)
-                }
-                menuIds.addAll(
-                    RedisUtil.hGet<RoleToken>(Constant.Redis.ROLE_PERMISSION, Constant.System.GUEST)?.menus
-                        ?: emptyList()
-                )
-            }
-            else -> {
-                val roles = user.roles.plus(Constant.System.GUEST)
-                val appRoleToken = RedisUtil.hGetAll<RoleToken>(Constant.Redis.ROLE_PERMISSION)
-                menuIds.addAll(appRoleToken.filter { roles.contains(it.key) }.values.map { it!!.menus }.flatten())
+        if (user == null) {
+            user = generate<UserDto> {
+                roles = listOf(Constant.System.GUEST)
             }
         }
-        if (menuIds.isNotEmpty()) {
-            val allMenu = copy<MenuDto>(menuMapper.selectByIds(StringUtils.join(menuIds, ",")).toList())
-            val menus = MenuUtil.recursive(null, allMenu).groupBy({ appMap[it.appId]!! }, { it })
-            user.menus = menus
+        return dealUser(user)
+    }
+
+    fun get(vo: UserVo): UserDto? {
+        if (vo.id == null && vo.username == null) {
+            throw CustomException("非法参数")
         }
-        return user
+        val userDocument = if (vo.id != null) {
+            collection.find(and(eq("_id", ObjectId(vo.id)), eq("isdel", false))).first() ?: return null
+        } else {
+            collection.find(and(eq("username", vo.username), eq("isdel", false))).first() ?: return null
+        }
+        val json = JSON.parseObject(JSON.toJSONString(userDocument))
+        val uid = userDocument.getObjectId("_id").toHexString()
+        json["id"] = uid
+        json.remove("_id")
+        json.remove("password")
+        json["roles"] = roleService.listRoleByUid(uid)
+        return dealUser(JSON.toJavaObject(json,UserDto::class.java))
     }
 
     /**
@@ -218,5 +219,29 @@ class UserService {
         } else if (type == 1) {
             MongoUtil.collection.deleteMany(and(ids.map { eq("_id", ObjectId(it)) }))
         }
+    }
+
+    /**
+     * 处理用户角色菜单信息
+     */
+    private fun dealUser(user: UserDto): UserDto {
+        val menuIds = arrayListOf<Long>()
+        val appMap = appMapper.selectAll().associateBy({ it!!.id!! }, { it!!.code!! })
+        if (user.id == null) {
+            menuIds.addAll(
+                RedisUtil.hGet<RoleToken>(Constant.Redis.ROLE_PERMISSION, Constant.System.GUEST)?.menus
+                    ?: emptyList()
+            )
+        } else {
+            val roles = user.roles.plus(Constant.System.GUEST)
+            val appRoleToken = RedisUtil.hGetAll<RoleToken>(Constant.Redis.ROLE_PERMISSION)
+            menuIds.addAll(appRoleToken.filter { roles.contains(it.key) }.values.map { it!!.menus }.flatten())
+        }
+        if (menuIds.isNotEmpty()) {
+            val allMenu = copy<MenuDto>(menuMapper.selectByIds(StringUtils.join(menuIds, ",")).toList())
+            val menus = MenuUtil.recursive(null, allMenu).groupBy({ appMap[it.appId]!! }, { it })
+            user.menus = menus
+        }
+        return user
     }
 }

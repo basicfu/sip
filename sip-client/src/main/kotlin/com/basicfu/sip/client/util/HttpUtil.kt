@@ -18,12 +18,12 @@ import java.net.URL
 
 object HttpUtil {
 
-    fun get(url: String, params: String? = null, app: String): String {
+    fun get(url: String, app: String): String {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.requestMethod = "GET"
         connection.connectTimeout = 60000
         connection.addRequestProperty("app", app)
-        connection.addRequestProperty(Constant.AUTHORIZATION, RequestUtil.getHeader(Constant.AUTHORIZATION))
+        connection.addRequestProperty(Constant.AUTHORIZATION, RequestUtil.getHeader(Constant.AUTHORIZATION)?:"")
         return inputStreamToString(connection.inputStream)
     }
 
