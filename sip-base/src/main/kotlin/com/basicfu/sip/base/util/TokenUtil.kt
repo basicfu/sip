@@ -45,7 +45,12 @@ object TokenUtil {
             AESUtil.decrypt(it, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
         }
     }
-
+    /**
+     * 获取从前台传来的token
+     */
+    fun getCurrentFrontToken(): String? {
+        return RequestUtil.getHeader(Constant.System.AUTHORIZATION)
+    }
     /**
      * 生成token
      */

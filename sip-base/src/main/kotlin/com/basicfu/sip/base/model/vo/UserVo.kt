@@ -24,14 +24,11 @@ class UserVo {
      */
     var orignPassword: String? = null
     /**
-     * 原用户名
-     */
-    var originalUsername:String?=null
-
-    var condition:String?=null
-
-    /**
      * 密码是否加密
      */
     var encry:Boolean=true
+
+    var q:String?=null
+    /**验证码*/
+    var code:String?=null
 }

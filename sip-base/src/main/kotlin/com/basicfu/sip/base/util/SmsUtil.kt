@@ -34,36 +34,17 @@ object SmsUtil {
         request.putQueryParameter("SignName", "初妆")
         request.putQueryParameter("TemplateCode", "SMS_174270504")
         request.putQueryParameter("TemplateParam", "{'code':\"$code\"}")
-        try {
-            val response = client.getCommonResponse(request)
-            val json=JSON.parseObject(response.data)
-            when(json.getString("Code")){
-                "OK"->{}
-                "isv.BUSINESS_LIMIT_CONTROL"->throw CustomException("发送频率频繁，请稍后重试")
-                "isv.BLACK_KEY_CONTROL_LIMIT"->throw CustomException("黑名单管控")
-                "isv.MOBILE_NUMBER_ILLEGAL"->throw CustomException("非法手机号")
-                "isv.SYSTEM_ERROR"->throw CustomException("系统错误，请稍后重试")
-                "isv.ACCOUNT_ABNORMAL","isv.AMOUNT_NOT_ENOUGH","isv.ACCOUNT_NOT_EXISTS"->throw CustomException("发送失败，请联系管理员")
-                else->throw CustomException("发送失败，请联系管理员")
-            }
-        } catch (e: ServerException) {
-            e.printStackTrace()
-        } catch (e: ClientException) {
-            e.printStackTrace()
+        val response = client.getCommonResponse(request)
+        val json = JSON.parseObject(response.data)
+        when (json.getString("Code")) {
+            "OK" -> {}
+            "isv.BUSINESS_LIMIT_CONTROL" -> throw CustomException("发送频率频繁，请稍后重试")
+            "isv.BLACK_KEY_CONTROL_LIMIT" -> throw CustomException("黑名单管控")
+            "isv.MOBILE_NUMBER_ILLEGAL" -> throw CustomException("非法手机号")
+            "isv.SYSTEM_ERROR" -> throw CustomException("系统错误，请稍后重试")
+            "isv.ACCOUNT_ABNORMAL", "isv.AMOUNT_NOT_ENOUGH", "isv.ACCOUNT_NOT_EXISTS" -> throw CustomException("发送失败，请联系管理员")
+            else -> throw CustomException("发送失败，请联系管理员")
         }
         RedisUtil.set("${Constant.Redis.SMS_CHECK}$mobile", code, 5 * 60 * 1000)
     }
 }
-
-// case "isv.MOBILE_NUMBER_ILLEGAL":
-//         msg = "手机号码格式错误";
-//         break;
-//         case "isv.BUSINESS_LIMIT_CONTROL":
-//         msg = "获取频繁，请稍后重试";//	短信验证码，使用同一个签名，对同一个手机号码发送短信验证码，支持1条/分钟，5条/小时，10条/天。一个手机号码通过阿里大于平台只能收到40条/天。 短信通知，使用同一签名、同一模板，对同一手机号发送短信通知，允许每天50条（自然日）。
-//         break;
-//         case "isv.AMOUNT_NOT_ENOUGH":
-//         msg = "获取手机号码错误，请联系管理员";//实际错误为账号余额不足
-//         break;
-//default:
-//        msg = "获取手机号码错误，请联系管理员";
-//        break;

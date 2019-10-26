@@ -26,11 +26,11 @@ class UserController {
     fun get(vo:UserVo): Result<Any> {
         return Result.success(userService.get(vo))
     }
-//
-//    @GetMapping("/list")
-//    fun list(vo: UserVo): Result<Any> {
-//        return Result.success(userService.list(vo))
-//    }
+
+    @GetMapping("/list")
+    fun list(vo: UserVo): Result<Any> {
+        return Result.success(userService.list(vo))
+    }
 //
 //    @GetMapping("/list/{ids}")
 //    fun listByIds(@PathVariable ids: List<Long>): Result<Any> {
@@ -73,15 +73,29 @@ class UserController {
         return Result.success(userService.insert(map))
     }
 
-    //
-//    @PostMapping("/update")
-//    fun update(@RequestBody map: Map<String, Any>): Result<Any> {
-//        return Result.success(userService.update(map))
-//    }
-//
+    /***
+     * 根据用户id修改用户信息(包括密码)
+     */
+    @PostMapping("/update")
+    fun update(@RequestBody map: Map<String, Any>): Result<Any> {
+        return Result.success(userService.update(map))
+    }
+
+    /***
+     * 根据原密码修改当前登录用户的密码
+     */
     @PostMapping("/update/password")
-    fun update(@RequestBody vo: UserVo): Result<Any> {
+    fun updatePassword(@RequestBody vo: UserVo): Result<Any> {
         return Result.success(userService.updatePassword(vo))
+    }
+
+    /***
+     * 获取找回方式/根据用户名发送验证码/找回密码
+     * 找回密码
+     */
+    @PostMapping("/find/password")
+    fun findPassword(@RequestBody vo: UserVo): Result<Any> {
+        return Result.success(userService.findPassword(vo))
     }
 
     @DeleteMapping("/delete")

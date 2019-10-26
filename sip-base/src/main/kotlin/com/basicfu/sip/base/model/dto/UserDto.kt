@@ -6,7 +6,6 @@ class UserDto {
     var nickname: String? = null
     var mobile: String? = null
     var email: String? = null
-    var password: String? = null
     var mobileVerified: Boolean? = null
     var emailVerified: Boolean? = null
     var avatar: String? = null
@@ -18,4 +17,5 @@ class UserDto {
 
     var roles: List<String> = emptyList()
     var menus: Map<String, List<MenuDto>> = emptyMap()
+    var token:String?=null
 }
