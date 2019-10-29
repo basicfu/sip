@@ -71,6 +71,7 @@ project(":sip-base") {
         compile("mysql:mysql-connector-java:5.1.45")
         compile "com.basicfu.sip:sip-core:0.0.3-2-SNAPSHOT"
         compile 'org.mongodb:mongo-java-driver:3.10.2'
+        compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
         compile 'com.aliyun:aliyun-java-sdk-core:4.4.5'
     }
 }

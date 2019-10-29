@@ -8,12 +8,13 @@ import com.basicfu.sip.base.mapper.AppMapper
 import com.basicfu.sip.base.mapper.MenuMapper
 import com.basicfu.sip.base.model.biz.RoleToken
 import com.basicfu.sip.base.model.dto.MenuDto
-import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.base.model.po.Menu
 import com.basicfu.sip.base.model.po.User
 import com.basicfu.sip.base.model.vo.UserVo
-import com.basicfu.sip.base.util.*
-import com.basicfu.sip.base.util.MongoUtil.collection
+import com.basicfu.sip.base.util.MenuUtil
+import com.basicfu.sip.base.util.PasswordUtil
+import com.basicfu.sip.base.util.TokenUtil
+import com.basicfu.sip.base.util.copy
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
@@ -21,17 +22,32 @@ import com.basicfu.sip.core.model.vo.BaseVo
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.log
 import com.github.pagehelper.PageInfo
-import com.mongodb.client.FindIterable
-import com.mongodb.client.model.Filters.*
-import com.mongodb.client.model.Sorts
-import com.mongodb.client.model.Updates.combine
-import com.mongodb.client.model.Updates.set
 import org.bson.Document
-import org.bson.conversions.Bson
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.arrayListOf
+import kotlin.collections.associateBy
+import kotlin.collections.emptyList
+import kotlin.collections.filter
+import kotlin.collections.flatten
+import kotlin.collections.forEach
+import kotlin.collections.get
+import kotlin.collections.groupBy
+import kotlin.collections.isNotEmpty
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.plus
+import kotlin.collections.set
+import kotlin.collections.toList
+
 
 /**
  * @author basicfu
@@ -45,67 +61,73 @@ class UserService {
     lateinit var menuMapper: MenuMapper
     @Autowired
     lateinit var appMapper: AppMapper
+    @Autowired
+    lateinit var mongoTemplate: MongoTemplate
 
-    fun status(): UserDto {
-        var user = TokenUtil.getCurrentUser()
+    fun status(): JSONObject {
+        var user = TokenUtil.getCurrentUserJson()
         if (user == null) {
-            user = generate<UserDto> {
-                roles = listOf(Constant.System.GUEST)
-            }
+            user=JSONObject()
+            user["roles"]=listOf(Constant.System.GUEST)
         }
         return dealUser(user)
     }
 
-    fun get(vo: UserVo): UserDto? {
+    fun get(vo: UserVo): JSONObject? {
         if (vo.id == null && vo.username == null) {
             throw CustomException("非法参数")
         }
-        val userDocument = if (vo.id != null) {
-            collection.find(and(eq("_id", ObjectId(vo.id)), eq("isdel", false))).first() ?: return null
+        val userDocument = (if (vo.id != null) {
+            mongoTemplate.findOne(
+                Query(Criteria.where("isdel").`is`(false).and("_id").`is`(vo.id)),
+                Document::class.java,
+                "user"
+            )
         } else {
-            collection.find(and(eq("username", vo.username), eq("isdel", false))).first() ?: return null
+            mongoTemplate.findOne(
+                Query(Criteria.where("isdel").`is`(false).and("username").`is`(vo.username)),
+                Document::class.java,
+                "user"
+            )
+        })
+        if (userDocument != null) {
+            val json = sec(userDocument)
+            json["roles"] = roleService.listRoleByUid(json.getString("id"))
+            return json
         }
-        val json = JSON.parseObject(JSON.toJSONString(userDocument))
-        val uid = userDocument.getObjectId("_id").toHexString()
-        json["id"] = uid
-        json.remove("_id")
-        json.remove("password")
-        json["roles"] = roleService.listRoleByUid(uid)
-        return dealUser(JSON.toJavaObject(json, UserDto::class.java))
+        return null
     }
 
     /**
      * 分页暂时采用skip+limit
      * 变慢以后采用find+limit
      */
-    fun list(vo: UserVo): PageInfo<UserDto> {
+    fun list(vo: UserVo): PageInfo<JSONObject> {
         val page = BaseVo().setInfo()
-        val filters = arrayListOf<Bson>()
-        val documents: FindIterable<Document>
-        val total: Int
+        val documents: List<Document>
+        val query = Query()
         if (vo.q != null) {
-            filters.add(regex("username", "${vo.q}"))
-            filters.add(regex("nickname", "${vo.q}"))
-            filters.add(regex("mobile", "${vo.q}"))
-            filters.add(regex("email", "${vo.q}"))
-            documents = collection.find(or(filters)).sort(Sorts.descending("createTime"))
-                .skip((page.pageNum - 1) * page.pageSize).limit(page.pageSize)
-            total = documents.count()
-        } else {
-            documents = collection.find().sort(Sorts.descending("createTime")).skip((page.pageNum - 1) * page.pageSize)
-                .limit(page.pageSize)
-            total = documents.count()
+            query.addCriteria(
+                Criteria().orOperator(
+                    Criteria.where("username").regex("${vo.q}"),
+                    Criteria.where("nickname").regex("${vo.q}"),
+                    Criteria.where("mobile").regex("${vo.q}"),
+                    Criteria.where("email").regex("${vo.q}")
+                )
+            )
         }
-        val list = arrayListOf<UserDto>()
+        query.with(Sort(Sort.Direction.DESC, "createTime"))
+            .skip((page.pageNum - 1) * page.pageSize.toLong()).limit(page.pageSize)
+        documents = mongoTemplate.find(query, Document::class.java, "user")
+        val total = mongoTemplate.count(query, Document::class.java, "user")
+        val list = arrayListOf<JSONObject>()
         documents.forEach {
-            val json = JSON.parseObject(JSON.toJSONString(it))
-            json["id"] = it.getObjectId("_id").toHexString()
-            list.add(json.toJavaObject(UserDto::class.java))
+            list.add(sec(it))
         }
-        val pageInfo = PageInfo<UserDto>(list)
+        val pageInfo = PageInfo<JSONObject>(list)
         pageInfo.pageNum = page.pageNum
         pageInfo.pageSize = page.pageSize
-        pageInfo.total = total.toLong()
+        pageInfo.total = total
         return pageInfo
     }
 
@@ -123,12 +145,18 @@ class UserService {
      */
     fun login(vo: UserVo): JSONObject {
         val username = vo.username!!
-        val collection = MongoUtil.collection
-        var userDocument = collection.find(and(eq("username", username), eq("isdel", false))).first()
+        var userDocument = mongoTemplate.findOne(
+            Query(Criteria.where("isdel").`is`(false).and("username").`is`(username)),
+            Document::class.java,
+            "user"
+        )
         if (userDocument == null) {
             //尝试手机登录、需要已验证的手机号
-            userDocument =
-                collection.find(and(eq("mobile", username), eq("mobileVerified", true), eq("isdel", false))).first()
+            userDocument = mongoTemplate.findOne(
+                Query(Criteria.where("isdel").`is`(false).and("mobile").`is`(username).and("mobileVerified").`is`(true)),
+                Document::class.java,
+                "user"
+            )
         }
         if (userDocument == null) {
             log.warn("用户名不存在username:$username")
@@ -153,13 +181,9 @@ class UserService {
         //TODO 记录用户登录记录
         //TODO 系统设置登录过期时间
         val token = TokenUtil.generateToken(username)
-        val json = JSON.parseObject(JSON.toJSONString(userDocument))
-        val uid = userDocument.getObjectId("_id").toHexString()
-        json["id"] = uid
+        val json = sec(userDocument)
         json["token"] = TokenUtil.generateFrontToken(token) ?: throw CustomException(Enum.LOGIN_ERROR)
-        json.remove("_id")
-        json.remove("password")
-        json["roles"] = roleService.listRoleByUid(uid)
+        json["roles"] = roleService.listRoleByUid(json.getString("id"))
         RedisUtil.set(TokenUtil.generateRedisToken(token), json.toJSONString(), Constant.System.SESSION_TIMEOUT)
         return json
     }
@@ -197,13 +221,17 @@ class UserService {
             isdel = false
             registerType = type
         }
-        if (MongoUtil.collection.countDocuments(and(eq("username", user.username), eq("isdel", false))) > 0) {
+        if (mongoTemplate.count(
+                Query(Criteria.where("isdel").`is`(false).and("username").`is`(user.username)),
+                "user"
+            ) > 0
+        ) {
             log.warn("用户名已存在")
             throw CustomException("用户名已存在")
         }
         when (type) {
             Enum.RegisterType.USERNAME.value -> {
-
+                //TODO
             }
             Enum.RegisterType.USERNAME_MOBILE.value -> {
                 val code = map["code"]?.toString()
@@ -216,28 +244,58 @@ class UserService {
                 RedisUtil.del(smsKey)
             }
             Enum.RegisterType.USERNAME_EMAIL.value -> {
-
+                //TODO
             }
             Enum.RegisterType.SYSTEM.value -> {
-
+                //TODO
             }
             else -> {
                 throw CustomException("不支持的注册方式")
             }
         }
-        MongoUtil.collection.insertOne(Document.parse(JSON.toJSONString(user)))
+        mongoTemplate.insert(user)
         return 1
-//        //检查用户名重复
 //        //处理用户角色
 //        if (vo.roleIds != null) {
 //            updateRole(user.id!!, vo.roleIds!!)
 //        }
     }
-    fun update(map: Map<String, Any>):Int{
-        return 0
+
+    fun update(map: Map<String, Any>): Int {
+        //参数强校验
+        val uid= map["id"]
+        val username=map["username"]
+        val mobile=map["username"]
+        val email=map["username"]
+        val update=Update()
+        map.forEach { k, v ->
+            //此处严谨应排除所有系统bean字段
+            if(k!="id"){
+                update.addToSet(k,v)
+            }
+        }
+        //校验用户名、手机、邮箱重复
+        if(mongoTemplate.count(Query(Criteria.where("username").`is`(username).and("isdel").`is`(false).and("id").ne(uid)),User::class.java)>0){
+            throw CustomException("用户名已存在")
+        }
+        if(mobile!=null&&mongoTemplate.count(Query(Criteria.where("mobile").`is`(mobile).and("isdel").`is`(false).and("id").ne(uid)),User::class.java)>0){
+            throw CustomException("手机号已存在")
+        }
+        if(email!=null&&mongoTemplate.count(Query(Criteria.where("email").`is`(email).and("isdel").`is`(false).and("id").ne(uid)),User::class.java)>0){
+            throw CustomException("邮箱已存在")
+        }
+        mongoTemplate.updateFirst(
+            Query(Criteria.where("_id").`is`(uid)),update,"user"
+        )
+        return 1
     }
+
     fun checkMobile(mobile: String) {
-        if (MongoUtil.collection.countDocuments(and(eq("mobile", mobile), eq("isdel", false))) > 0) {
+        if (mongoTemplate.count(
+                Query(Criteria.where("isdel").`is`(false).and("mobile").`is`(mobile)),
+                "user"
+            ) > 0
+        ) {
             log.warn("手机号已存在")
             throw CustomException("手机号已存在")
         }
@@ -245,38 +303,30 @@ class UserService {
 
     fun updatePassword(vo: UserVo) {
         val user = TokenUtil.getCurrentUser()!!
-        val password=MongoUtil.collection.find(and(eq("username", user.username), eq("isdel", false))).first().getString("password")
-        if(password!=BCryptPasswordEncoder().encode(vo.orignPassword)){
+        val password = mongoTemplate.findOne(
+            Query(Criteria.where("username").`is`(user.username).and("isdel").`is`(false)),
+            User::class.java
+        )!!.password
+        if (password != BCryptPasswordEncoder().encode(vo.orignPassword)) {
             throw CustomException("原密码不正确")
         }
-        MongoUtil.collection.updateOne(
-            eq("username", vo.username),
-            combine(
-                set("password", BCryptPasswordEncoder().encode(vo.password)),
-                set("updateTime", System.currentTimeMillis())
-            )
+        mongoTemplate.updateFirst(
+            Query(Criteria.where("username").`is`(user.username).and("isdel").`is`(false)),
+            Update.update("password", BCryptPasswordEncoder().encode(vo.password)).addToSet(
+                "updateTime",
+                System.currentTimeMillis()
+            ),
+            "user"
         )
     }
 
     fun findPassword(vo: UserVo) {
-        val code=vo.code?:throw CustomException("验证码不能为空")
+        val code = vo.code ?: throw CustomException("验证码不能为空")
         val smsKey = "${Constant.Redis.SMS_CHECK}${vo.mobile}"
         val redisCode = RedisUtil.get<String>(smsKey)
         if (redisCode == null || redisCode != code) throw CustomException("验证码错误")
         RedisUtil.del(smsKey)
-
-        val user = TokenUtil.getCurrentUser()!!
-        val password=MongoUtil.collection.find(and(eq("username", user.username), eq("isdel", false))).first().getString("password")
-        if(password!=BCryptPasswordEncoder().encode(vo.orignPassword)){
-            throw CustomException("原密码不正确")
-        }
-        MongoUtil.collection.updateOne(
-            eq("username", vo.username),
-            combine(
-                set("password", BCryptPasswordEncoder().encode(vo.password)),
-                set("updateTime", System.currentTimeMillis())
-            )
-        )
+        updatePassword(vo)
     }
 
     /***
@@ -285,34 +335,49 @@ class UserService {
      * 配置用户删除时的回调
      */
     fun delete(ids: List<String>, type: Int) {
-        if (type == 0) {
-            MongoUtil.collection.updateMany(and(ids.map { eq("_id", ObjectId(it)) }), set("isdel", true))
-        } else if (type == 1) {
-            MongoUtil.collection.deleteMany(and(ids.map { eq("_id", ObjectId(it)) }))
+        if (ids.isEmpty()) {
+            return
         }
-        val usernames =
-            MongoUtil.collection.find(and(ids.map { eq("_id", ObjectId(it)) })).map { it.getString("username") }
-        usernames.forEach { username ->
+        val criteria = Criteria()
+        ids.map {
+            criteria.and("_id").`is`(it)
+        }
+        mongoTemplate.find(Query(criteria), User::class.java).map { it.username!! }.forEach { username ->
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             RedisUtil.del(keys.map { it })
         }
+        if (type == 0) {
+            mongoTemplate.updateMulti(Query(criteria), Update.update("isdel", true), "user")
+        } else if (type == 1) {
+            mongoTemplate.remove(Query(criteria), "user")
+        }
+    }
+
+    private fun sec(document: Document): JSONObject {
+        val json = JSON.parseObject(JSON.toJSONString(document))
+        val uid = document.getObjectId("_id").toHexString()
+        json["id"] = uid
+        json.remove("_id")
+        json.remove("password")
+        return json
     }
 
     /**
      * 处理用户角色菜单信息
      */
-    private fun dealUser(user: UserDto): UserDto {
+    private fun dealUser(user: JSONObject): JSONObject {
         val menuIds = arrayListOf<Long>()
         val appMap = appMapper.selectAll().associateBy({ it!!.id!! }, { it!!.code!! })
-        if (user.id == null) {
+        val id=user.getString("id")
+        val roles=user.getJSONArray("roles")
+        if (id == null) {
             menuIds.addAll(
                 RedisUtil.hGet<RoleToken>(Constant.Redis.ROLE_PERMISSION, Constant.System.GUEST)?.menus
                     ?: emptyList()
             )
         } else {
-            val roles = user.roles.plus(Constant.System.GUEST)
             val appRoleToken = RedisUtil.hGetAll<RoleToken>(Constant.Redis.ROLE_PERMISSION)
-            menuIds.addAll(appRoleToken.filter { roles.contains(it.key) }.values.map { it!!.menus }.flatten())
+            menuIds.addAll(appRoleToken.filter { roles.plus(Constant.System.GUEST).contains(it.key) }.values.map { it!!.menus }.flatten())
         }
         if (menuIds.isNotEmpty()) {
             val allMenu = copy<MenuDto>(menuMapper.selectByExample(example<Menu> {
@@ -322,9 +387,9 @@ class UserService {
                 andIn(Menu::id, menuIds)
             }).toList())
             val menus = MenuUtil.recursive(null, allMenu).groupBy({ appMap[it.appId]!! }, { it })
-            user.menus = menus
+            user["menus"] = menus
         }
-        user.token = TokenUtil.getCurrentFrontToken()
+        user["token"] = TokenUtil.getCurrentFrontToken()
         return user
     }
 }

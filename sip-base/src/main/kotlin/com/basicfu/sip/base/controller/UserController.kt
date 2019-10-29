@@ -23,7 +23,7 @@ class UserController {
 
 
     @GetMapping("/get")
-    fun get(vo:UserVo): Result<Any> {
+    fun get(vo: UserVo): Result<Any> {
         return Result.success(userService.get(vo))
     }
 
@@ -31,7 +31,8 @@ class UserController {
     fun list(vo: UserVo): Result<Any> {
         return Result.success(userService.list(vo))
     }
-//
+
+    //
 //    @GetMapping("/list/{ids}")
 //    fun listByIds(@PathVariable ids: List<Long>): Result<Any> {
 //        return Result.success(userService.listByIds(ids))

@@ -1,5 +1,7 @@
 package com.basicfu.sip.base.util
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.model.dto.UserDto
 import com.basicfu.sip.core.util.AESUtil
@@ -65,6 +67,13 @@ object TokenUtil {
         return getCurrentRedisToken()?.let {token->
             RedisUtil.get<String>(token)?.let {u->
                 Gson().fromJson(u,UserDto::class.java)
+            }
+        }
+    }
+    fun getCurrentUserJson(): JSONObject? {
+        return getCurrentRedisToken()?.let {token->
+            RedisUtil.get<String>(token)?.let {u->
+                return JSON.parseObject(u)
             }
         }
     }

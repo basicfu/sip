@@ -19,3 +19,6 @@ spring:
     host: ${ENV_REDIS_HOST:localhost}
     port: ${ENV_REDIS_PORT:6379}
     password: ${ENV_REDIS_PASSWORD:root}
+  data:
+    mongodb:
+      uri: {$ENV_MONGODB_URI:}
