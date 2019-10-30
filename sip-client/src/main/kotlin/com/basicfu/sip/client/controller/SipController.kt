@@ -35,6 +35,31 @@ class SipController {
         return SipUtil.logoutController()
     }
 
+    @PostMapping("/update/password")
+    fun updatePassword(@RequestBody map: Map<String, Any>): Any {
+        return SipUtil.updatePasswordController(map)
+    }
+
+    @PostMapping("/update")
+    fun updateUser(@RequestBody map: Map<String, Any>): Any {
+        return SipUtil.updateUserController(map)
+    }
+
+    @DeleteMapping("/delete")
+    fun deleteUserController(@RequestBody ids: List<String>): Any {
+        return SipUtil.deleteUserController(ids)
+    }
+
+    @DeleteMapping("/delete/phy")
+    fun deleteUserPhyController(@RequestBody ids: List<String>): Any {
+        return SipUtil.deleteUserPhyController(ids)
+    }
+
+    @GetMapping("/role/all")
+    fun deleteUserPhyController(): Any {
+        return SipUtil.allRoleController()
+    }
+
 
     @GetMapping("/sip/client/url")
     fun getServiceAllUrl(): Result<Any> {

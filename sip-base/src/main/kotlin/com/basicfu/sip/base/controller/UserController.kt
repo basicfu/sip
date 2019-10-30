@@ -17,8 +17,8 @@ class UserController {
     lateinit var userService: UserService
 
     @GetMapping
-    fun status(): Result<Any> {
-        return Result.success(userService.status())
+    fun status(type:String?): Result<Any> {
+        return Result.success(userService.status(type))
     }
 
 

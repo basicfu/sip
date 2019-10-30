@@ -36,6 +36,8 @@ class SipService {
                 Result.success<Any>(null, null)
             }
         } else {
+            roles.addAll(user.roles)
+            roles.distinct()
             //带token登录信息又未过期，未授权
             if (!allowRequest(roles, app, targetUrl)) {
                 throw CustomException("未授权")

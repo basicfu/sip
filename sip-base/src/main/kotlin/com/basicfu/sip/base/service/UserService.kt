@@ -64,13 +64,22 @@ class UserService {
     @Autowired
     lateinit var mongoTemplate: MongoTemplate
 
-    fun status(): JSONObject {
+    /**
+     * 提供两种模式
+     * 简版-redis缓存的信息(一般用于后台调用)
+     * 完整版-包含菜单信息(一般用于前台页面显示)
+     */
+    fun status(type:String?): JSONObject {
         var user = TokenUtil.getCurrentUserJson()
         if (user == null) {
             user=JSONObject()
             user["roles"]=listOf(Constant.System.GUEST)
         }
-        return dealUser(user)
+        return if(type!=null&&type=="simple"){
+            user
+        }else{
+            dealUser(user)
+        }
     }
 
     fun get(vo: UserVo): JSONObject? {

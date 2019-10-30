@@ -25,6 +25,7 @@ object TokenUtil {
     fun generateToken(username: String): String {
         return "${username}_${generateToken()}"
     }
+
     /**
      * 生成redis token
      */
@@ -42,17 +43,22 @@ object TokenUtil {
     /**
      * 获取从前台传来的token并转为redis token
      */
-    fun getCurrentRedisToken(frontToken:String?=null): String? {
-        return frontToken?:RequestUtil.getHeader(Constant.System.AUTHORIZATION)?.let {
-            AESUtil.decrypt(it, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
+    fun getCurrentRedisToken(frontToken: String? = null): String? {
+        val token = frontToken ?: RequestUtil.getHeader(Constant.System.AUTHORIZATION)
+        return if (token != null) {
+            AESUtil.decrypt(token, Constant.System.AES_TOKEN_KEY)?.let { "${Constant.Redis.TOKEN_PREFIX}$it" }
+        } else {
+            null
         }
     }
+
     /**
      * 获取从前台传来的token
      */
     fun getCurrentFrontToken(): String? {
         return RequestUtil.getHeader(Constant.System.AUTHORIZATION)
     }
+
     /**
      * 生成token
      */
@@ -64,26 +70,28 @@ object TokenUtil {
      * 获取当前用户
      */
     fun getCurrentUser(): UserDto? {
-        return getCurrentRedisToken()?.let {token->
-            RedisUtil.get<String>(token)?.let {u->
-                Gson().fromJson(u,UserDto::class.java)
+        return getCurrentRedisToken()?.let { token ->
+            RedisUtil.get<String>(token)?.let { u ->
+                Gson().fromJson(u, UserDto::class.java)
             }
         }
     }
+
     fun getCurrentUserJson(): JSONObject? {
-        return getCurrentRedisToken()?.let {token->
-            RedisUtil.get<String>(token)?.let {u->
+        return getCurrentRedisToken()?.let { token ->
+            RedisUtil.get<String>(token)?.let { u ->
                 return JSON.parseObject(u)
             }
         }
     }
+
     /**
      * 获取当前用户
      */
-    fun getCurrentUser(frontToken:String): UserDto? {
-        return getCurrentRedisToken(frontToken)?.let {token->
-            RedisUtil.get<String>(token)?.let {u->
-                Gson().fromJson(u,UserDto::class.java)
+    fun getCurrentUser(frontToken: String): UserDto? {
+        return getCurrentRedisToken(frontToken)?.let { token ->
+            RedisUtil.get<String>(token)?.let { u ->
+                Gson().fromJson(u, UserDto::class.java)
             }
         }
     }

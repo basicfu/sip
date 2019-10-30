@@ -257,7 +257,6 @@ class RoleService : BaseService<RoleMapper, Role>() {
     fun refreshRolePermission() {
         val apps = to<AppDto>(appMapper.selectAll())
         val roles = to<RoleDto>(mapper.selectAll())
-        AppUtil.notCheckApp()
         val resources = to<ResourceDto>(resourceMapper.selectAll())
         val roleMenus = rmMapper.selectAll()
         val rolePermissions = rpMapper.selectAll()

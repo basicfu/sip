@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse
  * 内置权限过滤器
  * 可配置是否开启内置过滤器，或自己实现
  */
-@WebFilter(filterName = "permissionFilter", urlPatterns = ["/user"])
+@WebFilter(filterName = "permissionFilter", urlPatterns = ["/*"])
 class PermissionFilter : Filter {
     override fun init(filterConfig: FilterConfig) {
     }

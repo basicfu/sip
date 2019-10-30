@@ -40,7 +40,21 @@ object HttpUtil {
         out.write(JSON.toJSONString(json))
         out.flush()
         return inputStreamToString(connection.inputStream)
+    }
 
+    fun delete(url: String, json: Any, app: String): String {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.requestMethod = "DELETE"
+        connection.connectTimeout = 60000
+        connection.addRequestProperty("app", app)
+        connection.addRequestProperty("Content-Type", "application/json")
+        connection.addRequestProperty(Constant.AUTHORIZATION, RequestUtil.getHeader(Constant.AUTHORIZATION)?:"")
+        connection.doOutput = true
+        connection.doInput = true
+        val out = BufferedWriter(OutputStreamWriter(connection.outputStream))
+        out.write(JSON.toJSONString(json))
+        out.flush()
+        return inputStreamToString(connection.inputStream)
     }
 
     private fun inputStreamToString(inputStream: InputStream): String {
