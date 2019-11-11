@@ -1,5 +1,5 @@
 group 'com.basicfu.sip'
-version "1.0.0-17-SNAPSHOT"
+version "1.0.0-20-SNAPSHOT"
 def artifactId = "sip-client"
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -11,56 +11,56 @@ def gitUrl = 'https://github.com/basicfu/sip.git'
 def localMavenRepo='file://'+new File(System.getProperty('user.home'),'tool/repository').absolutePath
 //上传到nexus
 uploadArchives {
-    repositories{
-        mavenDeployer{
-            repository(url:localMavenRepo)
-            pom.project{
-                name=project.name
-                packaging='jar'
-                description='description'
-            }
-        }
-    }
-//    repositories {
-//        mavenDeployer {
-//            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-//            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-//                authentication(userName: System.getenv("NEXUS_USERNAME"),password: System.getenv("NEXUS_PASSWORD"))
-//            }
-//            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-//                authentication(userName: System.getenv("NEXUS_USERNAME"), password: System.getenv("NEXUS_PASSWORD"))
-//            }
-//            pom.version = "$project.version"
-//            pom.artifactId = "$artifactId"
-//            pom.groupId = "$project.group"
-//            pom.project {
-//                name project.name
-//                packaging 'jar'
-//                description 'sip client description'
-//                url siteUrl
-//                scm {
-//                    url siteUrl
-//                    connection gitUrl
-//                    developerConnection gitUrl
-//                }
-//                licenses {
-//                    license {
-//                        name 'The Apache Software License, Version 2.0'
-//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-//                        distribution 'repo'
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id 'basicfu'
-//                        name 'basicfu'
-//                        email 'basicfu@gmail.com'
-//                        url 'https://basicfu.com'
-//                    }
-//                }
+//    repositories{
+//        mavenDeployer{
+//            repository(url:localMavenRepo)
+//            pom.project{
+//                name=project.name
+//                packaging='jar'
+//                description='description'
 //            }
 //        }
 //    }
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: System.getenv("NEXUS_USERNAME"),password: System.getenv("NEXUS_PASSWORD"))
+            }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: System.getenv("NEXUS_USERNAME"), password: System.getenv("NEXUS_PASSWORD"))
+            }
+            pom.version = "$project.version"
+            pom.artifactId = "$artifactId"
+            pom.groupId = "$project.group"
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description 'sip client description'
+                url siteUrl
+                scm {
+                    url siteUrl
+                    connection gitUrl
+                    developerConnection gitUrl
+                }
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'basicfu'
+                        name 'basicfu'
+                        email 'basicfu@gmail.com'
+                        url 'https://basicfu.com'
+                    }
+                }
+            }
+        }
+    }
 }
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'

@@ -20,6 +20,11 @@ class SipController {
         return SipUtil.userController()
     }
 
+    @PostMapping("/sms/{mobile}")
+    fun sms(@PathVariable mobile: String): Any {
+        return SipUtil.smsController(mobile)
+    }
+
     @PostMapping("/login")
     fun login(@RequestBody map: Map<String, Any>): Any {
         return SipUtil.loginController(map)
@@ -61,8 +66,8 @@ class SipController {
     }
 
 
-    @GetMapping("/sip/client/url")
-    fun getServiceAllUrl(): Result<Any> {
+    @GetMapping("/sync/url")
+    fun syncUrl(): Result<Any> {
         val result = JSONArray()
         val map = requestMappingHandlerMapping.handlerMethods
         for (m in map.entries) {

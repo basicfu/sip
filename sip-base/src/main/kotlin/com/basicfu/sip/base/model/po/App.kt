@@ -10,6 +10,7 @@ class App {
     var id: Long? = null
     var name: String? = null
     var code: String? = null
+    var callback: String? = null
     var cdate: Int? = null
     var udate: Int? = null
 }

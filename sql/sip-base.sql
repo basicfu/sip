@@ -8,6 +8,7 @@ create table app
     id    bigint auto_increment primary key,
     name  varchar(32) not null default '' comment '应用名',
     code  varchar(32) not null default '' comment '应用CODE',
+    callback  varchar(255) not null default '' comment '应用回调地址',
     cdate int         not null default 0 comment '创建时间',
     udate int         not null default 0 comment '更新时间',
     unique key (code)

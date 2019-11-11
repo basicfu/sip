@@ -32,10 +32,10 @@ class ResourceController {
         return Result.success(resourceService.suggest(q, limit))
     }
 
-//    @PostMapping("/sync")
-//    fun sync(@RequestBody vo: ResourceVo): Result<Any> {
-//        return resourceService.sync(vo)
-//    }
+    @PostMapping("/sync")
+    fun sync(@RequestBody vo: ResourceVo): Result<Any> {
+        return resourceService.sync(vo)
+    }
 
     @PostMapping("/insert")
     fun insert(@RequestBody vo: ResourceVo): Result<Any> {

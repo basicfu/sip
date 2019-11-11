@@ -21,4 +21,4 @@ spring:
     password: ${ENV_REDIS_PASSWORD:root}
   data:
     mongodb:
-      uri: {$ENV_MONGODB_URI:}
+      uri: ${ENV_MONGODB_URI:}

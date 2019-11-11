@@ -29,7 +29,7 @@ class SipUtil {
     fun init() {
         APP = app
         LoginUsername = loginUsername
-        userUrl = "$host/user?type=simple"
+        userUrl = "$host/user"
         checkPermissionUrl = "$host/sip/permission/check"
         loginUrl = "$host/user/login"
         logoutUrl = "$host/user/logout"
@@ -41,6 +41,7 @@ class SipUtil {
         updatePasswordUrl = "$host/user/update/password"
         findPasswordUrl = "$host/user/find/password"
         allRoleUrl = "$host/role/all"
+        smsUrl = "$host/sip/sms"
         if(loginUsername.isNotBlank()){
             userResult = getUserByUsername(loginUsername)
         }
@@ -61,6 +62,7 @@ class SipUtil {
         var updatePasswordUrl = ""
         var findPasswordUrl = ""
         var allRoleUrl = ""
+        var smsUrl = ""
         var userResult: UserResult? = null
 
         /**
@@ -181,10 +183,14 @@ class SipUtil {
 
         fun userController(): JSONObject {
             return if (LoginUsername.isNotBlank()) {
-                JSON.parseObject(HttpUtil.get("$getUserUrl?username=$LoginUsername", APP))
+                JSON.parseObject(HttpUtil.get("$getUserUrl?username=$LoginUsername&type=full", APP))
             } else {
-                JSON.parseObject(HttpUtil.get(userUrl, APP))
+                JSON.parseObject(HttpUtil.get("$userUrl?type=full", APP))
             }
+        }
+
+        fun smsController(mobile: String): JSONObject {
+            return JSON.parseObject(HttpUtil.post("$smsUrl/$mobile",JSONObject(), APP))
         }
 
         fun loginController(map: Map<String, Any>): JSONObject {

@@ -19,6 +19,7 @@ import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.common.mapper.example
 import com.basicfu.sip.core.common.mapper.generate
 import com.basicfu.sip.core.model.vo.BaseVo
+import com.basicfu.sip.core.util.HttpUtil
 import com.basicfu.sip.core.util.RedisUtil
 import com.basicfu.sip.core.util.log
 import com.github.pagehelper.PageInfo
@@ -75,13 +76,18 @@ class UserService {
             user=JSONObject()
             user["roles"]=listOf(Constant.System.GUEST)
         }
-        return if(type!=null&&type=="simple"){
-            user
-        }else{
+        return if(type!=null&&type=="full"){
             dealUser(user)
+        }else{
+            user
         }
     }
 
+    /**
+     * 提供两种模式
+     * 简版-redis缓存的信息(一般用于后台调用)
+     * 完整版-包含菜单信息(一般用于前台页面显示)
+     */
     fun get(vo: UserVo): JSONObject? {
         if (vo.id == null && vo.username == null) {
             throw CustomException("非法参数")
@@ -100,9 +106,13 @@ class UserService {
             )
         })
         if (userDocument != null) {
-            val json = sec(userDocument)
-            json["roles"] = roleService.listRoleByUid(json.getString("id"))
-            return json
+            val user = sec(userDocument)
+            user["roles"] = roleService.listRoleByUid(user.getString("id"))
+            return if(vo.type!=null&&vo.type=="full"){
+                dealUser(user)
+            }else{
+                user
+            }
         }
         return null
     }
@@ -213,14 +223,15 @@ class UserService {
      * 用户名密码+手机号验证 1
      * 用户名密码+邮箱验证 2
      * 后台创建 3
+     * TODO注册权限问题
      */
-    fun insert(map: Map<String, Any>): Int {
+    fun insert(map: Map<String, String>): Int {
         val type = map["type"].toString().toInt()
         val user = generate<User> {
             username = map["username"].toString()
-            nickname = map["nickname"]?.toString()
-            email = map["email"]?.toString()
-            mobile = map["mobile"]?.toString()
+            nickname = map["nickname"]
+            email = map["email"]
+            mobile = map["mobile"]
             password = BCryptPasswordEncoder().encode(map["password"].toString())
             mobileVerified = false
             emailVerified = false
@@ -243,7 +254,7 @@ class UserService {
                 //TODO
             }
             Enum.RegisterType.USERNAME_MOBILE.value -> {
-                val code = map["code"]?.toString()
+                val code = map["code"]
                 if (user.mobile == null) throw CustomException("手机号不能为空")
                 if (code == null) throw CustomException("验证码不能为空")
                 val smsKey = "${Constant.Redis.SMS_CHECK}${user.mobile}"
@@ -262,7 +273,18 @@ class UserService {
                 throw CustomException("不支持的注册方式")
             }
         }
-        mongoTemplate.insert(user)
+        val u=mongoTemplate.insert(user)
+        val resultMap=map.toMutableMap()
+        resultMap["id"]=u.id!!
+        //处理每个应用的注册回调
+        appMapper.selectAll().filter { !it.callback.isNullOrBlank() }.forEach {
+            try {
+                HttpUtil.postJson(it.callback!!,null,resultMap)
+                log.info("注册回调完成")
+            }catch (e:Exception){
+                log.error("回调失败")
+            }
+        }
         return 1
 //        //处理用户角色
 //        if (vo.roleIds != null) {

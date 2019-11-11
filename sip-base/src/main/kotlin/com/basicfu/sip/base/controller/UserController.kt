@@ -70,7 +70,7 @@ class UserController {
 //    }
 //
     @PostMapping("/register")
-    fun register(@RequestBody map: Map<String, Any>): Result<Any> {
+    fun register(@RequestBody map: Map<String, String>): Result<Any> {
         return Result.success(userService.insert(map))
     }
 
