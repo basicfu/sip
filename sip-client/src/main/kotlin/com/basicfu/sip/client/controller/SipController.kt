@@ -45,6 +45,11 @@ class SipController {
         return SipUtil.updatePasswordController(map)
     }
 
+    @PostMapping("/find/password")
+    fun findPassword(@RequestBody map: Map<String, Any>): Any {
+        return SipUtil.findPasswordController(map)
+    }
+
     @PostMapping("/update")
     fun updateUser(@RequestBody map: Map<String, Any>): Any {
         return SipUtil.updateUserController(map)

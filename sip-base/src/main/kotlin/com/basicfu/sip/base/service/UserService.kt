@@ -3,6 +3,7 @@ package com.basicfu.sip.base.service
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.basicfu.sip.base.common.constant.Constant
+import com.basicfu.sip.base.common.constant.Constant.Redis.TOKEN_FORCED_PREFIX
 import com.basicfu.sip.base.common.enum.Enum
 import com.basicfu.sip.base.mapper.AppMapper
 import com.basicfu.sip.base.mapper.MenuMapper
@@ -32,22 +33,9 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.arrayListOf
-import kotlin.collections.associateBy
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.flatten
-import kotlin.collections.forEach
+import java.util.*
 import kotlin.collections.get
-import kotlin.collections.groupBy
-import kotlin.collections.isNotEmpty
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.plus
 import kotlin.collections.set
-import kotlin.collections.toList
 
 
 /**
@@ -70,15 +58,15 @@ class UserService {
      * 简版-redis缓存的信息(一般用于后台调用)
      * 完整版-包含菜单信息(一般用于前台页面显示)
      */
-    fun status(type:String?): JSONObject {
+    fun status(type: String?): JSONObject {
         var user = TokenUtil.getCurrentUserJson()
         if (user == null) {
-            user=JSONObject()
-            user["roles"]=listOf(Constant.System.GUEST)
+            user = JSONObject()
+            user["roles"] = listOf(Constant.System.GUEST)
         }
-        return if(type!=null&&type=="full"){
+        return if (type != null && type == "full") {
             dealUser(user)
-        }else{
+        } else {
             user
         }
     }
@@ -108,9 +96,9 @@ class UserService {
         if (userDocument != null) {
             val user = sec(userDocument)
             user["roles"] = roleService.listRoleByUid(user.getString("id"))
-            return if(vo.type!=null&&vo.type=="full"){
+            return if (vo.type != null && vo.type == "full") {
                 dealUser(user)
-            }else{
+            } else {
                 user
             }
         }
@@ -156,8 +144,10 @@ class UserService {
      * 后期密码使用加密后的值
      * TODO 界面配置登录模式
      * 模式一：系统配置允许用户同时在线用户数,如3，超过次数需等待其他用户过期或主动退出，否则只能修改密码强制退出所有用户
-     * 模式二：每次登录后上次用户自动过期，登录后清除该用户其他token
-     * 模式三：无限制登录次数
+     * 模式二：系统配置允许用户同时在线用户数,如3，超过次数将按照登录时间挤掉最开始的用户
+     * 模式三：每次登录后上次用户自动过期，登录后清除该用户其他token
+     * 模式四：无限制登录次数
+     * 判断是登录过期还是被挤掉的依据：如果token是自然过期则提示登录过期，如果token非自然过期而被挤掉则提示被挤掉线
      * TODO 校验手机和邮箱拥有者后可开启手机或邮箱登录
      * 子账号使用@形式待确定
      *
@@ -186,14 +176,22 @@ class UserService {
             log.warn("用户名密码错误username:$username")
             throw CustomException("用户名或密码错误")
         }
-        val loginModal = 3
+        val loginModal = 2
         @Suppress("ConstantConditionIf")
         if (loginModal == 1) {
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
-            if (keys.size >= 2) {
+            if (keys.size >= 3) {
                 throw CustomException(Enum.THEN_USER_MAX_ONLINE)
             }
         } else if (loginModal == 2) {
+            val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*").toList()
+            if (keys.size >= 3) {
+                val map=keys.associateBy({ it.substringAfterLast("_").toLong() },{it})
+                val key= map.getValue(map.keys.sorted()[0])
+                val newKey=key.replace(Constant.Redis.TOKEN_PREFIX,Constant.Redis.TOKEN_FORCED_PREFIX)
+                RedisUtil.redisTemplate.rename(key,newKey)
+            }
+        } else if (loginModal == 3) {
             val keys = RedisUtil.keys(TokenUtil.getRedisUserTokenPrefix(username) + "*")
             RedisUtil.del(keys.map { it })
         }
@@ -273,15 +271,15 @@ class UserService {
                 throw CustomException("不支持的注册方式")
             }
         }
-        val u=mongoTemplate.insert(user)
-        val resultMap=map.toMutableMap()
-        resultMap["id"]=u.id!!
+        val u = mongoTemplate.insert(user)
+        val resultMap = map.toMutableMap()
+        resultMap["id"] = u.id!!
         //处理每个应用的注册回调
         appMapper.selectAll().filter { !it.callback.isNullOrBlank() }.forEach {
             try {
-                HttpUtil.postJson(it.callback!!,null,resultMap)
+                HttpUtil.postJson(it.callback!!, null, resultMap)
                 log.info("注册回调完成")
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 log.error("回调失败")
             }
         }
@@ -294,41 +292,69 @@ class UserService {
 
     fun update(map: Map<String, Any>): Int {
         //参数强校验
-        val uid= map["id"]
-        val username=map["username"]
-        val mobile=map["username"]
-        val email=map["username"]
-        val update=Update()
+        val uid = map["id"]
+        val username = map["username"]
+        val mobile = map["username"]
+        val email = map["username"]
+        val update = Update()
         map.forEach { k, v ->
             //此处严谨应排除所有系统bean字段
-            if(k!="id"){
-                update.addToSet(k,v)
+            if (k != "id") {
+                update.addToSet(k, v)
             }
         }
         //校验用户名、手机、邮箱重复
-        if(mongoTemplate.count(Query(Criteria.where("username").`is`(username).and("isdel").`is`(false).and("id").ne(uid)),User::class.java)>0){
+        if (mongoTemplate.count(
+                Query(
+                    Criteria.where("username").`is`(username).and("isdel").`is`(false).and("id").ne(
+                        uid
+                    )
+                ), User::class.java
+            ) > 0
+        ) {
             throw CustomException("用户名已存在")
         }
-        if(mobile!=null&&mongoTemplate.count(Query(Criteria.where("mobile").`is`(mobile).and("isdel").`is`(false).and("id").ne(uid)),User::class.java)>0){
+        if (mobile != null && mongoTemplate.count(
+                Query(
+                    Criteria.where("mobile").`is`(mobile).and("isdel").`is`(false).and(
+                        "id"
+                    ).ne(uid)
+                ), User::class.java
+            ) > 0
+        ) {
             throw CustomException("手机号已存在")
         }
-        if(email!=null&&mongoTemplate.count(Query(Criteria.where("email").`is`(email).and("isdel").`is`(false).and("id").ne(uid)),User::class.java)>0){
+        if (email != null && mongoTemplate.count(
+                Query(
+                    Criteria.where("email").`is`(email).and("isdel").`is`(false).and(
+                        "id"
+                    ).ne(uid)
+                ), User::class.java
+            ) > 0
+        ) {
             throw CustomException("邮箱已存在")
         }
         mongoTemplate.updateFirst(
-            Query(Criteria.where("_id").`is`(uid)),update,"user"
+            Query(Criteria.where("_id").`is`(uid)), update, "user"
         )
         return 1
     }
 
-    fun checkMobile(mobile: String) {
-        if (mongoTemplate.count(
-                Query(Criteria.where("isdel").`is`(false).and("mobile").`is`(mobile)),
-                "user"
-            ) > 0
-        ) {
+    /**
+     * type 1手机号不能存在
+     * type 2手机号必须存在
+     */
+    fun checkMobile(mobile: String, type: String) {
+        val count = mongoTemplate.count(
+            Query(Criteria.where("isdel").`is`(false).and("mobile").`is`(mobile)),
+            "user"
+        )
+        if (type == "1" && count > 0) {
             log.warn("手机号已存在")
             throw CustomException("手机号已存在")
+        } else if (type == "2" && count != 1L) {
+            log.warn("手机号不存在")
+            throw CustomException("手机号不存在")
         }
     }
 
@@ -351,13 +377,20 @@ class UserService {
         )
     }
 
+    /**
+     * 按照手机号找回密码
+     */
     fun findPassword(vo: UserVo) {
         val code = vo.code ?: throw CustomException("验证码不能为空")
         val smsKey = "${Constant.Redis.SMS_CHECK}${vo.mobile}"
         val redisCode = RedisUtil.get<String>(smsKey)
         if (redisCode == null || redisCode != code) throw CustomException("验证码错误")
         RedisUtil.del(smsKey)
-        updatePassword(vo)
+        mongoTemplate.updateFirst(
+            Query(Criteria.where("mobile").`is`(vo.mobile).and("isdel").`is`(false)),
+            Update().set("password",BCryptPasswordEncoder().encode(vo.password)).set("updateTime",System.currentTimeMillis()),
+            "user"
+        )
     }
 
     /***
@@ -399,8 +432,8 @@ class UserService {
     private fun dealUser(user: JSONObject): JSONObject {
         val menuIds = arrayListOf<Long>()
         val appMap = appMapper.selectAll().associateBy({ it!!.id!! }, { it!!.code!! })
-        val id=user.getString("id")
-        val roles=user.getJSONArray("roles")
+        val id = user.getString("id")
+        val roles = user.getJSONArray("roles")
         if (id == null) {
             menuIds.addAll(
                 RedisUtil.hGet<RoleToken>(Constant.Redis.ROLE_PERMISSION, Constant.System.GUEST)?.menus
@@ -408,7 +441,9 @@ class UserService {
             )
         } else {
             val appRoleToken = RedisUtil.hGetAll<RoleToken>(Constant.Redis.ROLE_PERMISSION)
-            menuIds.addAll(appRoleToken.filter { roles.plus(Constant.System.GUEST).contains(it.key) }.values.map { it!!.menus }.flatten())
+            menuIds.addAll(appRoleToken.filter {
+                roles.plus(Constant.System.GUEST).contains(it.key)
+            }.values.map { it!!.menus }.flatten())
         }
         if (menuIds.isNotEmpty()) {
             val allMenu = copy<MenuDto>(menuMapper.selectByExample(example<Menu> {

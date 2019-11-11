@@ -28,6 +28,7 @@ object Constant {
 
     object Redis {
         const val TOKEN_PREFIX = "TOKEN_"
+        const val TOKEN_FORCED_PREFIX = "TOKEN_FORCED_"
         const val TOKEN_GUEST = TOKEN_PREFIX + System.GUEST + "_"
         const val APP = "APP"
         const val ROLE_PERMISSION = "ROLE_PERMISSION"

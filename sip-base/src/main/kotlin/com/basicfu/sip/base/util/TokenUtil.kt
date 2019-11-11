@@ -63,7 +63,7 @@ object TokenUtil {
      * 生成token
      */
     private fun generateToken(): String {
-        return UUID.randomUUID().toString().replace("-", "")
+        return UUID.randomUUID().toString().replace("-", "")+"_"+System.currentTimeMillis()
     }
 
     /**

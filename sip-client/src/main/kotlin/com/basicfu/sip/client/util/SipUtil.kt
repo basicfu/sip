@@ -209,6 +209,10 @@ class SipUtil {
             return JSON.parseObject(HttpUtil.post(updatePasswordUrl, map, APP))
         }
 
+        fun findPasswordController(map: Map<String, Any>): JSONObject {
+            return JSON.parseObject(HttpUtil.post(findPasswordUrl, map, APP))
+        }
+
         fun updateUserController(map: Map<String, Any>): JSONObject {
             return JSON.parseObject(HttpUtil.post(updateUserUrl, map, APP))
         }

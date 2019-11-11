@@ -3,6 +3,7 @@ package com.basicfu.sip.base.service
 import com.basicfu.sip.base.common.constant.Constant
 import com.basicfu.sip.base.model.biz.RoleToken
 import com.basicfu.sip.base.util.TokenUtil
+import com.basicfu.sip.base.util.TokenUtil.getCurrentRedisToken
 import com.basicfu.sip.core.common.exception.CustomException
 import com.basicfu.sip.core.model.Result
 import com.basicfu.sip.core.util.RedisUtil
@@ -29,6 +30,10 @@ class SipService {
         }
         val user = TokenUtil.getCurrentUser(authorization)
         return if (user == null) {
+            val forcedKey=getCurrentRedisToken(authorization)!!.replace(Constant.Redis.TOKEN_PREFIX,Constant.Redis.TOKEN_FORCED_PREFIX)
+            if(RedisUtil.exists(forcedKey)){
+                throw CustomException("超出当前同时用户数，已被迫下线")
+            }
             //带token又未查到用户信息，登录过期，但是还会处理不需要权限的接口
             if (!allowRequest(roles, app, targetUrl)) {
                 throw CustomException("登录过期")
